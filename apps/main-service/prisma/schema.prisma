@@ -8,12 +8,57 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
+
+model School {
   id        String   @id @default(uuid())
-  email     String   @unique
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  config SchoolConfig?
+  users  User[]
+
+  @@map("schools")
+}
+
+model SchoolConfig {
+  id       String @id @default(uuid())
+  schoolId String @unique
+  school   School @relation(fields: [schoolId], references: [id])
+
+  cancelDeadlineDaysBefore Int     @default(1)
+  cancelDeadlineTime       String  @default("15:00")
+  lateCancelPenaltyPerHour Decimal @default(0)
+  defaultLessonDurationMin Int     @default(120)
+  inviteExpiryHours        Int     @default(24)
+  defaultReminderHours     Int     @default(24)
+  timezone                 String  @default("Europe/Amsterdam")
+
+  @@map("school_configs")
+}
+
+model User {
+  id                 String   @id @default(uuid())
+  schoolId           String
+  school             School   @relation(fields: [schoolId], references: [id])
+
+  email              String
+  passwordHash       String
+  firstName          String
+  lastName           String
+  role               Role
+  status             String   @default("ACTIVE")
+  mustChangePassword Boolean  @default(true)
+  reminderHours      Int?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([schoolId, email])
+  @@index([schoolId, role])
   @@map("users")
 }
