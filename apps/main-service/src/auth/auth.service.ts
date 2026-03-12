@@ -2,7 +2,9 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
+import type { TokenResponseDto } from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
+import { UserStatus } from "../generated/prisma/enums";
 
 @Injectable()
 export class AuthService {
@@ -12,9 +14,9 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<TokenResponseDto> {
     const user = await this.prisma.user.findFirst({
-      where: { email, status: "ACTIVE" },
+      where: { email, status: UserStatus.ACTIVE },
     });
 
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
@@ -24,7 +26,7 @@ export class AuthService {
     return this.generateTokens(user);
   }
 
-  async refresh(refreshToken: string) {
+  async refresh(refreshToken: string): Promise<TokenResponseDto> {
     try {
       const payload = this.jwt.verify(refreshToken, {
         secret: this.config.getOrThrow<string>("JWT_REFRESH_SECRET"),
@@ -34,7 +36,7 @@ export class AuthService {
         where: { id: payload.sub },
       });
 
-      if (user?.status !== "ACTIVE") {
+      if (user?.status !== UserStatus.ACTIVE) {
         throw new UnauthorizedException();
       }
 
@@ -67,7 +69,11 @@ export class AuthService {
     return { message: "Password changed successfully" };
   }
 
-  private generateTokens(user: { id: string; schoolId: string; role: string }) {
+  private generateTokens(user: {
+    id: string;
+    schoolId: string;
+    role: string;
+  }): TokenResponseDto {
     const payload = { sub: user.id, schoolId: user.schoolId, role: user.role };
 
     const accessToken = this.jwt.sign(payload);

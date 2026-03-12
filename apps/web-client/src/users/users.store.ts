@@ -1,0 +1,65 @@
+import { ref } from "vue";
+import { defineStore } from "pinia";
+import {
+  ROLES,
+  type UserDto,
+  type CreateUserDto,
+  type UpdateUserDto,
+  type CreateUserResponseDto,
+} from "@driving-school-booking/shared-types";
+import api from "@/api/api";
+
+export const useUserStore = defineStore("users", () => {
+  const users = ref<UserDto[]>([]);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+
+  async function fetchUsers(role?: string) {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const params = role ? { role } : {};
+      const { data } = await api.get<UserDto[]>("/users", { params });
+
+      users.value = data;
+    } catch (e: any) {
+      error.value = e.response?.data?.message ?? "Failed to fetch users";
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function createUser(
+    payload: CreateUserDto,
+  ): Promise<CreateUserResponseDto> {
+    const { data } = await api.post<CreateUserResponseDto>("/users", payload);
+
+    await fetchUsers(ROLES.STUDENT);
+    return data;
+  }
+
+  async function updateUser(id: string, payload: UpdateUserDto) {
+    const { data } = await api.patch<UserDto>(`/users/${id}`, payload);
+
+    await fetchUsers(ROLES.STUDENT);
+    return data;
+  }
+
+  async function deactivateUser(id: string) {
+    const { data } = await api.patch<UserDto>(`/users/${id}/deactivate`);
+
+    await fetchUsers(ROLES.STUDENT);
+    return data;
+  }
+
+  return {
+    users,
+    loading,
+    error,
+    fetchUsers,
+    createUser,
+    updateUser,
+    deactivateUser,
+  };
+});

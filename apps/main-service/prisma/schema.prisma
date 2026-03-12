@@ -14,6 +14,11 @@ enum Role {
   STUDENT
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model School {
   id        String   @id @default(uuid())
   name      String
@@ -52,7 +57,7 @@ model User {
   firstName          String
   lastName           String
   role               Role
-  status             String   @default("ACTIVE")
+  status             UserStatus @default(ACTIVE)
   mustChangePassword Boolean  @default(true)
   reminderHours      Int?
   createdAt          DateTime @default(now())

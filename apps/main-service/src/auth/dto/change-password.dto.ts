@@ -1,4 +1,9 @@
 import { IsNotEmpty, IsString, MinLength } from "class-validator";
+import type {
+  ChangePasswordDto as SharedChangePasswordDto,
+  AssertTrue,
+  TypesAreEqual,
+} from "@driving-school-booking/shared-types";
 
 export class ChangePasswordDto {
   @IsString()
@@ -9,3 +14,7 @@ export class ChangePasswordDto {
   @MinLength(8)
   newPassword!: string;
 }
+
+type _assert = AssertTrue<
+  TypesAreEqual<ChangePasswordDto, SharedChangePasswordDto>
+>;

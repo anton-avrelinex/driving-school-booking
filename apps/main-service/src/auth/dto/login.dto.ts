@@ -1,4 +1,9 @@
 import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import type {
+  LoginDto as SharedLoginDto,
+  AssertTrue,
+  TypesAreEqual,
+} from "@driving-school-booking/shared-types";
 
 export class LoginDto {
   @IsEmail()
@@ -8,3 +13,5 @@ export class LoginDto {
   @IsNotEmpty()
   password!: string;
 }
+
+type _assert = AssertTrue<TypesAreEqual<LoginDto, SharedLoginDto>>;
