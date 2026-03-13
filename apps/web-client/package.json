@@ -9,7 +9,8 @@
     "test": "vitest run",
     "test:unit": "vitest",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build"
+    "type-check": "vue-tsc --build",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@driving-school-booking/shared-types": "workspace:^",
@@ -42,7 +43,8 @@
     "vite": "^7.3.1",
     "vite-plugin-vue-devtools": "^8.0.6",
     "vitest": "^4.0.18",
-    "vue-tsc": "^3.2.5"
+    "vue-tsc": "^3.2.5",
+    "@driving-school-booking/eslint-config": "workspace:^"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
