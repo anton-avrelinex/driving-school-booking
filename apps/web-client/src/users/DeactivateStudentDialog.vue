@@ -2,19 +2,22 @@
   <Dialog v-model:open="open">
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Deactivate Student</DialogTitle>
+        <DialogTitle>{{ $t("student_deactivate_title") }}</DialogTitle>
         <DialogDescription>
-          Are you sure you want to deactivate
-          {{ user?.firstName }} {{ user?.lastName }}?
-          They will no longer be able to log in.
+          {{
+            $t("student_deactivate_confirm", {
+              firstName: user?.firstName,
+              lastName: user?.lastName,
+            })
+          }}
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
         <Button variant="outline" @click="open = false">
-          Cancel
+          {{ $t("common_cancel") }}
         </Button>
         <Button variant="destructive" @click="handleDeactivate">
-          Deactivate
+          {{ $t("common_deactivate") }}
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -22,6 +25,7 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import { useUserStore } from "@/users/users.store";
 import type { UserDto } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
@@ -40,6 +44,7 @@ const props = defineProps<{
   user: UserDto | null;
 }>();
 
+const { t } = useI18n();
 const userStore = useUserStore();
 
 async function handleDeactivate() {
@@ -50,9 +55,9 @@ async function handleDeactivate() {
   try {
     await userStore.deactivateUser(props.user.id);
     open.value = false;
-    toast.success("Student deactivated");
-  } catch (e: any) {
-    toast.error(e.response?.data?.message ?? "Failed to deactivate student");
+    toast.success(t("student_deactivated"));
+  } catch {
+    toast.error(t("student_deactivate_failed"));
   }
 }
 </script>

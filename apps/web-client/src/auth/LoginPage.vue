@@ -2,15 +2,15 @@
   <div class="flex min-h-screen items-center justify-center bg-background px-4">
     <Card class="w-full max-w-sm">
       <CardHeader>
-        <CardTitle class="text-2xl">Login</CardTitle>
+        <CardTitle class="text-2xl">{{ $t("auth_login") }}</CardTitle>
         <CardDescription>
-          Enter your credentials to access the system
+          {{ $t("auth_login_description") }}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
-            <Label for="email">Email</Label>
+            <Label for="email">{{ $t("common_email") }}</Label>
             <Input
               id="email"
               v-model="email"
@@ -20,12 +20,12 @@
             />
           </div>
           <div class="flex flex-col gap-2">
-            <Label for="password">Password</Label>
+            <Label for="password">{{ $t("auth_password") }}</Label>
             <Input id="password" v-model="password" type="password" required />
           </div>
           <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
           <Button type="submit" class="w-full" :disabled="loading">
-            {{ loading ? "Logging in..." : "Login" }}
+            {{ loading ? $t("auth_logging_in") : $t("auth_login") }}
           </Button>
         </form>
       </CardContent>
@@ -36,6 +36,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/auth/auth.store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +49,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+const { t } = useI18n();
 const router = useRouter();
 const auth = useAuthStore();
 
@@ -64,8 +66,8 @@ async function handleSubmit() {
     await auth.login(email.value, password.value);
 
     router.push("/");
-  } catch (e: any) {
-    error.value = e.response?.data?.message ?? "Login failed";
+  } catch {
+    error.value = t("auth_login_failed");
   } finally {
     loading.value = false;
   }

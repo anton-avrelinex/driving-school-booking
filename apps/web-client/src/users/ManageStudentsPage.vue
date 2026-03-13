@@ -1,11 +1,11 @@
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">Manage Students</h1>
-      <Button @click="showCreateDialog = true">Add Student</Button>
+      <h1 class="text-2xl font-bold">{{ $t("student_manage_title") }}</h1>
+      <Button @click="showCreateDialog = true">{{ $t("student_add") }}</Button>
     </div>
 
-    <p v-if="userStore.loading" class="text-muted-foreground">Loading...</p>
+    <p v-if="userStore.loading" class="text-muted-foreground">{{ $t("common_loading") }}</p>
     <p v-else-if="userStore.error" class="text-destructive">
       {{ userStore.error }}
     </p>
@@ -13,11 +13,11 @@
     <Table v-else>
       <TableHeader>
         <TableRow>
-          <TableHead>First Name</TableHead>
-          <TableHead>Last Name</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead class="text-right">Actions</TableHead>
+          <TableHead>{{ $t("common_first_name") }}</TableHead>
+          <TableHead>{{ $t("common_last_name") }}</TableHead>
+          <TableHead>{{ $t("common_email") }}</TableHead>
+          <TableHead>{{ $t("common_status") }}</TableHead>
+          <TableHead class="text-right">{{ $t("common_actions") }}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -38,7 +38,7 @@
           </TableCell>
           <TableCell class="text-right space-x-2">
             <Button variant="outline" size="sm" @click="openEditDialog(user)">
-              Edit
+              {{ $t("common_edit") }}
             </Button>
             <Button
               variant="destructive"
@@ -46,7 +46,7 @@
               :disabled="user.status === USER_STATUSES.INACTIVE"
               @click="openDeactivateDialog(user)"
             >
-              Deactivate
+              {{ $t("common_deactivate") }}
             </Button>
           </TableCell>
         </TableRow>

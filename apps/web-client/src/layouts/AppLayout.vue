@@ -2,7 +2,7 @@
   <div class="flex min-h-screen">
     <aside class="w-60 border-r bg-muted/40 p-4 flex flex-col gap-2">
       <div class="flex flex-row justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold">Driving School</h2>
+        <h2 class="text-lg font-semibold">{{ $t("app_name") }}</h2>
         <Button @click="toggleTheme" variant="ghost">
           <MoonIcon v-if="mode === 'dark'" />
           <SunIcon v-else />
@@ -13,7 +13,7 @@
         to="/"
         class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
       >
-        Dashboard
+        {{ $t("nav_dashboard") }}
       </RouterLink>
 
       <template v-if="auth.isAdmin">
@@ -21,7 +21,7 @@
           to="/admin/students"
           class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
         >
-          Manage Students
+          {{ $t("nav_manage_students") }}
         </RouterLink>
       </template>
 
@@ -35,7 +35,7 @@
           class="w-full"
           @click="auth.logout()"
         >
-          Logout
+          {{ $t("logout") }}
         </Button>
       </div>
     </aside>

@@ -2,30 +2,27 @@
   <Dialog v-model:open="open">
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Edit Student</DialogTitle>
-        <DialogDescription>Update student information.</DialogDescription>
+        <DialogTitle>{{ $t("student_edit_title") }}</DialogTitle>
+        <DialogDescription>
+          {{ $t("student_edit_description") }}
+        </DialogDescription>
       </DialogHeader>
       <form @submit.prevent="handleEdit" class="flex flex-col gap-4">
         <div class="flex flex-col gap-2">
-          <Label for="edit-email">Email</Label>
-          <Input
-            id="edit-email"
-            v-model="form.email"
-            type="email"
-            required
-          />
+          <Label for="edit-email">{{ $t("common_email") }}</Label>
+          <Input id="edit-email" v-model="form.email" type="email" required />
         </div>
         <div class="flex flex-col gap-2">
-          <Label for="edit-first-name">First Name</Label>
+          <Label for="edit-first-name">{{ $t("common_first_name") }}</Label>
           <Input id="edit-first-name" v-model="form.firstName" required />
         </div>
         <div class="flex flex-col gap-2">
-          <Label for="edit-last-name">Last Name</Label>
+          <Label for="edit-last-name">{{ $t("common_last_name") }}</Label>
           <Input id="edit-last-name" v-model="form.lastName" required />
         </div>
         <DialogFooter>
           <Button type="submit" :disabled="updating">
-            {{ updating ? "Saving..." : "Save" }}
+            {{ updating ? $t("common_saving") : $t("common_save") }}
           </Button>
         </DialogFooter>
       </form>
@@ -35,8 +32,12 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { useUserStore } from "@/users/users.store";
-import type { UserDto, UpdateUserDto } from "@driving-school-booking/shared-types";
+import type {
+  UserDto,
+  UpdateUserDto,
+} from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,7 @@ const props = defineProps<{
   user: UserDto | null;
 }>();
 
+const { t } = useI18n();
 const userStore = useUserStore();
 const updating = ref(false);
 const form = ref<UpdateUserDto>({
@@ -85,9 +87,9 @@ async function handleEdit() {
   try {
     await userStore.updateUser(props.user.id, form.value);
     open.value = false;
-    toast.success("Student updated successfully");
-  } catch (e: any) {
-    toast.error(e.response?.data?.message ?? "Failed to update student");
+    toast.success(t("student_updated"));
+  } catch {
+    toast.error(t("student_update_failed"));
   } finally {
     updating.value = false;
   }

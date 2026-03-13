@@ -2,32 +2,33 @@
   <Dialog v-model:open="open">
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Student Created</DialogTitle>
+        <DialogTitle>{{ $t("student_created_title") }}</DialogTitle>
         <DialogDescription>
-          Save this temporary password. It will not be shown again.
+          {{ $t("student_created_save_password") }}
         </DialogDescription>
       </DialogHeader>
       <div class="space-y-2">
         <p class="text-sm text-muted-foreground">
-          Account: {{ email }}
+          {{ $t("student_created_account", { email }) }}
         </p>
         <div class="flex items-center gap-2">
           <code class="flex-1 rounded bg-muted px-3 py-2 font-mono text-sm">
             {{ password }}
           </code>
           <Button variant="outline" size="sm" @click="copyPassword">
-            Copy
+            {{ $t("common_copy") }}
           </Button>
         </div>
       </div>
       <DialogFooter>
-        <Button @click="open = false">Done</Button>
+        <Button @click="open = false">{{ $t("common_done") }}</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+const { t } = useI18n();
 const open = defineModel<boolean>("open", { required: true });
 const props = defineProps<{
   email: string;
@@ -47,6 +49,6 @@ const props = defineProps<{
 
 function copyPassword() {
   navigator.clipboard.writeText(props.password);
-  toast.success("Password copied to clipboard");
+  toast.success(t("student_password_copied"));
 }
 </script>
