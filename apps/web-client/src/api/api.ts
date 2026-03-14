@@ -11,11 +11,16 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+const PUBLIC_ROUTES = ["/auth/login", "/auth/refresh"];
+
 const api = axios.create({
   baseURL: "/api",
 });
 
 api.interceptors.request.use((config) => {
+  if (PUBLIC_ROUTES.some((route) => config.url?.includes(route))) {
+    return config;
+  }
   const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -32,7 +37,7 @@ api.interceptors.response.use(
       originalRequest &&
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes("/auth/")
+      !PUBLIC_ROUTES.some((route) => originalRequest.url?.includes(route))
     ) {
       originalRequest._retry = true;
 

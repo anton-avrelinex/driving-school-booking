@@ -35,6 +35,7 @@ export const useAuthStore = defineStore("auth", () => {
         id: payload.sub,
         schoolId: payload.schoolId,
         role: payload.role,
+        mustChangePassword: payload.mustChangePassword,
       };
     } catch {
       return null;
@@ -43,7 +44,9 @@ export const useAuthStore = defineStore("auth", () => {
 
   const isAuthenticated = computed(() => !!accessToken.value);
   const isAdmin = computed(() => user.value?.role === ROLES.ADMIN);
-  const mustChangePassword = ref(false);
+  const mustChangePassword = computed(() => {
+    return user.value?.mustChangePassword ?? false;
+  });
 
   function setTokens(access: string, refresh: string) {
     accessToken.value = access;
@@ -84,12 +87,11 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function changePassword(currentPassword: string, newPassword: string) {
-    await api.post("/auth/change-password", {
+    const { data } = await api.post<TokenResponseDto>("/auth/change-password", {
       currentPassword,
       newPassword,
     });
-
-    mustChangePassword.value = false;
+    setTokens(data.accessToken, data.refreshToken);
   }
 
   function logout() {

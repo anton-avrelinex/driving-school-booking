@@ -73,5 +73,6 @@ export interface JwtPayload {
   sub: string;
   schoolId: string;
   role: Role;
+  mustChangePassword: boolean;
   exp: number;
 }

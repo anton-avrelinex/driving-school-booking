@@ -12,6 +12,11 @@ const router = createRouter({
       meta: { public: true },
     },
     {
+      path: "/change-password",
+      name: "change-password",
+      component: () => import("@/auth/ChangePasswordPage.vue"),
+    },
+    {
       path: "/",
       component: () => import("@/layouts/AppLayout.vue"),
       children: [
@@ -44,6 +49,14 @@ router.beforeEach((to) => {
 
   if (!auth.isAuthenticated) {
     return { name: "login" };
+  }
+
+  if (auth.mustChangePassword) {
+    if (to.name === "change-password") {
+      return true;
+    }
+
+    return { name: "change-password" };
   }
 
   if (to.meta.role && auth.user?.role !== to.meta.role) {

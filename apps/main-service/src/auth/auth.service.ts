@@ -7,6 +7,7 @@ import type {
   TokenResponseDto,
 } from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
+import type { UserModel } from "../generated/prisma/models/User";
 import { UserStatus } from "../generated/prisma/enums";
 
 @Injectable()
@@ -64,20 +65,21 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
-    await this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: { passwordHash, mustChangePassword: false },
     });
 
-    return { message: "Password changed successfully" };
+    return this.generateTokens(updatedUser);
   }
 
-  private generateTokens(user: {
-    id: string;
-    schoolId: string;
-    role: string;
-  }): TokenResponseDto {
-    const payload = { sub: user.id, schoolId: user.schoolId, role: user.role };
+  private generateTokens(user: UserModel): TokenResponseDto {
+    const payload = {
+      sub: user.id,
+      schoolId: user.schoolId,
+      role: user.role,
+      mustChangePassword: user.mustChangePassword,
+    };
 
     const accessToken = this.jwt.sign(payload);
 
