@@ -1,6 +1,10 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
-import { ROLES, type JwtPayload, type TokenResponseDto } from "@driving-school-booking/shared-types";
+import {
+  ROLES,
+  type JwtPayload,
+  type TokenResponseDto,
+} from "@driving-school-booking/shared-types";
 import api from "@/api/api";
 import {
   getAccessToken,
@@ -56,7 +60,10 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function login(email: string, password: string) {
-    const { data } = await api.post<TokenResponseDto>("/auth/login", { email, password });
+    const { data } = await api.post<TokenResponseDto>("/auth/login", {
+      email,
+      password,
+    });
     setTokens(data.accessToken, data.refreshToken);
     return data;
   }

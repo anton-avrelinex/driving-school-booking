@@ -7,9 +7,10 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const apiTarget = mode === "production"
-    ? process.env.VITE_API_URL ?? "http://main-service:3001"
-    : process.env.VITE_API_URL ?? "http://localhost:3001";
+  const apiTarget =
+    mode === "production"
+      ? (process.env.VITE_API_URL ?? "http://main-service:3001")
+      : (process.env.VITE_API_URL ?? "http://localhost:3001");
 
   return {
     plugins: [vue(), vueDevTools(), tailwindcss()],
