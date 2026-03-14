@@ -4,6 +4,7 @@ import { LoginDto } from "./dto/login.dto";
 import { RefreshDto } from "./dto/refresh.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
 import { JwtAuthGuard } from "./jwt-auth.guard";
+import type { AuthenticatedRequest } from "./authenticated-request.interface";
 
 @Controller("auth")
 export class AuthController {
@@ -21,7 +22,10 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post("change-password")
-  changePassword(@Body() dto: ChangePasswordDto, @Request() req: any) {
+  changePassword(
+    @Body() dto: ChangePasswordDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
     return this.auth.changePassword(
       req.user.sub,
       dto.currentPassword,

@@ -5,7 +5,9 @@
       <Button @click="showCreateDialog = true">{{ $t("student_add") }}</Button>
     </div>
 
-    <p v-if="userStore.loading" class="text-muted-foreground">{{ $t("common_loading") }}</p>
+    <p v-if="userStore.loading" class="text-muted-foreground">
+      {{ $t("common_loading") }}
+    </p>
     <p v-else-if="userStore.error" class="text-destructive">
       {{ userStore.error }}
     </p>
@@ -109,8 +111,8 @@ const editingUser = ref<UserDto | null>(null);
 const showDeactivateDialog = ref(false);
 const deactivatingUser = ref<UserDto | null>(null);
 
-onMounted(() => {
-  userStore.fetchUsers(ROLES.STUDENT);
+onMounted(async () => {
+  await userStore.fetchUsers(ROLES.STUDENT);
 });
 
 function onStudentCreated(result: CreateUserResponseDto) {

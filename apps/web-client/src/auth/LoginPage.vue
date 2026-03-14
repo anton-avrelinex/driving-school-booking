@@ -65,7 +65,7 @@ async function handleSubmit() {
   try {
     await auth.login(email.value, password.value);
 
-    router.push("/");
+    void router.push("/");
   } catch {
     error.value = t("auth_login_failed");
   } finally {

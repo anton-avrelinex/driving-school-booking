@@ -2,7 +2,10 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
-import type { TokenResponseDto } from "@driving-school-booking/shared-types";
+import type {
+  JwtPayload,
+  TokenResponseDto,
+} from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
 import { UserStatus } from "../generated/prisma/enums";
 
@@ -28,7 +31,7 @@ export class AuthService {
 
   async refresh(refreshToken: string): Promise<TokenResponseDto> {
     try {
-      const payload = this.jwt.verify(refreshToken, {
+      const payload: JwtPayload = this.jwt.verify(refreshToken, {
         secret: this.config.getOrThrow<string>("JWT_REFRESH_SECRET"),
       });
 
@@ -80,8 +83,10 @@ export class AuthService {
 
     const refreshToken = this.jwt.sign(payload, {
       secret: this.config.getOrThrow<string>("JWT_REFRESH_SECRET"),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       expiresIn: this.config.getOrThrow<string>(
         "JWT_REFRESH_EXPIRATION",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ) as any,
     });
 

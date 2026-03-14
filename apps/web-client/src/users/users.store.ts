@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
+import { useI18n } from "vue-i18n";
 import {
   ROLES,
   type UserDto,
@@ -10,6 +11,8 @@ import {
 import api from "@/api/api";
 
 export const useUserStore = defineStore("users", () => {
+  const { t } = useI18n();
+
   const users = ref<UserDto[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -23,8 +26,8 @@ export const useUserStore = defineStore("users", () => {
       const { data } = await api.get<UserDto[]>("/users", { params });
 
       users.value = data;
-    } catch (e: any) {
-      error.value = e.response?.data?.message ?? "Failed to fetch users";
+    } catch {
+      error.value = t("student_fetch_failed");
     } finally {
       loading.value = false;
     }

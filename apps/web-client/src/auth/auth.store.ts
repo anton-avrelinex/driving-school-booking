@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
-import { ROLES, type JwtPayload } from "@driving-school-booking/shared-types";
+import { ROLES, type JwtPayload, type TokenResponseDto } from "@driving-school-booking/shared-types";
 import api from "@/api/api";
 import {
   getAccessToken,
@@ -12,7 +12,7 @@ import router from "@/router";
 
 function parseJwt(token: string): JwtPayload {
   const base64 = token.split(".")[1]!;
-  return JSON.parse(atob(base64));
+  return JSON.parse(atob(base64)) as JwtPayload;
 }
 
 export const useAuthStore = defineStore("auth", () => {
@@ -56,7 +56,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function login(email: string, password: string) {
-    const { data } = await api.post("/auth/login", { email, password });
+    const { data } = await api.post<TokenResponseDto>("/auth/login", { email, password });
     setTokens(data.accessToken, data.refreshToken);
     return data;
   }
@@ -65,7 +65,7 @@ export const useAuthStore = defineStore("auth", () => {
     if (!refreshToken.value) return false;
 
     try {
-      const { data } = await api.post("/auth/refresh", {
+      const { data } = await api.post<TokenResponseDto>("/auth/refresh", {
         refreshToken: refreshToken.value,
       });
       setTokens(data.accessToken, data.refreshToken);
@@ -77,18 +77,17 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function changePassword(currentPassword: string, newPassword: string) {
-    const { data } = await api.post("/auth/change-password", {
+    await api.post("/auth/change-password", {
       currentPassword,
       newPassword,
     });
 
     mustChangePassword.value = false;
-    return data;
   }
 
   function logout() {
     clearTokens();
-    router.push("/login");
+    void router.push("/login");
   }
 
   return {

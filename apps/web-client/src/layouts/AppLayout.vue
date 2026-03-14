@@ -35,7 +35,7 @@
           class="w-full"
           @click="auth.logout()"
         >
-          {{ $t("logout") }}
+          {{ $t("common_logout") }}
         </Button>
       </div>
     </aside>

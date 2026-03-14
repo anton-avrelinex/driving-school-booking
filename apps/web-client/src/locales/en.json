@@ -18,6 +18,7 @@
   "common_last_name": "Last Name",
   "common_status": "Status",
   "common_actions": "Actions",
+  "common_something_went_wrong": "Something went wrong",
   "auth_login": "Login",
   "auth_login_description": "Enter your credentials to access the system",
   "auth_password": "Password",
@@ -42,5 +43,6 @@
   "student_deactivate_title": "Deactivate Student",
   "student_deactivate_confirm": "Are you sure you want to deactivate {firstName} {lastName}? They will no longer be able to log in.",
   "student_deactivated": "Student deactivated",
-  "student_deactivate_failed": "Failed to deactivate student"
+  "student_deactivate_failed": "Failed to deactivate student",
+  "student_fetch_failed": "Failed to fetch students"
 }

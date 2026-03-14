@@ -47,8 +47,8 @@ const props = defineProps<{
   password: string;
 }>();
 
-function copyPassword() {
-  navigator.clipboard.writeText(props.password);
+async function copyPassword() {
+  await navigator.clipboard.writeText(props.password);
   toast.success(t("student_password_copied"));
 }
 </script>

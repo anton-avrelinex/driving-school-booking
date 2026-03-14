@@ -8,6 +8,7 @@ import * as bcrypt from "bcrypt";
 import type {
   UserDto,
   CreateUserResponseDto,
+  Role,
 } from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -25,7 +26,9 @@ const USER_SELECT = {
   createdAt: true,
 } as const;
 
-function toUserDto(user: Omit<UserDto, "createdAt"> & { createdAt: Date }): UserDto {
+function toUserDto(
+  user: Omit<UserDto, "createdAt"> & { createdAt: Date },
+): UserDto {
   return { ...user, createdAt: user.createdAt.toISOString() };
 }
 
@@ -71,7 +74,10 @@ export class UserService {
     schoolId: string,
     query: ListUsersQueryDto,
   ): Promise<UserDto[]> {
-    const where: any = { schoolId };
+    const where: {
+      role?: Role;
+      schoolId: string;
+    } = { schoolId };
 
     if (query.role) {
       where.role = query.role;

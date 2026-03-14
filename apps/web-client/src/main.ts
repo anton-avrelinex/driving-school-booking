@@ -14,6 +14,7 @@ const i18n = createI18n({
   legacy: false,
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 const app = createApp(App);
 
 app.use(i18n);
