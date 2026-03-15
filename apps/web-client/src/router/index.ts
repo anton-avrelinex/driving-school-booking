@@ -31,6 +31,12 @@ const router = createRouter({
           component: () => import("@/users/ManageStudentsPage.vue"),
           meta: { role: ROLES.ADMIN },
         },
+        {
+          path: "admin/teachers",
+          name: "manage-teachers",
+          component: () => import("@/teachers/ManageTeachersPage.vue"),
+          meta: { role: ROLES.ADMIN },
+        },
       ],
     },
   ],

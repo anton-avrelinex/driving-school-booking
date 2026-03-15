@@ -41,7 +41,32 @@ async function main() {
     },
   });
 
-  console.log("Seed complete: admin@demo.com / admin123");
+  const categoryNames = [
+    "AM",
+    "A1",
+    "A2",
+    "A",
+    "B",
+    "BE",
+    "C1",
+    "C1E",
+    "C",
+    "CE",
+    "D1",
+    "D1E",
+    "D",
+    "DE",
+  ];
+
+  for (const name of categoryNames) {
+    await prisma.category.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
+
+  console.log(`Seed complete: admin@demo.com / admin123, ${categoryNames.length} categories`);
 }
 
 main()

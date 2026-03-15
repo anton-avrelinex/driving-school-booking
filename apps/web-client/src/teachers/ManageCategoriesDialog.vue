@@ -1,0 +1,83 @@
+<template>
+  <Dialog v-model:open="open">
+    <DialogContent class="sm:max-w-2xl">
+      <DialogHeader>
+        <DialogTitle>{{ $t("category_manage_title") }}</DialogTitle>
+        <DialogDescription>
+          {{ $t("category_manage_description") }}
+        </DialogDescription>
+      </DialogHeader>
+
+      <div class="space-y-3">
+        <div
+          v-for="category in store.allCategories"
+          :key="category.id"
+          class="flex items-center gap-2"
+        >
+          <input
+            :id="`category-${category.id}`"
+            type="checkbox"
+            :value="category.id"
+            v-model="selectedIds"
+            class="h-4 w-4 rounded border-input"
+          />
+          <label :for="`category-${category.id}`" class="text-sm">
+            {{ category.name }}
+          </label>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-4 border-t">
+        <Button :disabled="saving" @click="handleSave">
+          {{ saving ? $t("common_saving") : $t("common_save") }}
+        </Button>
+      </div>
+    </DialogContent>
+  </Dialog>
+</template>
+
+<script setup lang="ts">
+import { ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { toast } from "vue-sonner";
+import { useTeacherStore } from "@/teachers/teachers.store";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+const open = defineModel<boolean>("open", { required: true });
+
+const { t } = useI18n();
+const store = useTeacherStore();
+
+const selectedIds = ref<string[]>([]);
+const saving = ref(false);
+
+watch(open, async (isOpen) => {
+  if (isOpen) {
+    await Promise.all([
+      store.fetchAllCategories(),
+      store.fetchSchoolCategories(),
+    ]);
+    selectedIds.value = store.schoolCategories.map((c) => c.id);
+  }
+});
+
+async function handleSave() {
+  saving.value = true;
+  try {
+    await store.updateSchoolCategories(selectedIds.value);
+    toast.success(t("category_school_updated"));
+    open.value = false;
+  } catch {
+    toast.error(t("category_school_update_failed"));
+  } finally {
+    saving.value = false;
+  }
+}
+</script>

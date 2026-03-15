@@ -19,6 +19,11 @@ enum UserStatus {
   INACTIVE
 }
 
+enum Transmission {
+  AUTOMATIC
+  MANUAL
+}
+
 model School {
   id        String   @id @default(uuid())
   name      String
@@ -27,6 +32,10 @@ model School {
 
   config SchoolConfig?
   users  User[]
+
+  categories Category[]
+  courses    Course[]
+  vehicles   Vehicle[]
 
   @@map("schools")
 }
@@ -60,10 +69,67 @@ model User {
   status             UserStatus @default(ACTIVE)
   mustChangePassword Boolean  @default(true)
   reminderHours      Int?
+  courses            Course[]
+  vehicles           Vehicle[]
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   @@unique([schoolId, email])
   @@index([schoolId, role])
   @@map("users")
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+
+  schools  School[]
+  courses  Course[]
+  vehicles Vehicle[]
+
+  @@map("categories")
+}
+
+model Course {
+  id           String       @id @default(uuid())
+  schoolId     String
+  school       School       @relation(fields: [schoolId], references: [id])
+
+  name         String
+  price        Decimal
+  hours        Int
+  categoryId   String
+  category     Category     @relation(fields: [categoryId], references: [id])
+  transmission Transmission
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  instructors  User[]
+
+  @@unique([schoolId, name])
+  @@index([schoolId])
+  @@index([categoryId])
+  @@map("courses")
+}
+
+model Vehicle {
+  id           String       @id @default(uuid())
+  schoolId     String
+  school       School       @relation(fields: [schoolId], references: [id])
+
+  make         String
+  model        String
+  licensePlate String
+  transmission Transmission
+  categoryId   String
+  category     Category     @relation(fields: [categoryId], references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  instructors  User[]
+
+  @@unique([schoolId, licensePlate])
+  @@index([schoolId])
+  @@index([categoryId])
+  @@map("vehicles")
 }
