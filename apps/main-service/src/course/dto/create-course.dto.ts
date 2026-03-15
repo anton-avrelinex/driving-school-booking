@@ -1,4 +1,12 @@
-import { IsIn, IsInt, IsNotEmpty, IsNumber, IsString, IsUUID, Min } from "class-validator";
+import {
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsUUID,
+  Min,
+} from "class-validator";
 import {
   TRANSMISSIONS,
   type Transmission,
@@ -27,4 +35,6 @@ export class CreateCourseDto {
   transmission!: Transmission;
 }
 
-type _assert = AssertTrue<TypesAreEqual<CreateCourseDto, SharedCreateCourseDto>>;
+type _assert = AssertTrue<
+  TypesAreEqual<CreateCourseDto, SharedCreateCourseDto>
+>;

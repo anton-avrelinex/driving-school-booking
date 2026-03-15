@@ -117,6 +117,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useTeacherStore } from "@/teachers/teachers.store";
+import { useCourseStore } from "@/courses/courses.store";
+import { useCategoryStore } from "@/categories/categories.store";
+import { useVehicleStore } from "@/vehicles/vehicles.store";
 import {
   USER_STATUSES,
   type UserDto,
@@ -135,11 +138,14 @@ import CreateTeacherDialog from "@/teachers/CreateTeacherDialog.vue";
 import TempPasswordDialog from "@/teachers/TempPasswordDialog.vue";
 import EditTeacherDialog from "@/teachers/EditTeacherDialog.vue";
 import DeactivateTeacherDialog from "@/teachers/DeactivateTeacherDialog.vue";
-import ManageCategoriesDialog from "@/teachers/ManageCategoriesDialog.vue";
-import ManageCoursesDialog from "@/teachers/ManageCoursesDialog.vue";
-import ManageVehiclesDialog from "@/teachers/ManageVehiclesDialog.vue";
+import ManageCategoriesDialog from "@/categories/ManageCategoriesDialog.vue";
+import ManageCoursesDialog from "@/courses/ManageCoursesDialog.vue";
+import ManageVehiclesDialog from "@/vehicles/ManageVehiclesDialog.vue";
 
 const teacherStore = useTeacherStore();
+const courseStore = useCourseStore();
+const categoryStore = useCategoryStore();
+const vehicleStore = useVehicleStore();
 
 const showCreateDialog = ref(false);
 const showTempPasswordDialog = ref(false);
@@ -159,10 +165,10 @@ const showVehiclesDialog = ref(false);
 onMounted(async () => {
   await Promise.all([
     teacherStore.fetchTeachers(),
-    teacherStore.fetchAllCategories(),
-    teacherStore.fetchSchoolCategories(),
-    teacherStore.fetchCourses(),
-    teacherStore.fetchVehicles(),
+    categoryStore.fetchAllCategories(),
+    categoryStore.fetchSchoolCategories(),
+    courseStore.fetchCourses(),
+    vehicleStore.fetchVehicles(),
   ]);
 });
 

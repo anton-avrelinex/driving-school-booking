@@ -8,4 +8,6 @@ import { CreateCourseDto } from "./create-course.dto";
 
 export class UpdateCourseDto extends PartialType(CreateCourseDto) {}
 
-type _assert = AssertTrue<TypesAreEqual<UpdateCourseDto, SharedUpdateCourseDto>>;
+type _assert = AssertTrue<
+  TypesAreEqual<UpdateCourseDto, SharedUpdateCourseDto>
+>;

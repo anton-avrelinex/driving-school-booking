@@ -8,4 +8,6 @@ import { CreateInstructorDto } from "./create-instructor.dto";
 
 export class UpdateInstructorDto extends PartialType(CreateInstructorDto) {}
 
-type _assert = AssertTrue<TypesAreEqual<UpdateInstructorDto, SharedUpdateInstructorDto>>;
+type _assert = AssertTrue<
+  TypesAreEqual<UpdateInstructorDto, SharedUpdateInstructorDto>
+>;

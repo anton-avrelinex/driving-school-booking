@@ -20,7 +20,7 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="course in store.courses" :key="course.id">
+          <TableRow v-for="course in courseStore.courses" :key="course.id">
             <template v-if="editingId === course.id">
               <TableCell>
                 <Input v-model="editForm.name" required />
@@ -49,7 +49,7 @@
                   required
                 >
                   <option
-                    v-for="category in store.schoolCategories"
+                    v-for="category in categoryStore.schoolCategories"
                     :key="category.id"
                     :value="category.id"
                   >
@@ -92,11 +92,7 @@
                 }}
               </TableCell>
               <TableCell class="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  @click="startEdit(course)"
-                >
+                <Button size="sm" variant="outline" @click="startEdit(course)">
                   {{ $t("common_edit") }}
                 </Button>
                 <Button
@@ -150,7 +146,7 @@
             required
           >
             <option
-              v-for="category in store.schoolCategories"
+              v-for="category in categoryStore.schoolCategories"
               :key="category.id"
               :value="category.id"
             >
@@ -187,7 +183,8 @@
 import { ref, watch, reactive } from "vue";
 import { useI18n } from "vue-i18n";
 import { toast } from "vue-sonner";
-import { useTeacherStore } from "@/teachers/teachers.store";
+import { useCourseStore } from "@/courses/courses.store";
+import { useCategoryStore } from "@/categories/categories.store";
 import {
   TRANSMISSIONS,
   type CourseDto,
@@ -215,7 +212,8 @@ import {
 const open = defineModel<boolean>("open", { required: true });
 
 const { t } = useI18n();
-const store = useTeacherStore();
+const courseStore = useCourseStore();
+const categoryStore = useCategoryStore();
 
 const editingId = ref<string | null>(null);
 const editForm = reactive({
@@ -235,13 +233,18 @@ const newForm = reactive({
 
 watch(open, async (isOpen) => {
   if (isOpen) {
-    await Promise.all([store.fetchCourses(), store.fetchSchoolCategories()]);
+    await Promise.all([
+      courseStore.fetchCourses(),
+      categoryStore.fetchSchoolCategories(),
+    ]);
     cancelEdit();
   }
 });
 
 function getCategoryName(categoryId: string): string {
-  const category = store.schoolCategories.find((c) => c.id === categoryId);
+  const category = categoryStore.schoolCategories.find(
+    (c) => c.id === categoryId,
+  );
   return category?.name ?? "";
 }
 
@@ -265,7 +268,7 @@ function cancelEdit() {
 
 async function handleUpdate(id: string) {
   try {
-    await store.updateCourse(id, {
+    await courseStore.updateCourse(id, {
       name: editForm.name,
       price: editForm.price,
       hours: editForm.hours,
@@ -280,14 +283,12 @@ async function handleUpdate(id: string) {
 }
 
 async function handleDelete(course: CourseDto) {
-  if (
-    !globalThis.confirm(t("course_delete_confirm", { name: course.name }))
-  ) {
+  if (!globalThis.confirm(t("course_delete_confirm", { name: course.name }))) {
     return;
   }
 
   try {
-    await store.deleteCourse(course.id);
+    await courseStore.deleteCourse(course.id);
     toast.success(t("course_deleted"));
   } catch {
     toast.error(t("course_delete_failed"));
@@ -296,7 +297,7 @@ async function handleDelete(course: CourseDto) {
 
 async function handleCreate() {
   try {
-    await store.createCourse({
+    await courseStore.createCourse({
       name: newForm.name,
       price: newForm.price,
       hours: newForm.hours,

@@ -7,15 +7,13 @@ import {
   type CreateStudentDto,
   type UpdateStudentDto,
   type CreateUserResponseDto,
-  type CourseDto,
 } from "@driving-school-booking/shared-types";
 import api from "@/api/api";
 
-export const useUserStore = defineStore("users", () => {
+export const useStudentStore = defineStore("students", () => {
   const { t } = useI18n();
 
   const users = ref<UserDto[]>([]);
-  const courses = ref<CourseDto[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -35,11 +33,6 @@ export const useUserStore = defineStore("users", () => {
     }
   }
 
-  async function fetchCourses() {
-    const { data } = await api.get<CourseDto[]>("/courses");
-    courses.value = data;
-  }
-
   async function createStudent(
     payload: CreateStudentDto,
   ): Promise<CreateUserResponseDto> {
@@ -53,10 +46,7 @@ export const useUserStore = defineStore("users", () => {
   }
 
   async function updateStudent(id: string, payload: UpdateStudentDto) {
-    const { data } = await api.patch<UserDto>(
-      `/users/students/${id}`,
-      payload,
-    );
+    const { data } = await api.patch<UserDto>(`/users/students/${id}`, payload);
 
     await fetchUsers(ROLES.STUDENT);
     return data;
@@ -71,11 +61,9 @@ export const useUserStore = defineStore("users", () => {
 
   return {
     users,
-    courses,
     loading,
     error,
     fetchUsers,
-    fetchCourses,
     createStudent,
     updateStudent,
     deactivateUser,

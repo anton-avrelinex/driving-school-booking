@@ -24,7 +24,7 @@
           <Label>{{ $t("student_courses") }}</Label>
           <div class="flex flex-col gap-1">
             <label
-              v-for="course in userStore.courses"
+              v-for="course in courseStore.courses"
               :key="course.id"
               class="flex items-center gap-2 text-sm"
             >
@@ -50,7 +50,8 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useUserStore } from "@/users/users.store";
+import { useStudentStore } from "@/students/students.store";
+import { useCourseStore } from "@/courses/courses.store";
 import type {
   CreateStudentDto,
   CreateUserResponseDto,
@@ -74,13 +75,14 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const userStore = useUserStore();
+const studentStore = useStudentStore();
+const courseStore = useCourseStore();
 const creating = ref(false);
 const selectedCourseIds = ref<string[]>([]);
 
 watch(open, async (isOpen) => {
   if (isOpen) {
-    await userStore.fetchCourses();
+    await courseStore.fetchCourses();
   }
 });
 const form = ref<Omit<CreateStudentDto, "enrollmentCourseIds">>({
@@ -96,7 +98,8 @@ async function handleCreate() {
       ...form.value,
       enrollmentCourseIds: selectedCourseIds.value,
     };
-    const result = await userStore.createStudent(payload);
+    const result = await studentStore.createStudent(payload);
+
     open.value = false;
     form.value = {
       email: "",
@@ -104,6 +107,7 @@ async function handleCreate() {
       lastName: "",
     };
     selectedCourseIds.value = [];
+
     toast.success(t("student_created"));
     emit("created", result);
   } catch {

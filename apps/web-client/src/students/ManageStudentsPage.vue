@@ -5,11 +5,11 @@
       <Button @click="showCreateDialog = true">{{ $t("student_add") }}</Button>
     </div>
 
-    <p v-if="userStore.loading" class="text-muted-foreground">
+    <p v-if="studentStore.loading" class="text-muted-foreground">
       {{ $t("common_loading") }}
     </p>
-    <p v-else-if="userStore.error" class="text-destructive">
-      {{ userStore.error }}
+    <p v-else-if="studentStore.error" class="text-destructive">
+      {{ studentStore.error }}
     </p>
 
     <Table v-else>
@@ -24,7 +24,7 @@
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow v-for="user in userStore.users" :key="user.id">
+        <TableRow v-for="user in studentStore.users" :key="user.id">
           <TableCell>{{ user.firstName }}</TableCell>
           <TableCell>{{ user.lastName }}</TableCell>
           <TableCell>{{ user.email }}</TableCell>
@@ -34,7 +34,13 @@
               :key="enrollment.id"
               class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary mr-1"
             >
-              {{ enrollment.course.name }} ({{ enrollment.hoursCompleted }}/{{ enrollment.hoursPurchased }}h)
+              {{
+                $t("student_enrollment_hours", {
+                  course: enrollment.course.name,
+                  completed: enrollment.hoursCompleted,
+                  purchased: enrollment.hoursPurchased,
+                })
+              }}
             </span>
           </TableCell>
           <TableCell>
@@ -87,7 +93,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import { useUserStore } from "@/users/users.store";
+import { useStudentStore } from "@/students/students.store";
 import {
   ROLES,
   USER_STATUSES,
@@ -103,12 +109,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import CreateStudentDialog from "@/users/CreateStudentDialog.vue";
-import TempPasswordDialog from "@/users/TempPasswordDialog.vue";
-import EditStudentDialog from "@/users/EditStudentDialog.vue";
-import DeactivateStudentDialog from "@/users/DeactivateStudentDialog.vue";
+import CreateStudentDialog from "@/students/CreateStudentDialog.vue";
+import TempPasswordDialog from "@/students/TempPasswordDialog.vue";
+import EditStudentDialog from "@/students/EditStudentDialog.vue";
+import DeactivateStudentDialog from "@/students/DeactivateStudentDialog.vue";
 
-const userStore = useUserStore();
+const studentStore = useStudentStore();
 
 const showCreateDialog = ref(false);
 const showTempPasswordDialog = ref(false);
@@ -122,7 +128,7 @@ const showDeactivateDialog = ref(false);
 const deactivatingUser = ref<UserDto | null>(null);
 
 onMounted(async () => {
-  await userStore.fetchUsers(ROLES.STUDENT);
+  await studentStore.fetchUsers(ROLES.STUDENT);
 });
 
 function onStudentCreated(result: CreateUserResponseDto) {

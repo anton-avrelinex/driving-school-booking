@@ -76,7 +76,9 @@ async function main() {
     });
   }
 
-  console.log(`Seed complete: admin@demo.com / admin123, ${categoryNames.length} categories`);
+  console.log(
+    `Seed complete: admin@demo.com / admin123, ${categoryNames.length} categories`,
+  );
 }
 
 main()

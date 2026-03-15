@@ -20,7 +20,7 @@
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="vehicle in store.vehicles" :key="vehicle.id">
+          <TableRow v-for="vehicle in vehicleStore.vehicles" :key="vehicle.id">
             <template v-if="editingId === vehicle.id">
               <TableCell>
                 <Input v-model="editForm.make" required />
@@ -51,7 +51,7 @@
                   required
                 >
                   <option
-                    v-for="category in store.schoolCategories"
+                    v-for="category in categoryStore.schoolCategories"
                     :key="category.id"
                     :value="category.id"
                   >
@@ -81,11 +81,7 @@
               </TableCell>
               <TableCell>{{ getCategoryName(vehicle.categoryId) }}</TableCell>
               <TableCell class="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  @click="startEdit(vehicle)"
-                >
+                <Button size="sm" variant="outline" @click="startEdit(vehicle)">
                   {{ $t("common_edit") }}
                 </Button>
                 <Button
@@ -151,7 +147,7 @@
             required
           >
             <option
-              v-for="category in store.schoolCategories"
+              v-for="category in categoryStore.schoolCategories"
               :key="category.id"
               :value="category.id"
             >
@@ -171,7 +167,8 @@
 import { ref, watch, reactive } from "vue";
 import { useI18n } from "vue-i18n";
 import { toast } from "vue-sonner";
-import { useTeacherStore } from "@/teachers/teachers.store";
+import { useVehicleStore } from "@/vehicles/vehicles.store";
+import { useCategoryStore } from "@/categories/categories.store";
 import {
   TRANSMISSIONS,
   type VehicleDto,
@@ -199,7 +196,8 @@ import {
 const open = defineModel<boolean>("open", { required: true });
 
 const { t } = useI18n();
-const store = useTeacherStore();
+const vehicleStore = useVehicleStore();
+const categoryStore = useCategoryStore();
 
 const editingId = ref<string | null>(null);
 const editForm = reactive({
@@ -219,13 +217,18 @@ const newForm = reactive({
 
 watch(open, async (isOpen) => {
   if (isOpen) {
-    await Promise.all([store.fetchVehicles(), store.fetchSchoolCategories()]);
+    await Promise.all([
+      vehicleStore.fetchVehicles(),
+      categoryStore.fetchSchoolCategories(),
+    ]);
     cancelEdit();
   }
 });
 
 function getCategoryName(categoryId: string): string {
-  const category = store.schoolCategories.find((c) => c.id === categoryId);
+  const category = categoryStore.schoolCategories.find(
+    (c) => c.id === categoryId,
+  );
   return category?.name ?? "";
 }
 
@@ -249,7 +252,7 @@ function cancelEdit() {
 
 async function handleUpdate(id: string) {
   try {
-    await store.updateVehicle(id, {
+    await vehicleStore.updateVehicle(id, {
       make: editForm.make,
       model: editForm.model,
       licensePlate: editForm.licensePlate,
@@ -277,7 +280,7 @@ async function handleDelete(vehicle: VehicleDto) {
   }
 
   try {
-    await store.deleteVehicle(vehicle.id);
+    await vehicleStore.deleteVehicle(vehicle.id);
     toast.success(t("vehicle_deleted"));
   } catch {
     toast.error(t("vehicle_delete_failed"));
@@ -286,18 +289,20 @@ async function handleDelete(vehicle: VehicleDto) {
 
 async function handleCreate() {
   try {
-    await store.createVehicle({
+    await vehicleStore.createVehicle({
       make: newForm.make,
       model: newForm.model,
       licensePlate: newForm.licensePlate,
       transmission: newForm.transmission,
       categoryId: newForm.categoryId,
     });
+
     newForm.make = "";
     newForm.model = "";
     newForm.licensePlate = "";
     newForm.transmission = TRANSMISSIONS.AUTOMATIC;
     newForm.categoryId = "";
+
     toast.success(t("vehicle_created"));
   } catch {
     toast.error(t("vehicle_create_failed"));

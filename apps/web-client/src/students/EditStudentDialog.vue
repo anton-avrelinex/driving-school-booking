@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useUserStore } from "@/users/users.store";
+import { useStudentStore } from "@/students/students.store";
 import type {
   UserDto,
   UpdateStudentDto,
@@ -57,7 +57,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const userStore = useUserStore();
+const studentStore = useStudentStore();
 const updating = ref(false);
 const form = ref<UpdateStudentDto>({
   email: "",
@@ -85,7 +85,8 @@ async function handleEdit() {
   updating.value = true;
 
   try {
-    await userStore.updateStudent(props.user.id, form.value);
+    await studentStore.updateStudent(props.user.id, form.value);
+
     open.value = false;
     toast.success(t("student_updated"));
   } catch {

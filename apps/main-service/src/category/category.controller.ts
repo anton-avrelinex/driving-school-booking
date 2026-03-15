@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Put,
-  Request,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Put, Request, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { RolesGuard } from "../auth/roles.guard";
 import { Roles } from "../auth/roles.decorator";
@@ -35,9 +28,6 @@ export class CategoryController {
     @Body() dto: UpdateSchoolCategoriesDto,
     @Request() req: AuthenticatedRequest,
   ) {
-    return this.categoryService.updateSchoolCategories(
-      req.user.schoolId,
-      dto,
-    );
+    return this.categoryService.updateSchoolCategories(req.user.schoolId, dto);
   }
 }

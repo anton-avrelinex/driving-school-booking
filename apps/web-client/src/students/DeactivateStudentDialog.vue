@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { useUserStore } from "@/users/users.store";
+import { useStudentStore } from "@/students/students.store";
 import type { UserDto } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const userStore = useUserStore();
+const studentStore = useStudentStore();
 
 async function handleDeactivate() {
   if (!props.user) {
@@ -53,7 +53,8 @@ async function handleDeactivate() {
   }
 
   try {
-    await userStore.deactivateUser(props.user.id);
+    await studentStore.deactivateUser(props.user.id);
+
     open.value = false;
     toast.success(t("student_deactivated"));
   } catch {

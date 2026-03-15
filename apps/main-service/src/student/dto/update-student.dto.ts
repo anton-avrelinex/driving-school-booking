@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import {
   type UpdateStudentDto as SharedUpdateStudentDto,
   type AssertTrue,
@@ -13,14 +13,14 @@ export class UpdateStudentDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  @MinLength(1)
   firstName?: string;
 
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  @MinLength(1)
   lastName?: string;
 }
 
-type _assert = AssertTrue<TypesAreEqual<UpdateStudentDto, SharedUpdateStudentDto>>;
+type _assert = AssertTrue<
+  TypesAreEqual<UpdateStudentDto, SharedUpdateStudentDto>
+>;

@@ -24,7 +24,7 @@
           <Label>{{ $t("teacher_courses") }}</Label>
           <div class="flex flex-col gap-1">
             <label
-              v-for="course in teacherStore.courses"
+              v-for="course in courseStore.courses"
               :key="course.id"
               class="flex items-center gap-2 text-sm"
             >
@@ -41,7 +41,7 @@
           <Label>{{ $t("teacher_vehicles") }}</Label>
           <div class="flex flex-col gap-1">
             <label
-              v-for="vehicle in teacherStore.vehicles"
+              v-for="vehicle in vehicleStore.vehicles"
               :key="vehicle.id"
               class="flex items-center gap-2 text-sm"
             >
@@ -50,7 +50,9 @@
                 :value="vehicle.id"
                 v-model="selectedVehicleIds"
               />
-              {{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.licensePlate }})
+              {{ vehicle.make }} {{ vehicle.model }} ({{
+                vehicle.licensePlate
+              }})
             </label>
           </div>
         </div>
@@ -68,6 +70,8 @@
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTeacherStore } from "@/teachers/teachers.store";
+import { useCourseStore } from "@/courses/courses.store";
+import { useVehicleStore } from "@/vehicles/vehicles.store";
 import type {
   UserDto,
   UpdateInstructorDto,
@@ -92,6 +96,8 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const teacherStore = useTeacherStore();
+const courseStore = useCourseStore();
+const vehicleStore = useVehicleStore();
 const updating = ref(false);
 const selectedCourseIds = ref<string[]>([]);
 const selectedVehicleIds = ref<string[]>([]);
@@ -110,8 +116,10 @@ watch(
         firstName: user.firstName,
         lastName: user.lastName,
       };
-      selectedCourseIds.value = user.instructorProfile?.courses.map((c) => c.id) ?? [];
-      selectedVehicleIds.value = user.instructorProfile?.vehicles.map((v) => v.id) ?? [];
+      selectedCourseIds.value =
+        user.instructorProfile?.courses.map((c) => c.id) ?? [];
+      selectedVehicleIds.value =
+        user.instructorProfile?.vehicles.map((v) => v.id) ?? [];
     }
   },
 );
@@ -128,6 +136,7 @@ async function handleEdit() {
       courseIds: selectedCourseIds.value,
       vehicleIds: selectedVehicleIds.value,
     });
+
     open.value = false;
     toast.success(t("teacher_updated"));
   } catch {

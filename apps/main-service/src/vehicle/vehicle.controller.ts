@@ -25,10 +25,7 @@ export class VehicleController {
   constructor(private readonly vehicleService: VehicleService) {}
 
   @Post()
-  create(
-    @Body() dto: CreateVehicleDto,
-    @Request() req: AuthenticatedRequest,
-  ) {
+  create(@Body() dto: CreateVehicleDto, @Request() req: AuthenticatedRequest) {
     return this.vehicleService.create(req.user.schoolId, dto);
   }
 

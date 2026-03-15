@@ -27,4 +27,6 @@ export class CreateVehicleDto {
   categoryId!: string;
 }
 
-type _assert = AssertTrue<TypesAreEqual<CreateVehicleDto, SharedCreateVehicleDto>>;
+type _assert = AssertTrue<
+  TypesAreEqual<CreateVehicleDto, SharedCreateVehicleDto>
+>;

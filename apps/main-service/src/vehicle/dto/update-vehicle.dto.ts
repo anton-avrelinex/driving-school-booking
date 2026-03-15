@@ -8,4 +8,6 @@ import { CreateVehicleDto } from "./create-vehicle.dto";
 
 export class UpdateVehicleDto extends PartialType(CreateVehicleDto) {}
 
-type _assert = AssertTrue<TypesAreEqual<UpdateVehicleDto, SharedUpdateVehicleDto>>;
+type _assert = AssertTrue<
+  TypesAreEqual<UpdateVehicleDto, SharedUpdateVehicleDto>
+>;

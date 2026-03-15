@@ -10,7 +10,7 @@
 
       <div class="space-y-3">
         <div
-          v-for="category in store.allCategories"
+          v-for="category in categoryStore.allCategories"
           :key="category.id"
           class="flex items-center gap-2"
         >
@@ -40,7 +40,7 @@
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { toast } from "vue-sonner";
-import { useTeacherStore } from "@/teachers/teachers.store";
+import { useCategoryStore } from "@/categories/categories.store";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -53,7 +53,7 @@ import {
 const open = defineModel<boolean>("open", { required: true });
 
 const { t } = useI18n();
-const store = useTeacherStore();
+const categoryStore = useCategoryStore();
 
 const selectedIds = ref<string[]>([]);
 const saving = ref(false);
@@ -61,17 +61,17 @@ const saving = ref(false);
 watch(open, async (isOpen) => {
   if (isOpen) {
     await Promise.all([
-      store.fetchAllCategories(),
-      store.fetchSchoolCategories(),
+      categoryStore.fetchAllCategories(),
+      categoryStore.fetchSchoolCategories(),
     ]);
-    selectedIds.value = store.schoolCategories.map((c) => c.id);
+    selectedIds.value = categoryStore.schoolCategories.map((c) => c.id);
   }
 });
 
 async function handleSave() {
   saving.value = true;
   try {
-    await store.updateSchoolCategories(selectedIds.value);
+    await categoryStore.updateSchoolCategories(selectedIds.value);
     toast.success(t("category_school_updated"));
     open.value = false;
   } catch {
