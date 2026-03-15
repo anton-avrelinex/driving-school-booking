@@ -68,10 +68,9 @@
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTeacherStore } from "@/teachers/teachers.store";
-import {
-  ROLES,
-  type CreateUserDto,
-  type CreateUserResponseDto,
+import type {
+  CreateInstructorDto,
+  CreateUserResponseDto,
 } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
@@ -96,17 +95,16 @@ const teacherStore = useTeacherStore();
 const creating = ref(false);
 const selectedCourseIds = ref<string[]>([]);
 const selectedVehicleIds = ref<string[]>([]);
-const form = ref<Omit<CreateUserDto, "courseIds" | "vehicleIds">>({
+const form = ref<Omit<CreateInstructorDto, "courseIds" | "vehicleIds">>({
   email: "",
   firstName: "",
   lastName: "",
-  role: ROLES.INSTRUCTOR,
 });
 
 async function handleCreate() {
   creating.value = true;
   try {
-    const payload: CreateUserDto = {
+    const payload: CreateInstructorDto = {
       ...form.value,
       courseIds: selectedCourseIds.value,
       vehicleIds: selectedVehicleIds.value,
@@ -117,7 +115,6 @@ async function handleCreate() {
       email: "",
       firstName: "",
       lastName: "",
-      role: ROLES.INSTRUCTOR,
     };
     selectedCourseIds.value = [];
     selectedVehicleIds.value = [];

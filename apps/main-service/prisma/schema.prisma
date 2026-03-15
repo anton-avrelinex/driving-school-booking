@@ -24,6 +24,11 @@ enum Transmission {
   MANUAL
 }
 
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+}
+
 model School {
   id        String   @id @default(uuid())
   name      String
@@ -33,9 +38,10 @@ model School {
   config SchoolConfig?
   users  User[]
 
-  categories Category[]
-  courses    Course[]
-  vehicles   Vehicle[]
+  categories  Category[]
+  courses     Course[]
+  vehicles    Vehicle[]
+  enrollments Enrollment[]
 
   @@map("schools")
 }
@@ -69,14 +75,62 @@ model User {
   status             UserStatus @default(ACTIVE)
   mustChangePassword Boolean  @default(true)
   reminderHours      Int?
-  courses            Course[]
-  vehicles           Vehicle[]
+  instructorProfile  InstructorProfile?
+  studentProfile     StudentProfile?
+  adminProfile       AdminProfile?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   @@unique([schoolId, email])
   @@index([schoolId, role])
   @@map("users")
+}
+
+model InstructorProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  courses  Course[]
+  vehicles Vehicle[]
+
+  @@map("instructor_profiles")
+}
+
+model StudentProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  enrollments Enrollment[]
+
+  @@map("student_profiles")
+}
+
+model AdminProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("admin_profiles")
+}
+
+model Enrollment {
+  id               String           @id @default(uuid())
+  schoolId         String
+  school           School           @relation(fields: [schoolId], references: [id])
+  studentProfileId String
+  studentProfile   StudentProfile   @relation(fields: [studentProfileId], references: [id])
+  courseId          String
+  course           Course           @relation(fields: [courseId], references: [id])
+  hoursPurchased   Decimal
+  hoursCompleted   Decimal          @default(0)
+  status           EnrollmentStatus @default(ACTIVE)
+  createdAt        DateTime         @default(now())
+
+  @@unique([studentProfileId, courseId])
+  @@index([schoolId])
+  @@map("enrollments")
 }
 
 model Category {
@@ -104,7 +158,8 @@ model Course {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  instructors  User[]
+  instructors  InstructorProfile[]
+  enrollments  Enrollment[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -126,7 +181,7 @@ model Vehicle {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  instructors  User[]
+  instructors  InstructorProfile[]
 
   @@unique([schoolId, licensePlate])
   @@index([schoolId])

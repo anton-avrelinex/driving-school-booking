@@ -4,8 +4,8 @@ import { useI18n } from "vue-i18n";
 import {
   ROLES,
   type UserDto,
-  type CreateUserDto,
-  type UpdateUserDto,
+  type CreateInstructorDto,
+  type UpdateInstructorDto,
   type CreateUserResponseDto,
   type CategoryDto,
   type UpdateSchoolCategoriesDto,
@@ -46,15 +46,21 @@ export const useTeacherStore = defineStore("teachers", () => {
   }
 
   async function createTeacher(
-    payload: CreateUserDto,
+    payload: CreateInstructorDto,
   ): Promise<CreateUserResponseDto> {
-    const { data } = await api.post<CreateUserResponseDto>("/users", payload);
+    const { data } = await api.post<CreateUserResponseDto>(
+      "/users/instructors",
+      payload,
+    );
     await fetchTeachers();
     return data;
   }
 
-  async function updateTeacher(id: string, payload: UpdateUserDto) {
-    const { data } = await api.patch<UserDto>(`/users/${id}`, payload);
+  async function updateTeacher(id: string, payload: UpdateInstructorDto) {
+    const { data } = await api.patch<UserDto>(
+      `/users/instructors/${id}`,
+      payload,
+    );
     await fetchTeachers();
     return data;
   }

@@ -1,22 +1,11 @@
+import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, MinLength } from "class-validator";
 import {
-  IsArray,
-  IsEmail,
-  IsIn,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MinLength,
-} from "class-validator";
-import {
-  ROLES,
-  type Role,
-  type CreateUserDto as SharedCreateUserDto,
+  type CreateInstructorDto as SharedCreateInstructorDto,
   type AssertTrue,
   type TypesAreEqual,
 } from "@driving-school-booking/shared-types";
 
-export class CreateUserDto {
+export class CreateInstructorDto {
   @IsEmail()
   email!: string;
 
@@ -30,9 +19,6 @@ export class CreateUserDto {
   @MinLength(1)
   lastName!: string;
 
-  @IsIn(Object.values(ROLES))
-  role!: Role;
-
   @IsOptional()
   @IsArray()
   @IsUUID("4", { each: true })
@@ -44,4 +30,4 @@ export class CreateUserDto {
   vehicleIds?: string[];
 }
 
-type _assert = AssertTrue<TypesAreEqual<CreateUserDto, SharedCreateUserDto>>;
+type _assert = AssertTrue<TypesAreEqual<CreateInstructorDto, SharedCreateInstructorDto>>;

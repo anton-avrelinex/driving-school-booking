@@ -101,7 +101,11 @@ export class CourseService {
   async remove(schoolId: string, id: string): Promise<void> {
     const existing = await this.prisma.course.findUnique({
       where: { id, schoolId },
-      include: { _count: { select: { instructors: true } } },
+      include: {
+        _count: {
+          select: { instructors: true, enrollments: true },
+        },
+      },
     });
 
     if (!existing) {
@@ -111,6 +115,12 @@ export class CourseService {
     if (existing._count.instructors > 0) {
       throw new ConflictException(
         "Cannot delete course with assigned instructors",
+      );
+    }
+
+    if (existing._count.enrollments > 0) {
+      throw new ConflictException(
+        "Cannot delete course with active enrollments",
       );
     }
 

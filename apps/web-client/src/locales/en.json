@@ -54,6 +54,8 @@
   "student_deactivate_confirm": "Are you sure you want to deactivate {firstName} {lastName}? They will no longer be able to log in.",
   "student_deactivated": "Student deactivated",
   "student_deactivate_failed": "Failed to deactivate student",
+  "student_courses": "Courses",
+  "student_enrollments": "Enrollments",
   "student_fetch_failed": "Failed to fetch students",
   "nav_manage_teachers": "Manage Teachers",
   "teacher_manage_title": "Manage Teachers",

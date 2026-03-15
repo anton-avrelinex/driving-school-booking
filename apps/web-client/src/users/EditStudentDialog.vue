@@ -36,7 +36,7 @@ import { useI18n } from "vue-i18n";
 import { useUserStore } from "@/users/users.store";
 import type {
   UserDto,
-  UpdateUserDto,
+  UpdateStudentDto,
 } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,7 @@ const props = defineProps<{
 const { t } = useI18n();
 const userStore = useUserStore();
 const updating = ref(false);
-const form = ref<UpdateUserDto>({
+const form = ref<UpdateStudentDto>({
   email: "",
   firstName: "",
   lastName: "",
@@ -85,7 +85,7 @@ async function handleEdit() {
   updating.value = true;
 
   try {
-    await userStore.updateUser(props.user.id, form.value);
+    await userStore.updateStudent(props.user.id, form.value);
     open.value = false;
     toast.success(t("student_updated"));
   } catch {

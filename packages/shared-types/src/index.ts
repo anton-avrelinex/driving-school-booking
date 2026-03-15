@@ -28,6 +28,14 @@ export const TRANSMISSIONS = {
 
 export type Transmission = (typeof TRANSMISSIONS)[keyof typeof TRANSMISSIONS];
 
+export const ENROLLMENT_STATUSES = {
+  ACTIVE: "ACTIVE",
+  COMPLETED: "COMPLETED",
+} as const;
+
+export type EnrollmentStatus =
+  (typeof ENROLLMENT_STATUSES)[keyof typeof ENROLLMENT_STATUSES];
+
 export interface CategoryDto {
   id: string;
   name: string;
@@ -87,6 +95,31 @@ export interface UpdateVehicleDto {
   categoryId?: string;
 }
 
+export interface InstructorProfileDto {
+  id: string;
+  courses: CourseDto[];
+  vehicles: VehicleDto[];
+}
+
+export interface StudentProfileDto {
+  id: string;
+  enrollments: EnrollmentDto[];
+}
+
+export interface AdminProfileDto {
+  id: string;
+}
+
+export interface EnrollmentDto {
+  id: string;
+  courseId: string;
+  course: CourseDto;
+  hoursPurchased: number;
+  hoursCompleted: number;
+  status: EnrollmentStatus;
+  createdAt: string;
+}
+
 export interface UserDto {
   id: string;
   email: string;
@@ -95,27 +128,50 @@ export interface UserDto {
   role: Role;
   status: UserStatus;
   createdAt: string;
-  courses?: CourseDto[];
-  vehicles?: VehicleDto[];
+  instructorProfile?: InstructorProfileDto;
+  studentProfile?: StudentProfileDto;
+  adminProfile?: AdminProfileDto;
 }
 
-export interface CreateUserDto {
+export interface CreateStudentDto {
   email: string;
   firstName: string;
   lastName: string;
-  role: Role;
+  enrollmentCourseIds?: string[];
+}
+
+export interface CreateInstructorDto {
+  email: string;
+  firstName: string;
+  lastName: string;
   courseIds?: string[];
   vehicleIds?: string[];
 }
 
-export interface UpdateUserDto {
+export interface CreateAdminDto {
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface UpdateStudentDto {
   email?: string;
   firstName?: string;
   lastName?: string;
-  role?: Role;
-  status?: UserStatus;
+}
+
+export interface UpdateInstructorDto {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
   courseIds?: string[];
   vehicleIds?: string[];
+}
+
+export interface UpdateAdminDto {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface CreateUserResponseDto extends UserDto {

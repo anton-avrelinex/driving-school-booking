@@ -13,8 +13,12 @@ import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { RolesGuard } from "../auth/roles.guard";
 import { Roles } from "../auth/roles.decorator";
 import { UserService } from "./user.service";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
+import { CreateStudentDto } from "./dto/create-student.dto";
+import { CreateInstructorDto } from "./dto/create-instructor.dto";
+import { CreateAdminDto } from "./dto/create-admin.dto";
+import { UpdateStudentDto } from "./dto/update-student.dto";
+import { UpdateInstructorDto } from "./dto/update-instructor.dto";
+import { UpdateAdminDto } from "./dto/update-admin.dto";
 import { ListUsersQueryDto } from "./dto/list-users-query.dto";
 import { Role } from "../generated/prisma/enums";
 import type { AuthenticatedRequest } from "../auth/authenticated-request.interface";
@@ -25,9 +29,28 @@ import type { AuthenticatedRequest } from "../auth/authenticated-request.interfa
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() dto: CreateUserDto, @Request() req: AuthenticatedRequest) {
-    return this.userService.create(req.user.schoolId, dto);
+  @Post("students")
+  createStudent(
+    @Body() dto: CreateStudentDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.userService.createStudent(req.user.schoolId, dto);
+  }
+
+  @Post("instructors")
+  createInstructor(
+    @Body() dto: CreateInstructorDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.userService.createInstructor(req.user.schoolId, dto);
+  }
+
+  @Post("admins")
+  createAdmin(
+    @Body() dto: CreateAdminDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.userService.createAdmin(req.user.schoolId, dto);
   }
 
   @Get()
@@ -43,13 +66,31 @@ export class UserController {
     return this.userService.findOne(req.user.schoolId, id);
   }
 
-  @Patch(":id")
-  update(
+  @Patch("students/:id")
+  updateStudent(
     @Param("id") id: string,
-    @Body() dto: UpdateUserDto,
+    @Body() dto: UpdateStudentDto,
     @Request() req: AuthenticatedRequest,
   ) {
-    return this.userService.update(req.user.schoolId, id, dto);
+    return this.userService.updateStudent(req.user.schoolId, id, dto);
+  }
+
+  @Patch("instructors/:id")
+  updateInstructor(
+    @Param("id") id: string,
+    @Body() dto: UpdateInstructorDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.userService.updateInstructor(req.user.schoolId, id, dto);
+  }
+
+  @Patch("admins/:id")
+  updateAdmin(
+    @Param("id") id: string,
+    @Body() dto: UpdateAdminDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.userService.updateAdmin(req.user.schoolId, id, dto);
   }
 
   @Patch(":id/deactivate")

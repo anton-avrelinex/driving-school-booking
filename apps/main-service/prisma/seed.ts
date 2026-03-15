@@ -22,7 +22,7 @@ async function main() {
 
   const passwordHash = await bcrypt.hash("admin123", 10);
 
-  await prisma.user.upsert({
+  const admin = await prisma.user.upsert({
     where: {
       schoolId_email: {
         schoolId: school.id,
@@ -38,7 +38,17 @@ async function main() {
       lastName: "User",
       role: Role.ADMIN,
       mustChangePassword: false,
+      adminProfile: {
+        create: {},
+      },
     },
+  });
+
+  // Ensure admin profile exists (for re-runs where user already existed)
+  await prisma.adminProfile.upsert({
+    where: { userId: admin.id },
+    update: {},
+    create: { userId: admin.id },
   });
 
   const categoryNames = [

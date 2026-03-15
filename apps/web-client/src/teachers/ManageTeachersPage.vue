@@ -44,7 +44,7 @@
           <TableCell>{{ user.email }}</TableCell>
           <TableCell>
             <span
-              v-for="course in user.courses"
+              v-for="course in user.instructorProfile?.courses"
               :key="course.id"
               class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary mr-1"
             >
@@ -53,7 +53,7 @@
           </TableCell>
           <TableCell>
             <span
-              v-for="vehicle in user.vehicles"
+              v-for="vehicle in user.instructorProfile?.vehicles"
               :key="vehicle.id"
               class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary mr-1"
             >

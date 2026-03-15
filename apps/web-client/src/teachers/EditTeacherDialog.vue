@@ -70,7 +70,7 @@ import { useI18n } from "vue-i18n";
 import { useTeacherStore } from "@/teachers/teachers.store";
 import type {
   UserDto,
-  UpdateUserDto,
+  UpdateInstructorDto,
 } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
@@ -95,7 +95,7 @@ const teacherStore = useTeacherStore();
 const updating = ref(false);
 const selectedCourseIds = ref<string[]>([]);
 const selectedVehicleIds = ref<string[]>([]);
-const form = ref<UpdateUserDto>({
+const form = ref<UpdateInstructorDto>({
   email: "",
   firstName: "",
   lastName: "",
@@ -110,8 +110,8 @@ watch(
         firstName: user.firstName,
         lastName: user.lastName,
       };
-      selectedCourseIds.value = user.courses?.map((c) => c.id) ?? [];
-      selectedVehicleIds.value = user.vehicles?.map((v) => v.id) ?? [];
+      selectedCourseIds.value = user.instructorProfile?.courses.map((c) => c.id) ?? [];
+      selectedVehicleIds.value = user.instructorProfile?.vehicles.map((v) => v.id) ?? [];
     }
   },
 );

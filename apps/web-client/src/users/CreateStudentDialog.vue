@@ -20,6 +20,23 @@
           <Label for="create-last-name">{{ $t("common_last_name") }}</Label>
           <Input id="create-last-name" v-model="form.lastName" required />
         </div>
+        <div class="flex flex-col gap-2">
+          <Label>{{ $t("student_courses") }}</Label>
+          <div class="flex flex-col gap-1">
+            <label
+              v-for="course in userStore.courses"
+              :key="course.id"
+              class="flex items-center gap-2 text-sm"
+            >
+              <input
+                type="checkbox"
+                :value="course.id"
+                v-model="selectedCourseIds"
+              />
+              {{ course.name }}
+            </label>
+          </div>
+        </div>
         <DialogFooter>
           <Button type="submit" :disabled="creating">
             {{ creating ? $t("common_creating") : $t("common_create") }}
@@ -31,13 +48,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useUserStore } from "@/users/users.store";
-import {
-  ROLES,
-  type CreateUserDto,
-  type CreateUserResponseDto,
+import type {
+  CreateStudentDto,
+  CreateUserResponseDto,
 } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
@@ -60,24 +76,34 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const userStore = useUserStore();
 const creating = ref(false);
-const form = ref<CreateUserDto>({
+const selectedCourseIds = ref<string[]>([]);
+
+watch(open, async (isOpen) => {
+  if (isOpen) {
+    await userStore.fetchCourses();
+  }
+});
+const form = ref<Omit<CreateStudentDto, "enrollmentCourseIds">>({
   email: "",
   firstName: "",
   lastName: "",
-  role: ROLES.STUDENT,
 });
 
 async function handleCreate() {
   creating.value = true;
   try {
-    const result = await userStore.createUser(form.value);
+    const payload: CreateStudentDto = {
+      ...form.value,
+      enrollmentCourseIds: selectedCourseIds.value,
+    };
+    const result = await userStore.createStudent(payload);
     open.value = false;
     form.value = {
       email: "",
       firstName: "",
       lastName: "",
-      role: ROLES.STUDENT,
     };
+    selectedCourseIds.value = [];
     toast.success(t("student_created"));
     emit("created", result);
   } catch {

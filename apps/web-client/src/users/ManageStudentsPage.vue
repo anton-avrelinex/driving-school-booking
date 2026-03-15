@@ -18,6 +18,7 @@
           <TableHead>{{ $t("common_first_name") }}</TableHead>
           <TableHead>{{ $t("common_last_name") }}</TableHead>
           <TableHead>{{ $t("common_email") }}</TableHead>
+          <TableHead>{{ $t("student_enrollments") }}</TableHead>
           <TableHead>{{ $t("common_status") }}</TableHead>
           <TableHead class="text-right">{{ $t("common_actions") }}</TableHead>
         </TableRow>
@@ -27,6 +28,15 @@
           <TableCell>{{ user.firstName }}</TableCell>
           <TableCell>{{ user.lastName }}</TableCell>
           <TableCell>{{ user.email }}</TableCell>
+          <TableCell>
+            <span
+              v-for="enrollment in user.studentProfile?.enrollments"
+              :key="enrollment.id"
+              class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary mr-1"
+            >
+              {{ enrollment.course.name }} ({{ enrollment.hoursCompleted }}/{{ enrollment.hoursPurchased }}h)
+            </span>
+          </TableCell>
           <TableCell>
             <span
               :class="
