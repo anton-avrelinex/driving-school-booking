@@ -72,6 +72,13 @@
             </span>
           </TableCell>
           <TableCell class="text-right space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              @click="openAvailabilityDialog(user)"
+            >
+              {{ $t("teacher_availability") }}
+            </Button>
             <Button variant="outline" size="sm" @click="openEditDialog(user)">
               {{ $t("common_edit") }}
             </Button>
@@ -111,6 +118,11 @@
     <ManageCoursesDialog v-model:open="showCoursesDialog" />
 
     <ManageVehiclesDialog v-model:open="showVehiclesDialog" />
+
+    <SetAvailabilityDialog
+      v-model:open="showAvailabilityDialog"
+      :user="availabilityUser"
+    />
   </div>
 </template>
 
@@ -141,6 +153,7 @@ import DeactivateTeacherDialog from "@/teachers/DeactivateTeacherDialog.vue";
 import ManageCategoriesDialog from "@/categories/ManageCategoriesDialog.vue";
 import ManageCoursesDialog from "@/courses/ManageCoursesDialog.vue";
 import ManageVehiclesDialog from "@/vehicles/ManageVehiclesDialog.vue";
+import SetAvailabilityDialog from "@/availability/SetAvailabilityDialog.vue";
 
 const teacherStore = useTeacherStore();
 const courseStore = useCourseStore();
@@ -161,6 +174,9 @@ const deactivatingUser = ref<UserDto | null>(null);
 const showCategoriesDialog = ref(false);
 const showCoursesDialog = ref(false);
 const showVehiclesDialog = ref(false);
+
+const showAvailabilityDialog = ref(false);
+const availabilityUser = ref<UserDto | null>(null);
 
 onMounted(async () => {
   await Promise.all([
@@ -186,5 +202,10 @@ function openEditDialog(user: UserDto) {
 function openDeactivateDialog(user: UserDto) {
   deactivatingUser.value = user;
   showDeactivateDialog.value = true;
+}
+
+function openAvailabilityDialog(user: UserDto) {
+  availabilityUser.value = user;
+  showAvailabilityDialog.value = true;
 }
 </script>

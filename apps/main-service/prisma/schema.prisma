@@ -49,7 +49,7 @@ model School {
 model SchoolConfig {
   id       String @id @default(uuid())
   schoolId String @unique
-  school   School @relation(fields: [schoolId], references: [id])
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   cancelDeadlineDaysBefore Int     @default(1)
   cancelDeadlineTime       String  @default("15:00")
@@ -89,18 +89,31 @@ model User {
 model InstructorProfile {
   id     String @id @default(uuid())
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  courses  Course[]
-  vehicles Vehicle[]
+  courses      Course[]
+  vehicles     Vehicle[]
+  availability InstructorAvailability[]
 
   @@map("instructor_profiles")
+}
+
+model InstructorAvailability {
+  id           String            @id @default(uuid())
+  instructorId String
+  instructor   InstructorProfile @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+
+  @@index([instructorId])
+  @@map("instructor_availabilities")
 }
 
 model StudentProfile {
   id     String @id @default(uuid())
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   enrollments Enrollment[]
 
@@ -110,7 +123,7 @@ model StudentProfile {
 model AdminProfile {
   id     String @id @default(uuid())
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("admin_profiles")
 }

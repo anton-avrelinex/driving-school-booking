@@ -31,6 +31,15 @@
         </RouterLink>
       </template>
 
+      <template v-if="auth.isInstructor">
+        <RouterLink
+          to="/instructor/availability"
+          class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
+        >
+          {{ $t("nav_my_availability") }}
+        </RouterLink>
+      </template>
+
       <div class="mt-auto">
         <p class="mb-2 text-xs text-muted-foreground truncate">
           {{ auth.user?.role }}

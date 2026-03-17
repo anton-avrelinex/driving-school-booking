@@ -43,7 +43,10 @@ export const useAuthStore = defineStore("auth", () => {
   });
 
   const isAuthenticated = computed(() => !!accessToken.value);
+
   const isAdmin = computed(() => user.value?.role === ROLES.ADMIN);
+  const isInstructor = computed(() => user.value?.role === ROLES.INSTRUCTOR);
+
   const mustChangePassword = computed(() => {
     return user.value?.mustChangePassword ?? false;
   });
@@ -105,6 +108,7 @@ export const useAuthStore = defineStore("auth", () => {
     user,
     isAuthenticated,
     isAdmin,
+    isInstructor,
     mustChangePassword,
     login,
     refresh,

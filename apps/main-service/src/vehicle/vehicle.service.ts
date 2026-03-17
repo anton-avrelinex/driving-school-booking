@@ -7,6 +7,7 @@ import type { VehicleDto } from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateVehicleDto } from "./dto/create-vehicle.dto";
 import { UpdateVehicleDto } from "./dto/update-vehicle.dto";
+import { Prisma } from "../generated/prisma/client";
 
 const VEHICLE_SELECT = {
   id: true,
@@ -15,7 +16,7 @@ const VEHICLE_SELECT = {
   licensePlate: true,
   transmission: true,
   categoryId: true,
-} as const;
+} as Prisma.VehicleSelect;
 
 @Injectable()
 export class VehicleService {

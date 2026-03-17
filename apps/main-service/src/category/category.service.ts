@@ -2,11 +2,12 @@ import { Injectable } from "@nestjs/common";
 import type { CategoryDto } from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
 import { UpdateSchoolCategoriesDto } from "./dto/update-school-categories.dto";
+import { Prisma } from "../generated/prisma/client";
 
 const CATEGORY_SELECT = {
   id: true,
   name: true,
-} as const;
+} as Prisma.CategorySelect;
 
 @Injectable()
 export class CategoryService {

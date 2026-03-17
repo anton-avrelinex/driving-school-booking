@@ -95,10 +95,21 @@ export interface UpdateVehicleDto {
   categoryId?: string;
 }
 
+export interface InstructorAvailabilityDto {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}
+
+export interface SetInstructorAvailabilityDto {
+  slots: InstructorAvailabilityDto[];
+}
+
 export interface InstructorProfileDto {
   id: string;
   courses: CourseDto[];
   vehicles: VehicleDto[];
+  availability: InstructorAvailabilityDto[];
 }
 
 export interface StudentProfileDto {

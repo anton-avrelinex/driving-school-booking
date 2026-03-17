@@ -3,6 +3,7 @@ import type {
   UserDto,
   VehicleDto,
   EnrollmentDto,
+  InstructorAvailabilityDto,
 } from "@driving-school-booking/shared-types";
 
 function toCourseDto(c: {
@@ -42,6 +43,7 @@ export function toUserDto(user: {
       transmission: string;
     }[];
     vehicles: VehicleDto[];
+    availability?: InstructorAvailabilityDto[];
   } | null;
   studentProfile?: {
     id: string;
@@ -81,6 +83,7 @@ export function toUserDto(user: {
       id: user.instructorProfile.id,
       courses: user.instructorProfile.courses.map(toCourseDto),
       vehicles: user.instructorProfile.vehicles,
+      availability: user.instructorProfile.availability ?? [],
     };
   }
 

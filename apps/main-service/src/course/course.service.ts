@@ -7,6 +7,7 @@ import type { CourseDto } from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
+import { Prisma } from "../generated/prisma/client";
 
 const COURSE_SELECT = {
   id: true,
@@ -15,7 +16,7 @@ const COURSE_SELECT = {
   hours: true,
   categoryId: true,
   transmission: true,
-} as const;
+} as Prisma.CourseSelect;
 
 function toCourseDto(course: {
   id: string;

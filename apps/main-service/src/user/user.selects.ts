@@ -1,3 +1,5 @@
+import { Prisma } from "../generated/prisma/client";
+
 const COURSE_SELECT_IN_PROFILE = {
   id: true,
   name: true,
@@ -5,7 +7,7 @@ const COURSE_SELECT_IN_PROFILE = {
   hours: true,
   categoryId: true,
   transmission: true,
-} as const;
+} satisfies Prisma.CourseSelect;
 
 const VEHICLE_SELECT_IN_PROFILE = {
   id: true,
@@ -14,7 +16,7 @@ const VEHICLE_SELECT_IN_PROFILE = {
   licensePlate: true,
   transmission: true,
   categoryId: true,
-} as const;
+} satisfies Prisma.VehicleSelect;
 
 export const USER_SELECT = {
   id: true,
@@ -29,6 +31,14 @@ export const USER_SELECT = {
       id: true,
       courses: { select: COURSE_SELECT_IN_PROFILE },
       vehicles: { select: VEHICLE_SELECT_IN_PROFILE },
+      availability: {
+        select: {
+          dayOfWeek: true,
+          startTime: true,
+          endTime: true,
+        },
+        orderBy: [{ dayOfWeek: "asc" as const }, { startTime: "asc" as const }],
+      },
     },
   },
   studentProfile: {
@@ -52,4 +62,4 @@ export const USER_SELECT = {
       id: true,
     },
   },
-} as const;
+} satisfies Prisma.UserSelect;
