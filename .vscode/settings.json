@@ -10,5 +10,19 @@
   },
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "i18n-ally.localesPaths": ["apps/web-client/src/locales"],
+  "i18n-ally.extract.keygenStyle": "snake_case",
+  "i18n-ally.keystyle": "flat",
+  "i18n-ally.sortKeys": true,
+  "i18n-ally.enabledFrameworks": ["vue"],
+  "i18n-ally.keysInUse": [
+    "common_days[0]",
+    "common_days[1]",
+    "common_days[2]",
+    "common_days[3]",
+    "common_days[4]",
+    "common_days[5]",
+    "common_days[6]"
+  ]
 }
