@@ -19,14 +19,6 @@ export default defineConfig(({ mode }) => {
         "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
     },
-    optimizeDeps: {
-      include: ["@driving-school-booking/shared-types"],
-    },
-    build: {
-      commonjsOptions: {
-        include: [/shared-types/],
-      },
-    },
     server: {
       proxy: {
         "/api": {

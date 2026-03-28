@@ -13,6 +13,7 @@ import { AdminModule } from "./admin/admin.module";
 import { CategoryModule } from "./category/category.module";
 import { VehicleModule } from "./vehicle/vehicle.module";
 import { CourseModule } from "./course/course.module";
+import { LessonModule } from "./lesson/lesson.module";
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CourseModule } from "./course/course.module";
     CategoryModule,
     CourseModule,
     VehicleModule,
+    LessonModule,
   ],
   controllers: [AppController],
   providers: [AppService],

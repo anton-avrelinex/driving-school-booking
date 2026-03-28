@@ -215,3 +215,49 @@ export interface JwtPayload {
   mustChangePassword: boolean;
   exp: number;
 }
+
+export const LESSON_STATUSES = {
+  SCHEDULED: "SCHEDULED",
+  COMPLETED: "COMPLETED",
+  CANCELLED: "CANCELLED",
+} as const;
+
+export type LessonStatus =
+  (typeof LESSON_STATUSES)[keyof typeof LESSON_STATUSES];
+
+export interface LessonDto {
+  id: string;
+  enrollmentId: string;
+  courseName: string;
+  instructorName: string;
+  studentName: string;
+  vehicleId: string | null;
+  vehicleName: string | null;
+  startTime: string;
+  endTime: string;
+  status: LessonStatus;
+  cancelledAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+export interface CreateLessonDto {
+  enrollmentId: string;
+  instructorId: string;
+  startTime: string;
+}
+
+export interface AvailableSlotDto {
+  startTime: string;
+  endTime: string;
+}
+
+export interface AvailableInstructorDto {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface AssignVehicleDto {
+  vehicleId: string;
+}

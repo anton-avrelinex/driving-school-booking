@@ -46,6 +46,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const isAdmin = computed(() => user.value?.role === ROLES.ADMIN);
   const isInstructor = computed(() => user.value?.role === ROLES.INSTRUCTOR);
+  const isStudent = computed(() => user.value?.role === ROLES.STUDENT);
 
   const mustChangePassword = computed(() => {
     return user.value?.mustChangePassword ?? false;
@@ -109,6 +110,7 @@ export const useAuthStore = defineStore("auth", () => {
     isAuthenticated,
     isAdmin,
     isInstructor,
+    isStudent,
     mustChangePassword,
     login,
     refresh,

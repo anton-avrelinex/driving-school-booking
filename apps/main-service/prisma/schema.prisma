@@ -29,6 +29,12 @@ enum EnrollmentStatus {
   COMPLETED
 }
 
+enum LessonStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
 model School {
   id        String   @id @default(uuid())
   name      String
@@ -42,6 +48,7 @@ model School {
   courses     Course[]
   vehicles    Vehicle[]
   enrollments Enrollment[]
+  lessons     Lesson[]
 
   @@map("schools")
 }
@@ -94,6 +101,7 @@ model InstructorProfile {
   courses      Course[]
   vehicles     Vehicle[]
   availability InstructorAvailability[]
+  lessons      Lesson[]
 
   @@map("instructor_profiles")
 }
@@ -141,9 +149,36 @@ model Enrollment {
   status           EnrollmentStatus @default(ACTIVE)
   createdAt        DateTime         @default(now())
 
+  lessons          Lesson[]
+
   @@unique([studentProfileId, courseId])
   @@index([schoolId])
   @@map("enrollments")
+}
+
+model Lesson {
+  id           String            @id @default(uuid())
+  schoolId     String
+  school       School            @relation(fields: [schoolId], references: [id])
+  enrollmentId String
+  enrollment   Enrollment        @relation(fields: [enrollmentId], references: [id])
+  instructorId String
+  instructor   InstructorProfile @relation(fields: [instructorId], references: [id])
+  vehicleId    String?
+  vehicle      Vehicle?          @relation(fields: [vehicleId], references: [id])
+  startTime    DateTime
+  endTime      DateTime
+  status       LessonStatus      @default(SCHEDULED)
+  cancelledAt  DateTime?
+  cancelledBy  String?
+  completedAt  DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([schoolId])
+  @@index([instructorId, startTime])
+  @@index([vehicleId, startTime])
+  @@map("lessons")
 }
 
 model Category {
@@ -195,6 +230,7 @@ model Vehicle {
   updatedAt    DateTime     @updatedAt
 
   instructors  InstructorProfile[]
+  lessons      Lesson[]
 
   @@unique([schoolId, licensePlate])
   @@index([schoolId])

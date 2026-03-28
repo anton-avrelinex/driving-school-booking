@@ -29,6 +29,12 @@
         >
           {{ $t("nav_manage_teachers") }}
         </RouterLink>
+        <RouterLink
+          to="/admin/lessons"
+          class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
+        >
+          {{ $t("nav_lessons") }}
+        </RouterLink>
       </template>
 
       <template v-if="auth.isInstructor">
@@ -37,6 +43,27 @@
           class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
         >
           {{ $t("nav_my_availability") }}
+        </RouterLink>
+        <RouterLink
+          to="/instructor/lessons"
+          class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
+        >
+          {{ $t("nav_my_lessons") }}
+        </RouterLink>
+      </template>
+
+      <template v-if="auth.isStudent">
+        <RouterLink
+          to="/lessons/book"
+          class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
+        >
+          {{ $t("nav_book_lesson") }}
+        </RouterLink>
+        <RouterLink
+          to="/lessons"
+          class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
+        >
+          {{ $t("nav_my_lessons") }}
         </RouterLink>
       </template>
 
