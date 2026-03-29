@@ -261,3 +261,15 @@ export interface AvailableInstructorDto {
 export interface AssignVehicleDto {
   vehicleId: string;
 }
+
+export interface RequestLogDto {
+  method: string;
+  path: string;
+  statusCode: number;
+  durationMs: number;
+  timestamp: string;
+  userId: string | null;
+  schoolId: string | null;
+}
+
+export const REQUEST_LOG_QUEUE = "request-logs" as const;

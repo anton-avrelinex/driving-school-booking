@@ -1,7 +1,10 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { BullModule } from "@nestjs/bullmq";
+import { REQUEST_LOG_QUEUE } from "@driving-school-booking/shared-types";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { RequestLogInterceptor } from "./request-log/request-log.interceptor";
 import { PrismaModule } from "./prisma/prisma.module";
 import { RedisModule } from "./redis/redis.module";
 import { HealthModule } from "./health/health.module";
@@ -20,6 +23,17 @@ import { LessonModule } from "./lesson/lesson.module";
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     RedisModule,
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          url: config.getOrThrow<string>("REDIS_URL"),
+        },
+      }),
+    }),
+    BullModule.registerQueue({
+      name: REQUEST_LOG_QUEUE,
+    }),
     HealthModule,
     AuthModule,
     UserModule,
@@ -32,6 +46,6 @@ import { LessonModule } from "./lesson/lesson.module";
     LessonModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RequestLogInterceptor],
 })
 export class AppModule {}
