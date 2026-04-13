@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ChartConfig } from ".";
 import { isClient } from "@vueuse/core";
 import { useId } from "reka-ui";

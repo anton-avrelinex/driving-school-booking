@@ -38,9 +38,7 @@ export class LogsController {
   }
 
   @Get("volume")
-  getVolume(
-    @Query() filters: TimeSeriesFiltersDto,
-  ): Promise<VolumePointDto[]> {
+  getVolume(@Query() filters: TimeSeriesFiltersDto): Promise<VolumePointDto[]> {
     return this.logsService.getVolume(filters);
   }
 

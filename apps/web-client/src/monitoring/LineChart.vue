@@ -11,7 +11,9 @@
           class="data-[active=true]:bg-muted/50 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
           @click="activeKey = 'all'"
         >
-          <span class="text-muted-foreground text-xs">{{ $t("common_all") }}</span>
+          <span class="text-muted-foreground text-xs">
+            {{ $t("common_all") }}
+          </span>
         </button>
         <button
           v-for="key in lineKeys"
@@ -72,7 +74,11 @@
                 },
               })
             "
-            :color="visibleKeys.length === 1 && visibleKeys[0] ? chartConfig[visibleKeys[0]]?.color ?? 'var(--chart-1)' : '#0000'"
+            :color="
+              visibleKeys.length === 1 && visibleKeys[0]
+                ? (chartConfig[visibleKeys[0]]?.color ?? 'var(--chart-1)')
+                : '#0000'
+            "
           />
         </VisXYContainer>
       </ChartContainer>
@@ -114,7 +120,9 @@ const props = withDefaults(
   },
 );
 
-const activeKey = ref(props.lineKeys.length > 1 ? "all" : props.lineKeys[0] ?? "");
+const activeKey = ref(
+  props.lineKeys.length > 1 ? "all" : (props.lineKeys[0] ?? ""),
+);
 
 const visibleKeys = computed(() =>
   activeKey.value === "all" ? props.lineKeys : [activeKey.value],

@@ -52,8 +52,9 @@ export async function getErrorRate(
 export async function getLatency(
   filters: TimeSeriesFilters,
 ): Promise<LatencyPointDto[]> {
-  const { data } = await api.get<LatencyPointDto[]>("/monitoring/logs/latency", {
-    params: filters,
-  });
+  const { data } = await api.get<LatencyPointDto[]>(
+    "/monitoring/logs/latency",
+    { params: filters },
+  );
   return data;
 }

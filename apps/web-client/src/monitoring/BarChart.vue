@@ -7,7 +7,9 @@
       </div>
       <div class="flex items-center px-6 py-4 sm:border-l sm:px-8 sm:py-6">
         <div class="flex flex-col gap-1 text-left">
-          <span class="text-muted-foreground text-xs">{{ $t("monitoring_bar_total") }}</span>
+          <span class="text-muted-foreground text-xs">
+            {{ $t("monitoring_bar_total") }}
+          </span>
           <span class="text-lg leading-none font-bold sm:text-3xl">
             {{ totalCount.toLocaleString() }}
           </span>
@@ -17,7 +19,7 @@
     <CardContent class="px-2 sm:p-6">
       <ChartContainer
         :config="chartConfig"
-        class="aspect-auto h-[250px] w-full"
+        class="aspect-auto h-62.5 w-full"
         cursor
       >
         <VisXYContainer
