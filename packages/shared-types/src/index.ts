@@ -273,3 +273,56 @@ export interface RequestLogDto {
 }
 
 export const REQUEST_LOG_QUEUE = "request-logs" as const;
+
+export const GRANULARITIES = {
+  HOUR: "hour",
+  DAY: "day",
+  WEEK: "week",
+} as const;
+
+export type Granularity = (typeof GRANULARITIES)[keyof typeof GRANULARITIES];
+
+export interface MonitoringFilters {
+  from: string;
+  to: string;
+  schoolId?: string;
+  userId?: string;
+}
+
+export interface TopEndpointsFilters extends MonitoringFilters {
+  limit?: number;
+}
+
+export interface TimeSeriesFilters extends MonitoringFilters {
+  granularity?: Granularity;
+}
+
+export interface TopEndpointDto {
+  method: string;
+  path: string;
+  count: number;
+}
+
+export interface RequestsBySchoolDto {
+  schoolId: string | null;
+  count: number;
+}
+
+export interface VolumePointDto {
+  bucket: string;
+  count: number;
+}
+
+export interface ErrorRatePointDto {
+  bucket: string;
+  total: number;
+  errors: number;
+  rate: number;
+}
+
+export interface LatencyPointDto {
+  bucket: string;
+  p50: number;
+  p95: number;
+  p99: number;
+}

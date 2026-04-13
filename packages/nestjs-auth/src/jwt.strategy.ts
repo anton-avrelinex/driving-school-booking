@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
+import type { JwtPayload } from "@driving-school-booking/shared-types";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -13,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: { sub: string; schoolId: string; role: string }) {
-    return { sub: payload.sub, schoolId: payload.schoolId, role: payload.role };
+  validate(payload: JwtPayload): JwtPayload {
+    return payload;
   }
 }

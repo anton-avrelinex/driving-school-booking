@@ -1,9 +1,11 @@
 import { Body, Controller, Get, Put, Request, UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { RolesGuard } from "../auth/roles.guard";
-import { Roles } from "../auth/roles.decorator";
+import {
+  JwtAuthGuard,
+  RolesGuard,
+  Roles,
+  type AuthenticatedRequest,
+} from "@driving-school-booking/nestjs-auth";
 import { Role } from "../generated/prisma/enums";
-import type { AuthenticatedRequest } from "../auth/authenticated-request.interface";
 import { CategoryService } from "./category.service";
 import { UpdateSchoolCategoriesDto } from "./dto/update-school-categories.dto";
 

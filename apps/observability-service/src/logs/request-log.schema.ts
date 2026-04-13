@@ -28,3 +28,5 @@ export class RequestLog {
 }
 
 export const RequestLogSchema = SchemaFactory.createForClass(RequestLog);
+
+RequestLogSchema.index({ timestamp: -1, schoolId: 1, userId: 1 });

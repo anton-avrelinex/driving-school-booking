@@ -5,6 +5,7 @@ import { HealthModule } from "./health/health.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
 import { BullModule } from "@nestjs/bullmq";
+import { JwtAuthModule } from "@driving-school-booking/nestjs-auth";
 import { LogsModule } from "./logs/logs.module";
 import { REQUEST_LOG_QUEUE } from "@driving-school-booking/shared-types";
 
@@ -30,6 +31,7 @@ import { REQUEST_LOG_QUEUE } from "@driving-school-booking/shared-types";
     BullModule.registerQueue({
       name: REQUEST_LOG_QUEUE,
     }),
+    JwtAuthModule,
     HealthModule,
     LogsModule,
   ],

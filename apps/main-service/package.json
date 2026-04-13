@@ -15,6 +15,7 @@
     "lint": "eslint --cache ."
   },
   "dependencies": {
+    "@driving-school-booking/nestjs-auth": "workspace:^",
     "@driving-school-booking/shared-types": "workspace:^",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.0.1",

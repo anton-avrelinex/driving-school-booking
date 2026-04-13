@@ -85,7 +85,7 @@ const tooltipLabel = computed(() => {
             />
           </template>
 
-          <div :class="cn('flex flex-1 justify-between leading-none', nestLabel ? 'items-end' : 'items-center')">
+          <div :class="cn('flex flex-1 justify-between gap-4 leading-none', nestLabel ? 'items-end' : 'items-center')">
             <div class="grid gap-1.5">
               <div v-if="nestLabel" class="font-medium">
                 {{ tooltipLabel }}

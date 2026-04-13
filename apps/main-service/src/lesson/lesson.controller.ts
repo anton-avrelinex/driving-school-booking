@@ -9,11 +9,13 @@ import {
   Request,
   UseGuards,
 } from "@nestjs/common";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { RolesGuard } from "../auth/roles.guard";
-import { Roles } from "../auth/roles.decorator";
+import {
+  JwtAuthGuard,
+  RolesGuard,
+  Roles,
+  type AuthenticatedRequest,
+} from "@driving-school-booking/nestjs-auth";
 import { Role } from "../generated/prisma/enums";
-import type { AuthenticatedRequest } from "../auth/authenticated-request.interface";
 import { LessonService } from "./lesson.service";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { AssignVehicleDto } from "./dto/assign-vehicle.dto";

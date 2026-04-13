@@ -12,6 +12,11 @@ export default defineConfig(({ mode }) => {
       ? (process.env.VITE_API_URL ?? "http://main-service:3001")
       : (process.env.VITE_API_URL ?? "http://localhost:3001");
 
+  const obsTarget =
+    mode === "production"
+      ? (process.env.VITE_OBS_URL ?? "http://observability-service:4001")
+      : (process.env.VITE_OBS_URL ?? "http://localhost:4001");
+
   return {
     plugins: [vue(), vueDevTools(), tailwindcss()],
     resolve: {
@@ -21,6 +26,11 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
+        "/api/monitoring": {
+          target: obsTarget,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/monitoring/, "/api"),
+        },
         "/api": {
           target: apiTarget,
           changeOrigin: true,

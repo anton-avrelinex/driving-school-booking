@@ -3,8 +3,10 @@ import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { RefreshDto } from "./dto/refresh.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
-import { JwtAuthGuard } from "./jwt-auth.guard";
-import type { AuthenticatedRequest } from "./authenticated-request.interface";
+import {
+  JwtAuthGuard,
+  type AuthenticatedRequest,
+} from "@driving-school-booking/nestjs-auth";
 
 @Controller("auth")
 export class AuthController {
