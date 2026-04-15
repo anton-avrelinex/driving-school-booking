@@ -1,7 +1,14 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { BullModule } from "@nestjs/bullmq";
-import { REQUEST_LOG_QUEUE } from "@driving-school-booking/shared-types";
+import { Queue } from "bullmq";
+import {
+  OBS_LOGS_QUEUE,
+  LOG_TYPES,
+  SERVICES,
+  type AppLogDto,
+} from "@driving-school-booking/shared-types";
+import { ObsLoggerModule } from "@driving-school-booking/nestjs-logger";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { RequestLogInterceptor } from "./request-log/request-log.interceptor";
@@ -18,6 +25,14 @@ import { VehicleModule } from "./vehicle/vehicle.module";
 import { CourseModule } from "./course/course.module";
 import { LessonModule } from "./lesson/lesson.module";
 
+let logQueue: Queue | null = null;
+function getLogQueue(): Queue {
+  logQueue ??= new Queue(OBS_LOGS_QUEUE, {
+    connection: { url: process.env.REDIS_URL },
+  });
+  return logQueue;
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -31,8 +46,13 @@ import { LessonModule } from "./lesson/lesson.module";
         },
       }),
     }),
-    BullModule.registerQueue({
-      name: REQUEST_LOG_QUEUE,
+    BullModule.registerQueue({ name: OBS_LOGS_QUEUE }),
+    ObsLoggerModule.forRoot({
+      serviceName: SERVICES.MAIN,
+      logLevel: process.env.LOG_LEVEL ?? "info",
+      writeLog: (entry: AppLogDto) => {
+        void getLogQueue().add(LOG_TYPES.APP, entry);
+      },
     }),
     HealthModule,
     AuthModule,

@@ -6,6 +6,7 @@ import { createPinia } from "pinia";
 
 import App from "./App.vue";
 import router from "./router";
+import { initObservability } from "./observability";
 
 const i18n = createI18n({
   messages: {
@@ -20,5 +21,7 @@ const app = createApp(App);
 app.use(i18n);
 app.use(createPinia());
 app.use(router);
+
+initObservability(router);
 
 app.mount("#app");

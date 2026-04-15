@@ -1,18 +1,31 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { RequestLog, RequestLogSchema } from "./request-log.schema";
-import { RequestLogProcessor } from "./request-log.processor";
+import { LOG_TYPES } from "@driving-school-booking/shared-types";
+import {
+  Log,
+  LogSchema,
+  RequestLogEntrySchema,
+  AppLogEntrySchema,
+} from "../schemas/log.schema";
+import { LogsProcessor } from "./logs.processor";
 import { LogsService } from "./logs.service";
 import { LogsController } from "./logs.controller";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: RequestLog.name, schema: RequestLogSchema },
+      {
+        name: Log.name,
+        schema: LogSchema,
+        discriminators: [
+          { name: LOG_TYPES.REQUEST, schema: RequestLogEntrySchema },
+          { name: LOG_TYPES.APP, schema: AppLogEntrySchema },
+        ],
+      },
     ]),
   ],
   controllers: [LogsController],
-  providers: [RequestLogProcessor, LogsService],
-  exports: [LogsService],
+  providers: [LogsProcessor, LogsService],
+  exports: [LogsService, MongooseModule],
 })
 export class LogsModule {}

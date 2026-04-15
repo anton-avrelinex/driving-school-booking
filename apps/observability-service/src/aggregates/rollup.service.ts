@@ -1,0 +1,203 @@
+import { Injectable, Logger } from "@nestjs/common";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model, type PipelineStage } from "mongoose";
+import {
+  LOG_TYPES,
+  SERVICES,
+  type DailyAggregateMetrics,
+  type TopEndpointAggregate,
+} from "@driving-school-booking/shared-types";
+import { Log } from "../schemas/log.schema";
+import { AnalyticsEvent } from "../schemas/analytics-event.schema";
+import { DailyAggregate } from "../schemas/daily-aggregate.schema";
+
+function roundTo(value: number, decimals: number): number {
+  const factor = 10 ** decimals;
+  return Math.round(value * factor) / factor;
+}
+
+function dayBounds(dateStr: string): { start: Date; end: Date } {
+  const start = new Date(`${dateStr}T00:00:00.000Z`);
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 1);
+  end.setTime(end.getTime() - 1);
+  return { start, end };
+}
+
+@Injectable()
+export class RollupService {
+  private readonly logger = new Logger(RollupService.name);
+
+  constructor(
+    @InjectModel(Log.name)
+    private readonly logModel: Model<Log>,
+    @InjectModel(AnalyticsEvent.name)
+    private readonly analyticsModel: Model<AnalyticsEvent>,
+    @InjectModel(DailyAggregate.name)
+    private readonly aggregateModel: Model<DailyAggregate>,
+  ) {}
+
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
+  async handleDailyRollup(): Promise<void> {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dateStr = yesterday.toISOString().slice(0, 10);
+
+    this.logger.log(`Starting daily rollup for ${dateStr}`);
+
+    for (const service of Object.values(SERVICES)) {
+      try {
+        await this.rollupForServiceAndDate(service, dateStr);
+      } catch (err) {
+        this.logger.error(`Rollup failed for ${service} on ${dateStr}`, err);
+      }
+    }
+  }
+
+  async rollupForServiceAndDate(
+    service: string,
+    dateStr: string,
+  ): Promise<void> {
+    const { start: dayStart, end: dayEnd } = dayBounds(dateStr);
+    const timeMatch = {
+      timestamp: { $gte: dayStart, $lte: dayEnd },
+      service,
+    };
+
+    const [metrics, topEndpoints, analyticsEventCounts] = await Promise.all([
+      this.computeMetrics(timeMatch),
+      this.computeTopEndpoints(timeMatch),
+      this.computeAnalyticsEventCounts(dayStart, dayEnd),
+    ]);
+
+    await this.aggregateModel.findOneAndUpdate(
+      { date: dateStr, service },
+      { date: dateStr, service, metrics, topEndpoints, analyticsEventCounts },
+      { upsert: true },
+    );
+  }
+
+  private async computeMetrics(
+    match: Record<string, unknown>,
+  ): Promise<DailyAggregateMetrics> {
+    const requestMatch = { ...match, type: LOG_TYPES.REQUEST };
+    const appMatch = { ...match, type: LOG_TYPES.APP };
+
+    const [requestStats, logCounts] = await Promise.all([
+      this.logModel.aggregate<{
+        requestCount: number;
+        errorCount: number;
+        avgDurationMs: number;
+        p50: number[];
+        p95: number[];
+        p99: number[];
+      }>([
+        { $match: requestMatch },
+        {
+          $group: {
+            _id: null,
+            requestCount: { $sum: 1 },
+            errorCount: {
+              $sum: { $cond: [{ $gte: ["$statusCode", 400] }, 1, 0] },
+            },
+            avgDurationMs: { $avg: "$durationMs" },
+            p50: {
+              $percentile: {
+                input: "$durationMs",
+                p: [0.5],
+                method: "approximate",
+              },
+            },
+            p95: {
+              $percentile: {
+                input: "$durationMs",
+                p: [0.95],
+                method: "approximate",
+              },
+            },
+            p99: {
+              $percentile: {
+                input: "$durationMs",
+                p: [0.99],
+                method: "approximate",
+              },
+            },
+          } as PipelineStage.Group["$group"],
+        },
+      ]),
+      this.logModel.aggregate<{ _id: string; count: number }>([
+        { $match: appMatch },
+        { $group: { _id: "$level", count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const stats = requestStats[0];
+    const logCountByLevel = { debug: 0, info: 0, warn: 0, error: 0 };
+    for (const lc of logCounts) {
+      if (lc._id in logCountByLevel) {
+        logCountByLevel[lc._id as keyof typeof logCountByLevel] = lc.count;
+      }
+    }
+
+    return {
+      requestCount: stats?.requestCount ?? 0,
+      errorCount: stats?.errorCount ?? 0,
+      errorRate:
+        stats && stats.requestCount > 0
+          ? roundTo(stats.errorCount / stats.requestCount, 4)
+          : 0,
+      avgDurationMs: roundTo(stats?.avgDurationMs ?? 0, 1),
+      p50DurationMs: roundTo(stats?.p50?.[0] ?? 0, 1),
+      p95DurationMs: roundTo(stats?.p95?.[0] ?? 0, 1),
+      p99DurationMs: roundTo(stats?.p99?.[0] ?? 0, 1),
+      logCountByLevel,
+    };
+  }
+
+  private async computeTopEndpoints(
+    match: Record<string, unknown>,
+  ): Promise<TopEndpointAggregate[]> {
+    return this.logModel.aggregate([
+      { $match: { ...match, type: LOG_TYPES.REQUEST } },
+      {
+        $group: {
+          _id: { method: "$method", path: "$path" },
+          count: { $sum: 1 },
+          avgDurationMs: { $avg: "$durationMs" },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+      {
+        $project: {
+          _id: 0,
+          method: "$_id.method",
+          path: "$_id.path",
+          count: 1,
+          avgDurationMs: { $round: ["$avgDurationMs", 1] },
+        },
+      },
+    ]);
+  }
+
+  private async computeAnalyticsEventCounts(
+    dayStart: Date,
+    dayEnd: Date,
+  ): Promise<Record<string, number>> {
+    const counts = await this.analyticsModel.aggregate<{
+      event: string;
+      count: number;
+    }>([
+      {
+        $match: {
+          timestamp: { $gte: dayStart, $lte: dayEnd },
+        },
+      },
+      { $group: { _id: "$event", count: { $sum: 1 } } },
+      { $project: { _id: 0, event: "$_id", count: 1 } },
+    ]);
+
+    return Object.fromEntries(counts.map((c) => [c.event, c.count]));
+  }
+}

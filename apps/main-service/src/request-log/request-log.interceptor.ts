@@ -1,6 +1,7 @@
 import {
   CallHandler,
   ExecutionContext,
+  HttpException,
   Injectable,
   NestInterceptor,
 } from "@nestjs/common";
@@ -9,15 +10,15 @@ import { Queue } from "bullmq";
 import { Observable, tap } from "rxjs";
 import { Request, Response } from "express";
 import {
-  REQUEST_LOG_QUEUE,
+  OBS_LOGS_QUEUE,
+  LOG_TYPES,
+  SERVICES,
   type RequestLogDto,
 } from "@driving-school-booking/shared-types";
 
 @Injectable()
 export class RequestLogInterceptor implements NestInterceptor {
-  constructor(
-    @InjectQueue(REQUEST_LOG_QUEUE) private readonly logQueue: Queue,
-  ) {}
+  constructor(@InjectQueue(OBS_LOGS_QUEUE) private readonly logQueue: Queue) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const start = Date.now();
@@ -25,22 +26,31 @@ export class RequestLogInterceptor implements NestInterceptor {
     const request = http.getRequest<Request>();
     const response = http.getResponse<Response>();
 
-    return next.handle().pipe(
-      tap(() => {
-        const user = request.user as
-          | { sub: string; schoolId: string }
-          | undefined;
-        const log: RequestLogDto = {
-          method: request.method,
-          path: request.originalUrl,
-          statusCode: response.statusCode,
-          durationMs: Date.now() - start,
-          timestamp: new Date().toISOString(),
-          userId: user?.sub ?? null,
-          schoolId: user?.schoolId ?? null,
-        };
+    const pushLog = (statusCode: number) => {
+      const user = request.user as
+        | { sub: string; schoolId: string }
+        | undefined;
+      const log: RequestLogDto = {
+        type: LOG_TYPES.REQUEST,
+        service: SERVICES.MAIN,
+        method: request.method,
+        path: request.originalUrl,
+        statusCode,
+        durationMs: Date.now() - start,
+        timestamp: new Date().toISOString(),
+        userId: user?.sub ?? null,
+        schoolId: user?.schoolId ?? null,
+      };
+      void this.logQueue.add(LOG_TYPES.REQUEST, log);
+    };
 
-        void this.logQueue.add("log", log);
+    return next.handle().pipe(
+      tap({
+        next: () => pushLog(response.statusCode),
+        error: (err: unknown) => {
+          const status = err instanceof HttpException ? err.getStatus() : 500;
+          pushLog(status);
+        },
       }),
     );
   }

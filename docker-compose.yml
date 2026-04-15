@@ -60,6 +60,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       JWT_SECRET: ${JWT_SECRET}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
       - "3001:3001"
     depends_on:
@@ -78,6 +79,7 @@ services:
       MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/${MONGO_INITDB_DATABASE}?authSource=admin
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       JWT_SECRET: ${JWT_SECRET}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
       - "4001:4001"
     depends_on:
