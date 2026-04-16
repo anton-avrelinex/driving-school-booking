@@ -8,6 +8,10 @@ import {
   AnalyticsEvent,
   AnalyticsEventSchema,
 } from "../schemas/analytics-event.schema";
+import {
+  HealthCheck,
+  HealthCheckSchema,
+} from "../schemas/health-check.schema";
 import { AggregatesController } from "./aggregates.controller";
 import { AggregatesService } from "./aggregates.service";
 import { RollupService } from "./rollup.service";
@@ -19,6 +23,7 @@ import { LogsModule } from "../logs/logs.module";
     MongooseModule.forFeature([
       { name: DailyAggregate.name, schema: DailyAggregateSchema },
       { name: AnalyticsEvent.name, schema: AnalyticsEventSchema },
+      { name: HealthCheck.name, schema: HealthCheckSchema },
     ]),
   ],
   controllers: [AggregatesController],

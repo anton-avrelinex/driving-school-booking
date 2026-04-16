@@ -5,12 +5,16 @@ import { Model, type PipelineStage } from "mongoose";
 import {
   LOG_TYPES,
   SERVICES,
+  HEALTH_COMPONENTS,
+  HEALTH_STATUSES,
   type DailyAggregateMetrics,
   type TopEndpointAggregate,
+  type HealthSummaryDto,
 } from "@driving-school-booking/shared-types";
 import { Log } from "../schemas/log.schema";
 import { AnalyticsEvent } from "../schemas/analytics-event.schema";
 import { DailyAggregate } from "../schemas/daily-aggregate.schema";
+import { HealthCheck } from "../schemas/health-check.schema";
 
 function roundTo(value: number, decimals: number): number {
   const factor = 10 ** decimals;
@@ -36,6 +40,8 @@ export class RollupService {
     private readonly analyticsModel: Model<AnalyticsEvent>,
     @InjectModel(DailyAggregate.name)
     private readonly aggregateModel: Model<DailyAggregate>,
+    @InjectModel(HealthCheck.name)
+    private readonly healthCheckModel: Model<HealthCheck>,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_1AM)
@@ -65,15 +71,24 @@ export class RollupService {
       service,
     };
 
-    const [metrics, topEndpoints, analyticsEventCounts] = await Promise.all([
-      this.computeMetrics(timeMatch),
-      this.computeTopEndpoints(timeMatch),
-      this.computeAnalyticsEventCounts(dayStart, dayEnd),
-    ]);
+    const [metrics, topEndpoints, analyticsEventCounts, healthSummary] =
+      await Promise.all([
+        this.computeMetrics(timeMatch),
+        this.computeTopEndpoints(timeMatch),
+        this.computeAnalyticsEventCounts(dayStart, dayEnd),
+        this.computeHealthSummary(dayStart, dayEnd),
+      ]);
 
     await this.aggregateModel.findOneAndUpdate(
       { date: dateStr, service },
-      { date: dateStr, service, metrics, topEndpoints, analyticsEventCounts },
+      {
+        date: dateStr,
+        service,
+        metrics,
+        topEndpoints,
+        analyticsEventCounts,
+        healthSummary,
+      },
       { upsert: true },
     );
   }
@@ -199,5 +214,54 @@ export class RollupService {
     ]);
 
     return Object.fromEntries(counts.map((c) => [c.event, c.count]));
+  }
+
+  private async computeHealthSummary(
+    dayStart: Date,
+    dayEnd: Date,
+  ): Promise<HealthSummaryDto[]> {
+    const components = Object.values(HEALTH_COMPONENTS);
+    const summaries: HealthSummaryDto[] = [];
+
+    for (const component of components) {
+      const checks = await this.healthCheckModel
+        .find({
+          component,
+          timestamp: { $gte: dayStart, $lte: dayEnd },
+        })
+        .sort({ timestamp: 1 })
+        .lean();
+
+      if (checks.length === 0) continue;
+
+      const healthyChecks = checks.filter(
+        (c) => c.status === HEALTH_STATUSES.HEALTHY,
+      ).length;
+      const unhealthyChecks = checks.length - healthyChecks;
+
+      let incidentCount = 0;
+      for (let i = 1; i < checks.length; i++) {
+        if (
+          checks[i - 1].status === HEALTH_STATUSES.HEALTHY &&
+          checks[i].status === HEALTH_STATUSES.UNHEALTHY
+        ) {
+          incidentCount++;
+        }
+      }
+      if (checks[0].status === HEALTH_STATUSES.UNHEALTHY) {
+        incidentCount++;
+      }
+
+      summaries.push({
+        component: component,
+        totalChecks: checks.length,
+        healthyChecks,
+        uptimePercent: roundTo((healthyChecks / checks.length) * 100, 2),
+        totalDowntimeMinutes: unhealthyChecks,
+        incidentCount,
+      });
+    }
+
+    return summaries;
   }
 }

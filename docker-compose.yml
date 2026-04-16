@@ -80,6 +80,10 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       JWT_SECRET: ${JWT_SECRET}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      HEALTH_MAIN_SERVICE_URL: http://main-service:3001/api/health
+      HEALTH_NGINX_URL: http://nginx:80/
+      HEALTH_POSTGRES_HOST: postgres
+      HEALTH_POSTGRES_PORT: "5432"
     ports:
       - "4001:4001"
     depends_on:

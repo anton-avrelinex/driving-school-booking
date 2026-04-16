@@ -48,6 +48,43 @@ export const GRANULARITIES = {
 
 export type Granularity = (typeof GRANULARITIES)[keyof typeof GRANULARITIES];
 
+export const HEALTH_COMPONENTS = {
+  MAIN_SERVICE: "main-service",
+  OBS_SERVICE: "observability-service",
+  POSTGRES: "postgres",
+  MONGODB: "mongodb",
+  REDIS: "redis",
+  NGINX: "nginx",
+} as const;
+
+export type HealthComponent =
+  (typeof HEALTH_COMPONENTS)[keyof typeof HEALTH_COMPONENTS];
+
+export const HEALTH_STATUSES = {
+  HEALTHY: "healthy",
+  UNHEALTHY: "unhealthy",
+} as const;
+
+export type HealthStatus =
+  (typeof HEALTH_STATUSES)[keyof typeof HEALTH_STATUSES];
+
+export interface HealthCheckDto {
+  component: HealthComponent;
+  timestamp: string;
+  status: HealthStatus;
+  responseTimeMs: number;
+  error?: string | null;
+}
+
+export interface HealthSummaryDto {
+  component: HealthComponent;
+  totalChecks: number;
+  healthyChecks: number;
+  uptimePercent: number;
+  totalDowntimeMinutes: number;
+  incidentCount: number;
+}
+
 export interface BaseLogDto {
   type: LogType;
   service: Service;
@@ -132,6 +169,7 @@ export interface DailyAggregateDto {
   metrics: DailyAggregateMetrics;
   topEndpoints: TopEndpointAggregate[];
   analyticsEventCounts: Record<string, number>;
+  healthSummary?: HealthSummaryDto[];
 }
 
 export interface MonitoringFilters {
