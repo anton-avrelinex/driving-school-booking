@@ -1,12 +1,19 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
 import type {
   JwtPayload,
   TokenResponseDto,
+  UserDto,
 } from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
+import { USER_SELECT } from "../user/user.selects";
+import { toUserDto } from "../user/user.mappers";
 import type { UserModel } from "../generated/prisma/models/User";
 import { UserStatus } from "../generated/prisma/enums";
 
@@ -71,6 +78,39 @@ export class AuthService {
     });
 
     return this.generateTokens(updatedUser);
+  }
+
+  async getProfile(userId: string): Promise<UserDto> {
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: USER_SELECT,
+    });
+
+    return toUserDto(user);
+  }
+
+  async updateProfile(
+    userId: string,
+    schoolId: string,
+    data: { firstName?: string; lastName?: string; email?: string },
+  ): Promise<UserDto> {
+    if (data.email) {
+      const existing = await this.prisma.user.findUnique({
+        where: { schoolId_email: { schoolId, email: data.email } },
+      });
+
+      if (existing && existing.id !== userId) {
+        throw new ConflictException("A user with this email already exists");
+      }
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data,
+      select: USER_SELECT,
+    });
+
+    return toUserDto(user);
   }
 
   private generateTokens(user: UserModel): TokenResponseDto {

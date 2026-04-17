@@ -154,6 +154,12 @@ export interface UpdateAdminDto {
   lastName?: string;
 }
 
+export interface UpdateProfileDto {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
 export interface CreateUserResponseDto extends UserDto {
   temporaryPassword: string;
 }

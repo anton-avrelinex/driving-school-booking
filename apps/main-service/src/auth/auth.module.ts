@@ -4,9 +4,11 @@ import { ConfigService } from "@nestjs/config";
 import { JwtAuthModule } from "@driving-school-booking/nestjs-auth";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
+import { UserModule } from "../user/user.module";
 
 @Module({
   imports: [
+    UserModule,
     JwtAuthModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

@@ -73,6 +73,13 @@
         </RouterLink>
       </template>
 
+      <RouterLink
+        to="/settings"
+        class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
+      >
+        {{ $t("nav_settings") }}
+      </RouterLink>
+
       <div class="mt-auto">
         <p class="mb-2 text-xs text-muted-foreground truncate">
           {{ auth.user?.role }}
