@@ -287,3 +287,15 @@ export interface PerformanceDto {
   p50: number;
   p95: number;
 }
+
+export interface PageViewTimeSeriesDto {
+  bucket: string;
+  route: string;
+  count: number;
+}
+
+export interface PageLoadTimeSeriesDto {
+  bucket: string;
+  route: string;
+  avgLoadTimeMs: number;
+}

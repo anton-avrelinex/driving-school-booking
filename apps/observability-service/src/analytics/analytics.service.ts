@@ -7,7 +7,10 @@ import {
   type TimeSeriesFilters,
   type AnalyticsEventResultDto,
   type EventCountDto,
+  type EventCountTimeSeriesDto,
   type PageViewDto,
+  type PageViewTimeSeriesDto,
+  type PageLoadTimeSeriesDto,
   type PerformanceDto,
 } from "@driving-school-booking/shared-types";
 import { AnalyticsEvent } from "../schemas/analytics-event.schema";
@@ -134,6 +137,110 @@ export class AnalyticsService {
     if (filters.schoolId) match.schoolId = filters.schoolId;
     if (filters.userId) match.userId = filters.userId;
     return match;
+  }
+
+  async getEventCountSeries(
+    filters: TimeSeriesFilters,
+  ): Promise<EventCountTimeSeriesDto[]> {
+    const granularity = filters.granularity ?? "day";
+
+    return this.analyticsModel.aggregate([
+      { $match: this.buildTimeMatch(filters) },
+      {
+        $group: {
+          _id: {
+            bucket: { $dateTrunc: { date: "$timestamp", unit: granularity } },
+            event: "$event",
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.bucket": 1, "_id.event": 1 } },
+      {
+        $project: {
+          _id: 0,
+          bucket: { $dateToString: { format: "%Y-%m-%dT%H:%M:%S.000Z", date: "$_id.bucket" } },
+          event: "$_id.event",
+          count: 1,
+        },
+      },
+    ]);
+  }
+
+  async getPageViewSeries(
+    filters: TimeSeriesFilters,
+  ): Promise<PageViewTimeSeriesDto[]> {
+    const granularity = filters.granularity ?? "day";
+
+    return this.analyticsModel.aggregate([
+      {
+        $match: {
+          ...this.buildTimeMatch(filters),
+          event: ANALYTICS_EVENTS.PAGE_VIEW,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            bucket: { $dateTrunc: { date: "$timestamp", unit: granularity } },
+            route: "$properties.route",
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.bucket": 1 } },
+      {
+        $project: {
+          _id: 0,
+          bucket: {
+            $dateToString: {
+              format: "%Y-%m-%dT%H:%M:%S.000Z",
+              date: "$_id.bucket",
+            },
+          },
+          route: "$_id.route",
+          count: 1,
+        },
+      },
+    ]);
+  }
+
+  async getPageLoadSeries(
+    filters: TimeSeriesFilters,
+  ): Promise<PageLoadTimeSeriesDto[]> {
+    const granularity = filters.granularity ?? "day";
+
+    return this.analyticsModel.aggregate([
+      {
+        $match: {
+          ...this.buildTimeMatch(filters),
+          event: ANALYTICS_EVENTS.PAGE_LOAD,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            bucket: { $dateTrunc: { date: "$timestamp", unit: granularity } },
+            route: "$properties.route",
+          },
+          avgLoadTimeMs: { $avg: "$properties.loadTimeMs" },
+        },
+      },
+      { $sort: { "_id.bucket": 1 } },
+      {
+        $project: {
+          _id: 0,
+          bucket: {
+            $dateToString: {
+              format: "%Y-%m-%dT%H:%M:%S.000Z",
+              date: "$_id.bucket",
+            },
+          },
+          route: "$_id.route",
+          avgLoadTimeMs: { $round: ["$avgLoadTimeMs", 1] },
+        },
+      },
+    ]);
   }
 
   private buildTimeMatch(filters: TimeSeriesFilters) {

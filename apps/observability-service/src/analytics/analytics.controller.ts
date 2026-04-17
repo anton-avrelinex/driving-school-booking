@@ -8,7 +8,10 @@ import { ROLES } from "@driving-school-booking/shared-types";
 import type {
   AnalyticsEventResultDto,
   EventCountDto,
+  EventCountTimeSeriesDto,
   PageViewDto,
+  PageViewTimeSeriesDto,
+  PageLoadTimeSeriesDto,
   PerformanceDto,
 } from "@driving-school-booking/shared-types";
 import { AnalyticsService } from "./analytics.service";
@@ -45,5 +48,26 @@ export class AnalyticsController {
     @Query() filters: TimeSeriesFiltersDto,
   ): Promise<PerformanceDto[]> {
     return this.analyticsService.getPerformance(filters);
+  }
+
+  @Get("event-count-series")
+  getEventCountSeries(
+    @Query() filters: TimeSeriesFiltersDto,
+  ): Promise<EventCountTimeSeriesDto[]> {
+    return this.analyticsService.getEventCountSeries(filters);
+  }
+
+  @Get("page-view-series")
+  getPageViewSeries(
+    @Query() filters: TimeSeriesFiltersDto,
+  ): Promise<PageViewTimeSeriesDto[]> {
+    return this.analyticsService.getPageViewSeries(filters);
+  }
+
+  @Get("page-load-series")
+  getPageLoadSeries(
+    @Query() filters: TimeSeriesFiltersDto,
+  ): Promise<PageLoadTimeSeriesDto[]> {
+    return this.analyticsService.getPageLoadSeries(filters);
   }
 }
