@@ -3,6 +3,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule } from "@nestjs/config";
 import { HealthController } from "./health.controller";
 import { HealthCheckRunnerService } from "./health-check-runner.service";
+import { HealthSummaryService } from "./health-summary.service";
 import {
   HealthCheck,
   HealthCheckSchema,
@@ -16,7 +17,7 @@ import {
     ]),
   ],
   controllers: [HealthController],
-  providers: [HealthCheckRunnerService],
+  providers: [HealthCheckRunnerService, HealthSummaryService],
   exports: [MongooseModule],
 })
 export class HealthModule {}

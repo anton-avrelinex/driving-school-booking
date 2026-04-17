@@ -69,9 +69,33 @@ const router = createRouter({
         },
         {
           path: "admin/monitoring",
-          name: "monitoring",
-          component: () => import("@/monitoring/MonitoringPage.vue"),
+          component: () => import("@/monitoring/MonitoringLayout.vue"),
           meta: { role: ROLES.ADMIN },
+          redirect: { name: "monitoring-requests" },
+          children: [
+            {
+              path: "requests",
+              name: "monitoring-requests",
+              component: () =>
+                import("@/monitoring/MonitoringRequestsPage.vue"),
+            },
+            {
+              path: "health",
+              name: "monitoring-health",
+              component: () => import("@/monitoring/MonitoringHealthPage.vue"),
+            },
+            {
+              path: "logs",
+              name: "monitoring-logs",
+              component: () => import("@/monitoring/MonitoringLogsPage.vue"),
+            },
+            {
+              path: "analytics",
+              name: "monitoring-analytics",
+              component: () =>
+                import("@/monitoring/MonitoringAnalyticsPage.vue"),
+            },
+          ],
         },
       ],
     },

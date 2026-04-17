@@ -209,6 +209,17 @@ export interface TrendsFilters {
   service?: Service;
 }
 
+export interface HealthSummaryFilters {
+  from: string;
+  to: string;
+  component?: HealthComponent;
+}
+
+export interface DayHealthSummaryDto {
+  date: string;
+  summaries: HealthSummaryDto[];
+}
+
 export interface TopEndpointDto {
   method: string;
   path: string;
