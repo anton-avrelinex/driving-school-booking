@@ -50,5 +50,13 @@ export const useHealthStore = defineStore("health", () => {
     }
   }
 
-  return { aggregates, recentSummaries, checks, loading, error, fetchAll, fetchChecks };
+  return {
+    aggregates,
+    recentSummaries,
+    checks,
+    loading,
+    error,
+    fetchAll,
+    fetchChecks,
+  };
 });

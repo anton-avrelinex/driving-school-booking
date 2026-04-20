@@ -16,19 +16,35 @@
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem :value="GRANULARITIES.HOUR">{{ t("monitoring_granularity_hour") }}</SelectItem>
-            <SelectItem :value="GRANULARITIES.DAY">{{ t("monitoring_granularity_day") }}</SelectItem>
-            <SelectItem :value="GRANULARITIES.WEEK">{{ t("monitoring_granularity_week") }}</SelectItem>
+            <SelectItem :value="GRANULARITIES.HOUR">
+              {{ t("monitoring_granularity_hour") }}
+            </SelectItem>
+            <SelectItem :value="GRANULARITIES.DAY">
+              {{ t("monitoring_granularity_day") }}
+            </SelectItem>
+            <SelectItem :value="GRANULARITIES.WEEK">
+              {{ t("monitoring_granularity_week") }}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div class="flex flex-col gap-1.5">
         <Label>{{ t("analytics_filter_school_id") }}</Label>
-        <Input v-model="filterSchoolId" type="text" class="w-40" :placeholder="t('common_all')" />
+        <Input
+          v-model="filterSchoolId"
+          type="text"
+          class="w-40"
+          :placeholder="t('common_all')"
+        />
       </div>
       <div class="flex flex-col gap-1.5">
         <Label>{{ t("analytics_filter_user_id") }}</Label>
-        <Input v-model="filterUserId" type="text" class="w-40" :placeholder="t('common_all')" />
+        <Input
+          v-model="filterUserId"
+          type="text"
+          class="w-40"
+          :placeholder="t('common_all')"
+        />
       </div>
       <Button @click="applyFilters">{{ t("monitoring_apply") }}</Button>
     </div>
@@ -63,7 +79,9 @@
       />
       <Card v-else>
         <CardContent class="py-4">
-          <p class="text-muted-foreground text-sm text-center">{{ t("common_no_results") }}</p>
+          <p class="text-muted-foreground text-sm text-center">
+            {{ t("common_no_results") }}
+          </p>
         </CardContent>
       </Card>
 
@@ -77,19 +95,27 @@
             <TableHeader>
               <TableRow>
                 <TableHead>{{ t("analytics_col_route") }}</TableHead>
-                <TableHead class="text-right">{{ t("analytics_col_count") }}</TableHead>
-                <TableHead class="text-right">{{ t("analytics_col_duration") }}</TableHead>
+                <TableHead class="text-right">
+                  {{ t("analytics_col_count") }}
+                </TableHead>
+                <TableHead class="text-right">
+                  {{ t("analytics_col_duration") }}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow v-for="pv in store.pageViews" :key="pv.route">
                 <TableCell class="text-sm font-mono">{{ pv.route }}</TableCell>
                 <TableCell class="text-sm text-right">{{ pv.count }}</TableCell>
-                <TableCell class="text-sm text-right">{{ Math.round(pv.avgDurationMs) }}</TableCell>
+                <TableCell class="text-sm text-right">
+                  {{ Math.round(pv.avgDurationMs) }}
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
-          <p v-else class="text-muted-foreground text-sm py-4 text-center">{{ t("common_no_results") }}</p>
+          <p v-else class="text-muted-foreground text-sm py-4 text-center">
+            {{ t("common_no_results") }}
+          </p>
         </CardContent>
       </Card>
 
@@ -103,21 +129,35 @@
             <TableHeader>
               <TableRow>
                 <TableHead>{{ t("analytics_col_route") }}</TableHead>
-                <TableHead class="text-right">{{ t("analytics_col_avg") }}</TableHead>
-                <TableHead class="text-right">{{ t("analytics_col_p50") }}</TableHead>
-                <TableHead class="text-right">{{ t("analytics_col_p95") }}</TableHead>
+                <TableHead class="text-right">
+                  {{ t("analytics_col_avg") }}
+                </TableHead>
+                <TableHead class="text-right">
+                  {{ t("analytics_col_p50") }}
+                </TableHead>
+                <TableHead class="text-right">
+                  {{ t("analytics_col_p95") }}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow v-for="p in store.performance" :key="p.route">
                 <TableCell class="text-sm font-mono">{{ p.route }}</TableCell>
-                <TableCell class="text-sm text-right">{{ Math.round(p.avg) }}</TableCell>
-                <TableCell class="text-sm text-right">{{ Math.round(p.p50) }}</TableCell>
-                <TableCell class="text-sm text-right">{{ Math.round(p.p95) }}</TableCell>
+                <TableCell class="text-sm text-right">
+                  {{ Math.round(p.avg) }}
+                </TableCell>
+                <TableCell class="text-sm text-right">
+                  {{ Math.round(p.p50) }}
+                </TableCell>
+                <TableCell class="text-sm text-right">
+                  {{ Math.round(p.p95) }}
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
-          <p v-else class="text-muted-foreground text-sm py-4 text-center">{{ t("common_no_results") }}</p>
+          <p v-else class="text-muted-foreground text-sm py-4 text-center">
+            {{ t("common_no_results") }}
+          </p>
         </CardContent>
       </Card>
 
@@ -180,12 +220,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -230,7 +265,8 @@ function buildFilters(): TimeSeriesFilters {
     to: filterTo.value + "T23:59:59.999Z",
     granularity: granularity.value,
   };
-  if (filterSchoolId.value.trim()) filters.schoolId = filterSchoolId.value.trim();
+  if (filterSchoolId.value.trim())
+    filters.schoolId = filterSchoolId.value.trim();
   if (filterUserId.value.trim()) filters.userId = filterUserId.value.trim();
   return filters;
 }
@@ -319,7 +355,8 @@ const pageViewSeriesData = computed<Record<string, unknown>[]>(() => {
 
 const pageViewSeriesConfig = computed<ChartConfig>(() => ({
   count: {
-    label: selectedRoute.value === "all" ? t("common_all") : selectedRoute.value,
+    label:
+      selectedRoute.value === "all" ? t("common_all") : selectedRoute.value,
     color: CHART_COLORS[0],
   },
 }));
@@ -332,7 +369,10 @@ const pageLoadSeriesData = computed<Record<string, unknown>[]>(() => {
       : store.pageLoadSeries.filter((d) => d.route === selectedRoute.value);
 
   if (selectedRoute.value !== "all") {
-    return filtered.map((d) => ({ bucket: d.bucket, avgLoadTimeMs: d.avgLoadTimeMs }));
+    return filtered.map((d) => ({
+      bucket: d.bucket,
+      avgLoadTimeMs: d.avgLoadTimeMs,
+    }));
   }
 
   // Average across routes per bucket
@@ -351,7 +391,8 @@ const pageLoadSeriesData = computed<Record<string, unknown>[]>(() => {
 
 const pageLoadSeriesConfig = computed<ChartConfig>(() => ({
   avgLoadTimeMs: {
-    label: selectedRoute.value === "all" ? t("common_all") : selectedRoute.value,
+    label:
+      selectedRoute.value === "all" ? t("common_all") : selectedRoute.value,
     color: CHART_COLORS[1],
   },
 }));

@@ -64,8 +64,14 @@ export const useAnalyticsStore = defineStore("analytics", () => {
   }
 
   return {
-    pageViews, performance, eventCounts,
-    eventCountSeries, pageViewSeries, pageLoadSeries,
-    loading, error, fetchAll,
+    pageViews,
+    performance,
+    eventCounts,
+    eventCountSeries,
+    pageViewSeries,
+    pageLoadSeries,
+    loading,
+    error,
+    fetchAll,
   };
 });

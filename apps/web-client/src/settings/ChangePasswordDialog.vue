@@ -11,11 +11,7 @@
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <div class="flex flex-col gap-2">
           <Label for="cp-current">{{ $t("auth_current_password") }}</Label>
-          <PasswordInput
-            id="cp-current"
-            v-model="currentPassword"
-            required
-          />
+          <PasswordInput id="cp-current" v-model="currentPassword" required />
         </div>
         <div class="flex flex-col gap-2">
           <Label for="cp-new">{{ $t("auth_new_password") }}</Label>

@@ -159,7 +159,12 @@ export class AnalyticsService {
       {
         $project: {
           _id: 0,
-          bucket: { $dateToString: { format: "%Y-%m-%dT%H:%M:%S.000Z", date: "$_id.bucket" } },
+          bucket: {
+            $dateToString: {
+              format: "%Y-%m-%dT%H:%M:%S.000Z",
+              date: "$_id.bucket",
+            },
+          },
           event: "$_id.event",
           count: 1,
         },

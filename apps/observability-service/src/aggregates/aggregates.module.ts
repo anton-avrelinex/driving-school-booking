@@ -8,10 +8,7 @@ import {
   AnalyticsEvent,
   AnalyticsEventSchema,
 } from "../schemas/analytics-event.schema";
-import {
-  HealthCheck,
-  HealthCheckSchema,
-} from "../schemas/health-check.schema";
+import { HealthCheck, HealthCheckSchema } from "../schemas/health-check.schema";
 import { AggregatesController } from "./aggregates.controller";
 import { AggregatesService } from "./aggregates.service";
 import { RollupService } from "./rollup.service";

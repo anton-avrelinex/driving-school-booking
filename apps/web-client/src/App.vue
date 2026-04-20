@@ -29,7 +29,11 @@ globalThis.addEventListener("error", (event) => {
   const stack = err instanceof Error ? err.stack : undefined;
 
   toast.error(t("common_something_went_wrong"));
-  logError(event.message, { filename: event.filename, lineno: event.lineno }, stack);
+  logError(
+    event.message,
+    { filename: event.filename, lineno: event.lineno },
+    stack,
+  );
 });
 
 onErrorCaptured((e) => {

@@ -24,8 +24,7 @@ export const useLogsStore = defineStore("logs", () => {
     try {
       result.value = await searchLogs(filters);
     } catch (err) {
-      error.value =
-        err instanceof Error ? err.message : t("logs_fetch_failed");
+      error.value = err instanceof Error ? err.message : t("logs_fetch_failed");
     } finally {
       loading.value = false;
     }

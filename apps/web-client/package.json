@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@driving-school-booking/shared-types": "workspace:^",
+    "@internationalized/date": "^3.12.1",
     "@tanstack/vue-table": "^8.21.3",
     "@unovis/ts": "^1.6.4",
     "@unovis/vue": "^1.6.4",
