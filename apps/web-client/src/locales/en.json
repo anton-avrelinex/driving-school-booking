@@ -205,6 +205,8 @@
   "nav_my_availability": "My Availability",
   "nav_my_lessons": "My Lessons",
   "nav_settings": "Settings",
+  "password_hide": "Hide password",
+  "password_show": "Show password",
   "student_add": "Add Student",
   "student_add_description": "Create a new student account. A temporary password will be generated.",
   "student_add_title": "Add Student",

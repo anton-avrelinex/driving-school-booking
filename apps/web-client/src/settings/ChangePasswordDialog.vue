@@ -11,29 +11,26 @@
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <div class="flex flex-col gap-2">
           <Label for="cp-current">{{ $t("auth_current_password") }}</Label>
-          <Input
+          <PasswordInput
             id="cp-current"
             v-model="currentPassword"
-            type="password"
             required
           />
         </div>
         <div class="flex flex-col gap-2">
           <Label for="cp-new">{{ $t("auth_new_password") }}</Label>
-          <Input
+          <PasswordInput
             id="cp-new"
             v-model="newPassword"
-            type="password"
             minlength="8"
             required
           />
         </div>
         <div class="flex flex-col gap-2">
           <Label for="cp-confirm">{{ $t("auth_confirm_password") }}</Label>
-          <Input
+          <PasswordInput
             id="cp-confirm"
             v-model="confirmPassword"
-            type="password"
             minlength="8"
             required
           />
@@ -61,8 +58,8 @@ import { useI18n } from "vue-i18n";
 import { toast } from "vue-sonner";
 import { useAuthStore } from "@/auth/auth.store";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import PasswordInput from "@/components/PasswordInput.vue";
 import {
   Dialog,
   DialogContent,

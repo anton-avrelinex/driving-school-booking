@@ -21,7 +21,7 @@
           </div>
           <div class="flex flex-col gap-2">
             <Label for="password">{{ $t("auth_password") }}</Label>
-            <Input id="password" v-model="password" type="password" required />
+            <PasswordInput id="password" v-model="password" required />
           </div>
           <p v-if="error" class="text-sm text-destructive">{{ error }}</p>
           <Button type="submit" class="w-full" :disabled="loading">
@@ -41,6 +41,7 @@ import { useAuthStore } from "@/auth/auth.store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import PasswordInput from "@/components/PasswordInput.vue";
 import {
   Card,
   CardContent,
