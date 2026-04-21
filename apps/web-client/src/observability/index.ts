@@ -26,6 +26,16 @@ function bufferLog(
   context?: Record<string, unknown>,
   stack?: string,
 ): void {
+  if (import.meta.env.DEV) {
+    const fn =
+      level === LOG_LEVELS.ERROR
+        ? console.error
+        : level === LOG_LEVELS.WARN
+          ? console.warn
+          : console.info;
+    fn(message, ...(context ? [context] : []), ...(stack ? [stack] : []));
+  }
+
   logBuffer.push({
     type: LOG_TYPES.APP,
     service: SERVICES.WEB,
