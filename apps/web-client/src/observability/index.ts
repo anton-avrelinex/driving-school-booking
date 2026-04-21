@@ -115,9 +115,8 @@ export function initObservability(router: Router): void {
   let lastRouteEnterTime: number | null = null;
   let lastRoute: string | null = null;
 
-  router.beforeEach((_to, _from, next) => {
+  router.beforeEach(() => {
     navigationStartTime = performance.now();
-    next();
   });
 
   router.afterEach((to) => {
