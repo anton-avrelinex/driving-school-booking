@@ -23,37 +23,41 @@
         <div class="flex flex-col gap-2">
           <Label>{{ $t("teacher_courses") }}</Label>
           <div class="flex flex-col gap-1">
-            <label
+            <div
               v-for="course in courseStore.courses"
               :key="course.id"
-              class="flex items-center gap-2 text-sm"
+              class="flex items-center gap-2"
             >
-              <input
-                type="checkbox"
-                :value="course.id"
-                v-model="selectedCourseIds"
+              <Checkbox
+                :id="`course-${course.id}`"
+                :model-value="selectedCourseIds.includes(course.id)"
+                @update:model-value="(v) => toggleCourseId(course.id, v)"
               />
-              {{ course.name }}
-            </label>
+              <Label :for="`course-${course.id}`" class="text-sm font-normal">
+                {{ course.name }}
+              </Label>
+            </div>
           </div>
         </div>
         <div class="flex flex-col gap-2">
           <Label>{{ $t("teacher_vehicles") }}</Label>
           <div class="flex flex-col gap-1">
-            <label
+            <div
               v-for="vehicle in vehicleStore.vehicles"
               :key="vehicle.id"
-              class="flex items-center gap-2 text-sm"
+              class="flex items-center gap-2"
             >
-              <input
-                type="checkbox"
-                :value="vehicle.id"
-                v-model="selectedVehicleIds"
+              <Checkbox
+                :id="`vehicle-${vehicle.id}`"
+                :model-value="selectedVehicleIds.includes(vehicle.id)"
+                @update:model-value="(v) => toggleVehicleId(vehicle.id, v)"
               />
-              {{ vehicle.make }} {{ vehicle.model }} ({{
-                vehicle.licensePlate
-              }})
-            </label>
+              <Label :for="`vehicle-${vehicle.id}`" class="text-sm font-normal">
+                {{ vehicle.make }} {{ vehicle.model }} ({{
+                  vehicle.licensePlate
+                }})
+              </Label>
+            </div>
           </div>
         </div>
         <DialogFooter>
@@ -78,6 +82,7 @@ import type {
 } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -88,6 +93,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { makeToggle } from "@/lib/toggle-list";
 
 const open = defineModel<boolean>("open", { required: true });
 const props = defineProps<{
@@ -101,6 +107,8 @@ const vehicleStore = useVehicleStore();
 const updating = ref(false);
 const selectedCourseIds = ref<string[]>([]);
 const selectedVehicleIds = ref<string[]>([]);
+const toggleCourseId = makeToggle(selectedCourseIds);
+const toggleVehicleId = makeToggle(selectedVehicleIds);
 const form = ref<UpdateInstructorDto>({
   email: "",
   firstName: "",

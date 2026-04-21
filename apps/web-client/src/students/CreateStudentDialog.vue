@@ -23,18 +23,20 @@
         <div class="flex flex-col gap-2">
           <Label>{{ $t("student_courses") }}</Label>
           <div class="flex flex-col gap-1">
-            <label
+            <div
               v-for="course in courseStore.courses"
               :key="course.id"
-              class="flex items-center gap-2 text-sm"
+              class="flex items-center gap-2"
             >
-              <input
-                type="checkbox"
-                :value="course.id"
-                v-model="selectedCourseIds"
+              <Checkbox
+                :id="`course-${course.id}`"
+                :model-value="selectedCourseIds.includes(course.id)"
+                @update:model-value="(v) => toggleCourseId(course.id, v)"
               />
-              {{ course.name }}
-            </label>
+              <Label :for="`course-${course.id}`" class="text-sm font-normal">
+                {{ course.name }}
+              </Label>
+            </div>
           </div>
         </div>
         <DialogFooter>
@@ -58,6 +60,7 @@ import type {
 } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -68,6 +71,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { makeToggle } from "@/lib/toggle-list";
 
 const open = defineModel<boolean>("open", { required: true });
 const emit = defineEmits<{
@@ -79,6 +83,7 @@ const studentStore = useStudentStore();
 const courseStore = useCourseStore();
 const creating = ref(false);
 const selectedCourseIds = ref<string[]>([]);
+const toggleCourseId = makeToggle(selectedCourseIds);
 
 watch(open, async (isOpen) => {
   if (isOpen) {

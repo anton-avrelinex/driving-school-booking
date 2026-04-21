@@ -14,16 +14,14 @@
           :key="category.id"
           class="flex items-center gap-2"
         >
-          <input
+          <Checkbox
             :id="`category-${category.id}`"
-            type="checkbox"
-            :value="category.id"
-            v-model="selectedIds"
-            class="h-4 w-4 rounded border-input"
+            :model-value="selectedIds.includes(category.id)"
+            @update:model-value="(v) => toggleCategoryId(category.id, v)"
           />
-          <label :for="`category-${category.id}`" class="text-sm">
+          <Label :for="`category-${category.id}`" class="text-sm font-normal">
             {{ category.name }}
-          </label>
+          </Label>
         </div>
       </div>
 
@@ -42,6 +40,8 @@ import { useI18n } from "vue-i18n";
 import { toast } from "vue-sonner";
 import { useCategoryStore } from "@/categories/categories.store";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -49,6 +49,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { makeToggle } from "@/lib/toggle-list";
 
 const open = defineModel<boolean>("open", { required: true });
 
@@ -56,6 +57,7 @@ const { t } = useI18n();
 const categoryStore = useCategoryStore();
 
 const selectedIds = ref<string[]>([]);
+const toggleCategoryId = makeToggle(selectedIds);
 const saving = ref(false);
 
 watch(open, async (isOpen) => {
