@@ -98,13 +98,34 @@
                 <Button size="sm" variant="outline" @click="startEdit(course)">
                   {{ $t("common_edit") }}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  @click="handleDelete(course)"
-                >
-                  {{ $t("common_delete") }}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger as-child>
+                    <Button size="sm" variant="destructive">
+                      {{ $t("common_delete") }}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {{ $t("common_confirm_delete") }}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {{ $t("course_delete_confirm", { name: course.name }) }}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>
+                        {{ $t("common_cancel") }}
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        :class="buttonVariants({ variant: 'destructive' })"
+                        @click="handleDelete(course)"
+                      >
+                        {{ $t("common_delete") }}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </TableCell>
             </template>
           </TableRow>
@@ -194,7 +215,7 @@ import {
   type CourseDto,
   type Transmission,
 } from "@driving-school-booking/shared-types";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -204,6 +225,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Table,
   TableBody,
@@ -307,10 +339,6 @@ async function handleUpdate(id: string) {
 }
 
 async function handleDelete(course: CourseDto) {
-  if (!globalThis.confirm(t("course_delete_confirm", { name: course.name }))) {
-    return;
-  }
-
   try {
     await courseStore.deleteCourse(course.id);
     toast.success(t("course_deleted"));

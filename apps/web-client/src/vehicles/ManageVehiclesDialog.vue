@@ -87,13 +87,40 @@
                 <Button size="sm" variant="outline" @click="startEdit(vehicle)">
                   {{ $t("common_edit") }}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  @click="handleDelete(vehicle)"
-                >
-                  {{ $t("common_delete") }}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger as-child>
+                    <Button size="sm" variant="destructive">
+                      {{ $t("common_delete") }}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {{ $t("common_confirm_delete") }}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {{
+                          $t("vehicle_delete_confirm", {
+                            make: vehicle.make,
+                            model: vehicle.model,
+                            licensePlate: vehicle.licensePlate,
+                          })
+                        }}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>
+                        {{ $t("common_cancel") }}
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        :class="buttonVariants({ variant: 'destructive' })"
+                        @click="handleDelete(vehicle)"
+                      >
+                        {{ $t("common_delete") }}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </TableCell>
             </template>
           </TableRow>
@@ -178,7 +205,7 @@ import {
   type VehicleDto,
   type Transmission,
 } from "@driving-school-booking/shared-types";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -188,6 +215,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Table,
   TableBody,
@@ -291,18 +329,6 @@ async function handleUpdate(id: string) {
 }
 
 async function handleDelete(vehicle: VehicleDto) {
-  if (
-    !globalThis.confirm(
-      t("vehicle_delete_confirm", {
-        make: vehicle.make,
-        model: vehicle.model,
-        licensePlate: vehicle.licensePlate,
-      }),
-    )
-  ) {
-    return;
-  }
-
   try {
     await vehicleStore.deleteVehicle(vehicle.id);
     toast.success(t("vehicle_deleted"));
