@@ -15,24 +15,25 @@
       <!-- Step 1: Select enrollment -->
       <div class="flex flex-col gap-2">
         <label class="text-sm font-medium">{{ $t("lesson_enrollment") }}</label>
-        <select
+        <Select
           v-model="selectedEnrollmentId"
-          class="w-full max-w-md rounded-md border px-3 py-2 text-sm"
-          @change="onEnrollmentChange"
+          @update:model-value="onEnrollmentChange"
         >
-          <option value="" disabled>
-            {{ $t("lesson_select_enrollment") }}
-          </option>
-          <option
-            v-for="enrollment in activeEnrollments"
-            :key="enrollment.id"
-            :value="enrollment.id"
-          >
-            {{ enrollment.course.name }} ({{ enrollment.hoursCompleted }}/{{
-              enrollment.hoursPurchased
-            }}h)
-          </option>
-        </select>
+          <SelectTrigger class="w-full">
+            <SelectValue :placeholder="$t('lesson_select_enrollment')" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="enrollment in activeEnrollments"
+              :key="enrollment.id"
+              :value="enrollment.id"
+            >
+              {{ enrollment.course.name }} ({{ enrollment.hoursCompleted }}/{{
+                enrollment.hoursPurchased
+              }}h)
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <!-- Step 2: Select instructor -->
@@ -41,23 +42,24 @@
         <p v-if="lessonStore.loading" class="text-muted-foreground text-sm">
           {{ $t("common_loading") }}
         </p>
-        <select
+        <Select
           v-else
           v-model="selectedInstructorId"
-          class="w-full max-w-md rounded-md border px-3 py-2 text-sm"
-          @change="onInstructorChange"
+          @update:model-value="onInstructorChange"
         >
-          <option value="" disabled>
-            {{ $t("lesson_select_instructor") }}
-          </option>
-          <option
-            v-for="instructor in lessonStore.availableInstructors"
-            :key="instructor.id"
-            :value="instructor.id"
-          >
-            {{ instructor.firstName }} {{ instructor.lastName }}
-          </option>
-        </select>
+          <SelectTrigger class="w-full">
+            <SelectValue :placeholder="$t('lesson_select_instructor')" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="instructor in lessonStore.availableInstructors"
+              :key="instructor.id"
+              :value="instructor.id"
+            >
+              {{ instructor.firstName }} {{ instructor.lastName }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <!-- Step 3: Select date -->
@@ -120,6 +122,13 @@ import { toast } from "vue-sonner";
 import { useAuthStore } from "@/auth/auth.store";
 import { useLessonStore } from "@/lessons/lessons.store";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import api from "@/api/api";
 
 const { t } = useI18n();
@@ -131,8 +140,8 @@ const loadingEnrollments = ref(false);
 const enrollmentError = ref<string | null>(null);
 const enrollments = ref<UserDto["studentProfile"]>();
 
-const selectedEnrollmentId = ref("");
-const selectedInstructorId = ref("");
+const selectedEnrollmentId = ref<string | null>(null);
+const selectedInstructorId = ref<string | null>(null);
 const selectedDate = ref("");
 const selectedSlot = ref("");
 
@@ -169,9 +178,10 @@ onMounted(async () => {
 });
 
 function onEnrollmentChange() {
-  selectedInstructorId.value = "";
+  selectedInstructorId.value = null;
   selectedDate.value = "";
   selectedSlot.value = "";
+  if (!selectedEnrollmentId.value) return;
   void lessonStore.fetchAvailableInstructors(selectedEnrollmentId.value);
 }
 
@@ -182,16 +192,22 @@ function onInstructorChange() {
 
 function onDateChange() {
   selectedSlot.value = "";
-  if (selectedDate.value) {
-    void lessonStore.fetchAvailableSlots(
-      selectedEnrollmentId.value,
-      selectedInstructorId.value,
-      selectedDate.value,
-    );
+  if (
+    !selectedEnrollmentId.value ||
+    !selectedInstructorId.value ||
+    !selectedDate.value
+  ) {
+    return;
   }
+  void lessonStore.fetchAvailableSlots(
+    selectedEnrollmentId.value,
+    selectedInstructorId.value,
+    selectedDate.value,
+  );
 }
 
 async function handleBook() {
+  if (!selectedEnrollmentId.value || !selectedInstructorId.value) return;
   try {
     const startTime = new Date(
       `${selectedDate.value}T${selectedSlot.value}:00Z`,

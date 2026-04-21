@@ -43,32 +43,35 @@
                 />
               </TableCell>
               <TableCell>
-                <select
-                  v-model="editForm.categoryId"
-                  class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                  required
-                >
-                  <option
-                    v-for="category in categoryStore.schoolCategories"
-                    :key="category.id"
-                    :value="category.id"
-                  >
-                    {{ category.name }}
-                  </option>
-                </select>
+                <Select v-model="editForm.categoryId">
+                  <SelectTrigger class="w-full">
+                    <SelectValue :placeholder="$t('course_category')" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="category in categoryStore.schoolCategories"
+                      :key="category.id"
+                      :value="category.id"
+                    >
+                      {{ category.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </TableCell>
               <TableCell>
-                <select
-                  v-model="editForm.transmission"
-                  class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                >
-                  <option value="AUTOMATIC">
-                    {{ $t("vehicle_transmission_automatic") }}
-                  </option>
-                  <option value="MANUAL">
-                    {{ $t("vehicle_transmission_manual") }}
-                  </option>
-                </select>
+                <Select v-model="editForm.transmission">
+                  <SelectTrigger class="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem :value="TRANSMISSIONS.AUTOMATIC">
+                      {{ $t("vehicle_transmission_automatic") }}
+                    </SelectItem>
+                    <SelectItem :value="TRANSMISSIONS.MANUAL">
+                      {{ $t("vehicle_transmission_manual") }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </TableCell>
               <TableCell class="flex gap-2">
                 <Button size="sm" @click="handleUpdate(course.id)">
@@ -139,39 +142,40 @@
         </div>
         <div class="flex flex-col gap-1">
           <Label for="new-course-category">{{ $t("course_category") }}</Label>
-          <select
-            id="new-course-category"
-            v-model="newForm.categoryId"
-            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-            required
-          >
-            <option
-              v-for="category in categoryStore.schoolCategories"
-              :key="category.id"
-              :value="category.id"
-            >
-              {{ category.name }}
-            </option>
-          </select>
+          <Select v-model="newForm.categoryId">
+            <SelectTrigger id="new-course-category" class="w-full">
+              <SelectValue :placeholder="$t('course_category')" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="category in categoryStore.schoolCategories"
+                :key="category.id"
+                :value="category.id"
+              >
+                {{ category.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div class="flex flex-col gap-1">
           <Label for="new-course-transmission">
             {{ $t("course_transmission") }}
           </Label>
-          <select
-            id="new-course-transmission"
-            v-model="newForm.transmission"
-            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-          >
-            <option value="AUTOMATIC">
-              {{ $t("vehicle_transmission_automatic") }}
-            </option>
-            <option value="MANUAL">
-              {{ $t("vehicle_transmission_manual") }}
-            </option>
-          </select>
+          <Select v-model="newForm.transmission">
+            <SelectTrigger id="new-course-transmission" class="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem :value="TRANSMISSIONS.AUTOMATIC">
+                {{ $t("vehicle_transmission_automatic") }}
+              </SelectItem>
+              <SelectItem :value="TRANSMISSIONS.MANUAL">
+                {{ $t("vehicle_transmission_manual") }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Button type="submit">
+        <Button type="submit" :disabled="!newForm.categoryId">
           {{ $t("course_add") }}
         </Button>
       </form>
@@ -208,6 +212,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const open = defineModel<boolean>("open", { required: true });
 
@@ -216,19 +227,31 @@ const courseStore = useCourseStore();
 const categoryStore = useCategoryStore();
 
 const editingId = ref<string | null>(null);
-const editForm = reactive({
+const editForm = reactive<{
+  name: string;
+  price: number;
+  hours: number;
+  categoryId: string | null;
+  transmission: Transmission;
+}>({
   name: "",
   price: 0,
   hours: 0,
-  categoryId: "",
-  transmission: TRANSMISSIONS.AUTOMATIC as Transmission,
+  categoryId: null,
+  transmission: TRANSMISSIONS.AUTOMATIC,
 });
-const newForm = reactive({
+const newForm = reactive<{
+  name: string;
+  price: number;
+  hours: number;
+  categoryId: string | null;
+  transmission: Transmission;
+}>({
   name: "",
   price: 0,
   hours: 0,
-  categoryId: "",
-  transmission: TRANSMISSIONS.AUTOMATIC as Transmission,
+  categoryId: null,
+  transmission: TRANSMISSIONS.AUTOMATIC,
 });
 
 watch(open, async (isOpen) => {
@@ -262,11 +285,12 @@ function cancelEdit() {
   editForm.name = "";
   editForm.price = 0;
   editForm.hours = 0;
-  editForm.categoryId = "";
+  editForm.categoryId = null;
   editForm.transmission = TRANSMISSIONS.AUTOMATIC;
 }
 
 async function handleUpdate(id: string) {
+  if (!editForm.categoryId) return;
   try {
     await courseStore.updateCourse(id, {
       name: editForm.name,
@@ -296,6 +320,7 @@ async function handleDelete(course: CourseDto) {
 }
 
 async function handleCreate() {
+  if (!newForm.categoryId) return;
   try {
     await courseStore.createCourse({
       name: newForm.name,
@@ -307,7 +332,7 @@ async function handleCreate() {
     newForm.name = "";
     newForm.price = 0;
     newForm.hours = 0;
-    newForm.categoryId = "";
+    newForm.categoryId = null;
     newForm.transmission = TRANSMISSIONS.AUTOMATIC;
     toast.success(t("course_created"));
   } catch {

@@ -13,19 +13,20 @@
       </p>
 
       <div v-else>
-        <select
-          v-model="selectedVehicleId"
-          class="w-full rounded-md border px-3 py-2 text-sm"
-        >
-          <option value="">--</option>
-          <option
-            v-for="vehicle in vehicles"
-            :key="vehicle.id"
-            :value="vehicle.id"
-          >
-            {{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.licensePlate }})
-          </option>
-        </select>
+        <Select v-model="selectedVehicleId">
+          <SelectTrigger class="w-full">
+            <SelectValue :placeholder="$t('lesson_select_vehicle')" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="vehicle in vehicles"
+              :key="vehicle.id"
+              :value="vehicle.id"
+            >
+              {{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.licensePlate }})
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <DialogFooter>
@@ -56,6 +57,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const open = defineModel<boolean>("open", { required: true });
 const props = defineProps<{
@@ -67,7 +75,7 @@ const { t } = useI18n();
 const lessonStore = useLessonStore();
 
 const vehicles = ref<VehicleDto[]>([]);
-const selectedVehicleId = ref("");
+const selectedVehicleId = ref<string | null>(null);
 const loading = ref(false);
 const saving = ref(false);
 
@@ -76,7 +84,7 @@ watch(
   async ([isOpen, lesson]) => {
     if (isOpen && lesson) {
       loading.value = true;
-      selectedVehicleId.value = "";
+      selectedVehicleId.value = null;
       try {
         const { data } = await api.get<VehicleDto[]>("/vehicles");
         vehicles.value = data;

@@ -32,32 +32,35 @@
                 <Input v-model="editForm.licensePlate" required />
               </TableCell>
               <TableCell>
-                <select
-                  v-model="editForm.transmission"
-                  class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                >
-                  <option value="AUTOMATIC">
-                    {{ $t("vehicle_transmission_automatic") }}
-                  </option>
-                  <option value="MANUAL">
-                    {{ $t("vehicle_transmission_manual") }}
-                  </option>
-                </select>
+                <Select v-model="editForm.transmission">
+                  <SelectTrigger class="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem :value="TRANSMISSIONS.AUTOMATIC">
+                      {{ $t("vehicle_transmission_automatic") }}
+                    </SelectItem>
+                    <SelectItem :value="TRANSMISSIONS.MANUAL">
+                      {{ $t("vehicle_transmission_manual") }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </TableCell>
               <TableCell>
-                <select
-                  v-model="editForm.categoryId"
-                  class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                  required
-                >
-                  <option
-                    v-for="category in categoryStore.schoolCategories"
-                    :key="category.id"
-                    :value="category.id"
-                  >
-                    {{ category.name }}
-                  </option>
-                </select>
+                <Select v-model="editForm.categoryId">
+                  <SelectTrigger class="w-full">
+                    <SelectValue :placeholder="$t('vehicle_category')" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="category in categoryStore.schoolCategories"
+                      :key="category.id"
+                      :value="category.id"
+                    >
+                      {{ category.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </TableCell>
               <TableCell class="flex gap-2">
                 <Button size="sm" @click="handleUpdate(vehicle.id)">
@@ -123,39 +126,40 @@
           <Label for="new-transmission">
             {{ $t("vehicle_transmission") }}
           </Label>
-          <select
-            id="new-transmission"
-            v-model="newForm.transmission"
-            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-          >
-            <option value="AUTOMATIC">
-              {{ $t("vehicle_transmission_automatic") }}
-            </option>
-            <option value="MANUAL">
-              {{ $t("vehicle_transmission_manual") }}
-            </option>
-          </select>
+          <Select v-model="newForm.transmission">
+            <SelectTrigger id="new-transmission" class="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem :value="TRANSMISSIONS.AUTOMATIC">
+                {{ $t("vehicle_transmission_automatic") }}
+              </SelectItem>
+              <SelectItem :value="TRANSMISSIONS.MANUAL">
+                {{ $t("vehicle_transmission_manual") }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div class="flex flex-col gap-1">
           <Label for="new-category">
             {{ $t("vehicle_category") }}
           </Label>
-          <select
-            id="new-category"
-            v-model="newForm.categoryId"
-            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-            required
-          >
-            <option
-              v-for="category in categoryStore.schoolCategories"
-              :key="category.id"
-              :value="category.id"
-            >
-              {{ category.name }}
-            </option>
-          </select>
+          <Select v-model="newForm.categoryId">
+            <SelectTrigger id="new-category" class="w-full">
+              <SelectValue :placeholder="$t('vehicle_category')" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="category in categoryStore.schoolCategories"
+                :key="category.id"
+                :value="category.id"
+              >
+                {{ category.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Button type="submit">
+        <Button type="submit" :disabled="!newForm.categoryId">
           {{ $t("vehicle_add") }}
         </Button>
       </form>
@@ -192,6 +196,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const open = defineModel<boolean>("open", { required: true });
 
@@ -200,19 +211,31 @@ const vehicleStore = useVehicleStore();
 const categoryStore = useCategoryStore();
 
 const editingId = ref<string | null>(null);
-const editForm = reactive({
+const editForm = reactive<{
+  make: string;
+  model: string;
+  licensePlate: string;
+  transmission: Transmission;
+  categoryId: string | null;
+}>({
   make: "",
   model: "",
   licensePlate: "",
-  transmission: TRANSMISSIONS.AUTOMATIC as Transmission,
-  categoryId: "",
+  transmission: TRANSMISSIONS.AUTOMATIC,
+  categoryId: null,
 });
-const newForm = reactive({
+const newForm = reactive<{
+  make: string;
+  model: string;
+  licensePlate: string;
+  transmission: Transmission;
+  categoryId: string | null;
+}>({
   make: "",
   model: "",
   licensePlate: "",
-  transmission: TRANSMISSIONS.AUTOMATIC as Transmission,
-  categoryId: "",
+  transmission: TRANSMISSIONS.AUTOMATIC,
+  categoryId: null,
 });
 
 watch(open, async (isOpen) => {
@@ -247,10 +270,11 @@ function cancelEdit() {
   editForm.model = "";
   editForm.licensePlate = "";
   editForm.transmission = TRANSMISSIONS.AUTOMATIC;
-  editForm.categoryId = "";
+  editForm.categoryId = null;
 }
 
 async function handleUpdate(id: string) {
+  if (!editForm.categoryId) return;
   try {
     await vehicleStore.updateVehicle(id, {
       make: editForm.make,
@@ -288,6 +312,7 @@ async function handleDelete(vehicle: VehicleDto) {
 }
 
 async function handleCreate() {
+  if (!newForm.categoryId) return;
   try {
     await vehicleStore.createVehicle({
       make: newForm.make,
@@ -301,7 +326,7 @@ async function handleCreate() {
     newForm.model = "";
     newForm.licensePlate = "";
     newForm.transmission = TRANSMISSIONS.AUTOMATIC;
-    newForm.categoryId = "";
+    newForm.categoryId = null;
 
     toast.success(t("vehicle_created"));
   } catch {

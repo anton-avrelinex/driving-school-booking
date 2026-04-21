@@ -5,16 +5,23 @@
     </div>
 
     <div class="flex items-center gap-4 mb-4">
-      <select
-        v-model="statusFilter"
-        class="rounded-md border px-3 py-2 text-sm"
-        @change="applyFilters"
-      >
-        <option value="">{{ $t("common_all") }}</option>
-        <option value="SCHEDULED">{{ $t("lesson_status_scheduled") }}</option>
-        <option value="COMPLETED">{{ $t("lesson_status_completed") }}</option>
-        <option value="CANCELLED">{{ $t("lesson_status_cancelled") }}</option>
-      </select>
+      <Select v-model="statusFilter" @update:model-value="applyFilters">
+        <SelectTrigger class="w-48">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="null">{{ $t("common_all") }}</SelectItem>
+          <SelectItem :value="LESSON_STATUSES.SCHEDULED">
+            {{ $t("lesson_status_scheduled") }}
+          </SelectItem>
+          <SelectItem :value="LESSON_STATUSES.COMPLETED">
+            {{ $t("lesson_status_completed") }}
+          </SelectItem>
+          <SelectItem :value="LESSON_STATUSES.CANCELLED">
+            {{ $t("lesson_status_cancelled") }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
 
     <p v-if="lessonStore.loading" class="text-muted-foreground">
@@ -116,6 +123,7 @@ import { toast } from "vue-sonner";
 import {
   LESSON_STATUSES,
   type LessonDto,
+  type LessonStatus,
 } from "@driving-school-booking/shared-types";
 import { useLessonStore } from "@/lessons/lessons.store";
 import { Button } from "@/components/ui/button";
@@ -127,21 +135,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
 
 const { t } = useI18n();
 const lessonStore = useLessonStore();
 
-const statusFilter = ref("");
+const statusFilter = ref<LessonStatus | null>(null);
 const showAssignVehicleDialog = ref(false);
 const assignVehicleLesson = ref<LessonDto | null>(null);
 
 function applyFilters() {
-  const filters: { status?: string } = {};
-  if (statusFilter.value) {
-    filters.status = statusFilter.value;
-  }
-  void lessonStore.fetchLessons(filters);
+  void lessonStore.fetchLessons(
+    statusFilter.value ? { status: statusFilter.value } : {},
+  );
 }
 
 async function handleComplete(lessonId: string) {
