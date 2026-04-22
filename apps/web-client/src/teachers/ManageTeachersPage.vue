@@ -42,34 +42,32 @@
           <TableCell>{{ user.firstName }}</TableCell>
           <TableCell>{{ user.lastName }}</TableCell>
           <TableCell>{{ user.email }}</TableCell>
-          <TableCell>
-            <span
+          <TableCell class="space-x-1">
+            <Badge
               v-for="course in user.instructorProfile?.courses"
               :key="course.id"
-              class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary mr-1"
+              variant="secondary"
             >
               {{ course.name }}
-            </span>
+            </Badge>
           </TableCell>
-          <TableCell>
-            <span
+          <TableCell class="space-x-1">
+            <Badge
               v-for="vehicle in user.instructorProfile?.vehicles"
               :key="vehicle.id"
-              class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary mr-1"
+              variant="secondary"
             >
               {{ vehicle.make }} {{ vehicle.model }}
-            </span>
+            </Badge>
           </TableCell>
           <TableCell>
-            <span
-              :class="
-                user.status === USER_STATUSES.ACTIVE
-                  ? 'text-green-600'
-                  : 'text-muted-foreground'
+            <Badge
+              :variant="
+                user.status === USER_STATUSES.ACTIVE ? 'success' : 'secondary'
               "
             >
               {{ user.status }}
-            </span>
+            </Badge>
           </TableCell>
           <TableCell class="text-right space-x-2">
             <Button
@@ -138,6 +136,7 @@ import {
   type CreateUserResponseDto,
 } from "@driving-school-booking/shared-types";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,

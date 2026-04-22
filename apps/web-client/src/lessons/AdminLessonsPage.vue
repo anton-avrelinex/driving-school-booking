@@ -68,15 +68,9 @@
           <TableCell>{{ lesson.studentName }}</TableCell>
           <TableCell>{{ lesson.vehicleName ?? "—" }}</TableCell>
           <TableCell>
-            <span
-              :class="{
-                'text-blue-600': lesson.status === LESSON_STATUSES.SCHEDULED,
-                'text-green-600': lesson.status === LESSON_STATUSES.COMPLETED,
-                'text-red-600': lesson.status === LESSON_STATUSES.CANCELLED,
-              }"
-            >
-              {{ lesson.status }}
-            </span>
+            <Badge :variant="lessonStatusVariant(lesson.status)">
+              {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
+            </Badge>
           </TableCell>
           <TableCell class="text-right space-x-2">
             <template v-if="lesson.status === LESSON_STATUSES.SCHEDULED">
@@ -142,7 +136,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
+
+function lessonStatusVariant(
+  status: LessonStatus,
+): BadgeVariants["variant"] {
+  switch (status) {
+    case LESSON_STATUSES.SCHEDULED:
+      return "info";
+    case LESSON_STATUSES.COMPLETED:
+      return "success";
+    case LESSON_STATUSES.CANCELLED:
+      return "destructive";
+  }
+}
 
 const { t } = useI18n();
 const lessonStore = useLessonStore();

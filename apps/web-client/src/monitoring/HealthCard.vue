@@ -2,12 +2,9 @@
   <div class="rounded-lg border bg-card p-4 space-y-2">
     <div class="flex items-center justify-between">
       <span class="font-medium text-sm">{{ component }}</span>
-      <span
-        class="text-xs font-medium px-2 py-0.5 rounded-full"
-        :class="statusClass"
-      >
+      <Badge :variant="statusVariant">
         {{ statusLabel }}
-      </span>
+      </Badge>
     </div>
 
     <div class="flex gap-px h-8 items-end">
@@ -45,6 +42,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { Badge, type BadgeVariants } from "@/components/ui/badge";
 
 const { t } = useI18n();
 
@@ -108,13 +106,11 @@ const statusLabel = computed(() => {
   return t("health_status_down");
 });
 
-const statusClass = computed(() => {
-  if (props.days.length === 0) return "bg-muted text-muted-foreground";
+const statusVariant = computed<BadgeVariants["variant"]>(() => {
+  if (props.days.length === 0) return "secondary";
   const latest = props.days[props.days.length - 1]!;
-  if (latest.uptimePercent >= 99)
-    return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
-  if (latest.uptimePercent >= 90)
-    return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
-  return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
+  if (latest.uptimePercent >= 99) return "success";
+  if (latest.uptimePercent >= 90) return "warning";
+  return "destructive";
 });
 </script>

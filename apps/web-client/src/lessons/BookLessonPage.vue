@@ -65,14 +65,15 @@
       <!-- Step 3: Select date -->
       <div v-if="selectedInstructorId" class="flex flex-col gap-2">
         <label class="text-sm font-medium">{{ $t("lesson_date") }}</label>
-        <input
-          v-model="selectedDate"
-          type="date"
-          :min="minDate"
-          :max="maxDate"
-          class="w-full max-w-md rounded-md border px-3 py-2 text-sm"
-          @change="onDateChange"
-        />
+        <div class="max-w-md">
+          <DatePicker
+            v-model="selectedDate"
+            :min="minDate"
+            :max="maxDate"
+            :placeholder="$t('lesson_select_date')"
+            @update:model-value="onDateChange"
+          />
+        </div>
       </div>
 
       <!-- Step 4: Select slot -->
@@ -129,6 +130,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import api from "@/api/api";
 
 const { t } = useI18n();
@@ -142,7 +144,7 @@ const enrollments = ref<UserDto["studentProfile"]>();
 
 const selectedEnrollmentId = ref<string | null>(null);
 const selectedInstructorId = ref<string | null>(null);
-const selectedDate = ref("");
+const selectedDate = ref<string | null>(null);
 const selectedSlot = ref("");
 
 const activeEnrollments = computed(() => {
@@ -179,14 +181,14 @@ onMounted(async () => {
 
 function onEnrollmentChange() {
   selectedInstructorId.value = null;
-  selectedDate.value = "";
+  selectedDate.value = null;
   selectedSlot.value = "";
   if (!selectedEnrollmentId.value) return;
   void lessonStore.fetchAvailableInstructors(selectedEnrollmentId.value);
 }
 
 function onInstructorChange() {
-  selectedDate.value = "";
+  selectedDate.value = null;
   selectedSlot.value = "";
 }
 
@@ -207,7 +209,13 @@ function onDateChange() {
 }
 
 async function handleBook() {
-  if (!selectedEnrollmentId.value || !selectedInstructorId.value) return;
+  if (
+    !selectedEnrollmentId.value ||
+    !selectedInstructorId.value ||
+    !selectedDate.value
+  ) {
+    return;
+  }
   try {
     const startTime = new Date(
       `${selectedDate.value}T${selectedSlot.value}:00Z`,

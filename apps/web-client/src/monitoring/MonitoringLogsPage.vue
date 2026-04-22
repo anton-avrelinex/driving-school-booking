@@ -111,16 +111,11 @@
               {{ new Date(log.timestamp).toLocaleString() }}
             </TableCell>
             <TableCell>
-              <span
-                class="text-xs font-medium px-2 py-0.5 rounded-full"
-                :class="
-                  log.type === 'request'
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                    : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
-                "
+              <Badge
+                :variant="log.type === LOG_TYPES.REQUEST ? 'info' : 'secondary'"
               >
                 {{ log.type }}
-              </span>
+              </Badge>
             </TableCell>
             <TableCell class="text-xs">{{ log.service }}</TableCell>
             <TableCell class="text-sm">
@@ -130,26 +125,24 @@
               {{ log.type === "request" ? log.path : "—" }}
             </TableCell>
             <TableCell>
-              <span
-                v-if="log.type === 'request'"
-                class="text-xs font-medium px-2 py-0.5 rounded-full"
-                :class="statusCodeClass(log.statusCode)"
+              <Badge
+                v-if="log.type === LOG_TYPES.REQUEST"
+                :variant="statusCodeVariant(log.statusCode)"
               >
                 {{ log.statusCode }}
-              </span>
+              </Badge>
               <span v-else>—</span>
             </TableCell>
             <TableCell class="text-sm">
               {{ log.type === "request" ? log.durationMs + "ms" : "—" }}
             </TableCell>
             <TableCell>
-              <span
-                v-if="log.type === 'app'"
-                class="text-xs font-medium px-2 py-0.5 rounded-full"
-                :class="levelClass(log.level)"
+              <Badge
+                v-if="log.type === LOG_TYPES.APP"
+                :variant="levelVariant(log.level)"
               >
                 {{ log.level }}
-              </span>
+              </Badge>
               <span v-else>—</span>
             </TableCell>
             <TableCell class="text-xs max-w-sm truncate">
@@ -198,6 +191,7 @@ import {
   type Service,
   type LogSearchFilters,
 } from "@driving-school-booking/shared-types";
+import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -269,27 +263,23 @@ async function applyFilters(page: number) {
   await store.fetch(buildFilters(page));
 }
 
-function statusCodeClass(code: number): string {
-  if (code < 300)
-    return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
-  if (code < 400)
-    return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
-  if (code < 500)
-    return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
-
-  return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
+function statusCodeVariant(code: number): BadgeVariants["variant"] {
+  if (code < 300) return "success";
+  if (code < 400) return "info";
+  if (code < 500) return "warning";
+  return "destructive";
 }
 
-function levelClass(level: string): string {
+function levelVariant(level: LogLevel): BadgeVariants["variant"] {
   switch (level) {
     case LOG_LEVELS.ERROR:
-      return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
+      return "destructive";
     case LOG_LEVELS.WARN:
-      return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
+      return "warning";
     case LOG_LEVELS.INFO:
-      return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+      return "success";
     default:
-      return "bg-muted text-muted-foreground";
+      return "secondary";
   }
 }
 

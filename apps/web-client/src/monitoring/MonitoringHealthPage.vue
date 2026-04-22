@@ -82,20 +82,15 @@
             </TableCell>
             <TableCell class="text-sm">{{ check.component }}</TableCell>
             <TableCell>
-              <span
-                class="text-xs font-medium px-2 py-0.5 rounded-full"
-                :class="
-                  check.status === 'healthy'
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                    : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                "
+              <Badge
+                :variant="check.status === 'healthy' ? 'success' : 'destructive'"
               >
                 {{
                   check.status === "healthy"
                     ? t("health_status_operational")
                     : t("health_status_down")
                 }}
-              </span>
+              </Badge>
             </TableCell>
             <TableCell class="text-sm">{{ check.responseTimeMs }}ms</TableCell>
             <TableCell class="text-xs text-muted-foreground max-w-xs truncate">
@@ -118,6 +113,7 @@ import {
   HEALTH_COMPONENTS,
   type HealthComponent,
 } from "@driving-school-booking/shared-types";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

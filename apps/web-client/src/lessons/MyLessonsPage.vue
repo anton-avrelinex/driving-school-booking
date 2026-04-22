@@ -69,15 +69,9 @@
             {{ lesson.vehicleName ?? "—" }}
           </td>
           <td class="px-3 py-2">
-            <span
-              :class="{
-                'text-blue-600': lesson.status === 'SCHEDULED',
-                'text-green-600': lesson.status === 'COMPLETED',
-                'text-red-600': lesson.status === 'CANCELLED',
-              }"
-            >
+            <Badge :variant="lessonStatusVariant(lesson.status)">
               {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
-            </span>
+            </Badge>
           </td>
           <td class="px-3 py-2 space-x-2">
             <template v-if="lesson.status === 'SCHEDULED'">
@@ -127,12 +121,30 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import type { LessonDto } from "@driving-school-booking/shared-types";
+import {
+  LESSON_STATUSES,
+  type LessonDto,
+  type LessonStatus,
+} from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { useAuthStore } from "@/auth/auth.store";
 import { useLessonStore } from "@/lessons/lessons.store";
 import { Button } from "@/components/ui/button";
+import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
+
+function lessonStatusVariant(
+  status: LessonStatus,
+): BadgeVariants["variant"] {
+  switch (status) {
+    case LESSON_STATUSES.SCHEDULED:
+      return "info";
+    case LESSON_STATUSES.COMPLETED:
+      return "success";
+    case LESSON_STATUSES.CANCELLED:
+      return "destructive";
+  }
+}
 
 const { t } = useI18n();
 const authStore = useAuthStore();
