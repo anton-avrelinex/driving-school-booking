@@ -3,11 +3,15 @@
     <div class="flex flex-wrap items-end gap-4">
       <div class="flex flex-col gap-1.5">
         <Label>{{ t("monitoring_filter_from") }}</Label>
-        <Input v-model="filterFrom" type="date" class="w-40" />
+        <div class="w-40">
+          <DatePicker v-model="filterFrom" />
+        </div>
       </div>
       <div class="flex flex-col gap-1.5">
         <Label>{{ t("monitoring_filter_to") }}</Label>
-        <Input v-model="filterTo" type="date" class="w-40" />
+        <div class="w-40">
+          <DatePicker v-model="filterTo" />
+        </div>
       </div>
       <div class="flex flex-col gap-1.5">
         <Label>{{ t("logs_filter_type") }}</Label>
@@ -108,7 +112,7 @@
         <TableBody>
           <TableRow v-for="(log, i) in store.result.items" :key="i">
             <TableCell class="text-xs whitespace-nowrap">
-              {{ new Date(log.timestamp).toLocaleString() }}
+              {{ log.timestamp.toDate().toLocaleString() }}
             </TableCell>
             <TableCell>
               <Badge
@@ -180,7 +184,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   LOG_TYPES,
@@ -193,6 +197,7 @@ import {
 } from "@driving-school-booking/shared-types";
 import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -210,17 +215,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  type CalendarDate,
+  getLocalTimeZone,
+  today,
+} from "@internationalized/date";
+import { dateEnd, dateStart } from "@/lib/date-utils";
 import { useLogsStore } from "./logs.store";
 
 const { t } = useI18n();
 const store = useLogsStore();
 
-const now = new Date();
-const sevenDaysAgo = new Date(now);
-sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-const filterFrom = ref(formatDate(sevenDaysAgo));
-const filterTo = ref(formatDate(now));
+const filterFrom = ref(
+  today(getLocalTimeZone()).subtract({ days: 7 }),
+) as Ref<CalendarDate>;
+const filterTo = ref(today(getLocalTimeZone())) as Ref<CalendarDate>;
 const filterType = ref<LogType | "all">("all");
 const filterService = ref<Service | "all">("all");
 const filterLevel = ref<LogLevel | "all">("all");
@@ -228,18 +237,14 @@ const filterQuery = ref("");
 
 const PAGE_SIZE = 50;
 
-function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(store.result.total / store.result.limit)),
 );
 
 function buildFilters(page: number): LogSearchFilters {
   const filters: LogSearchFilters = {
-    from: filterFrom.value + "T00:00:00.000Z",
-    to: filterTo.value + "T23:59:59.999Z",
+    from: dateStart(filterFrom.value),
+    to: dateEnd(filterTo.value),
     page,
     limit: PAGE_SIZE,
   };

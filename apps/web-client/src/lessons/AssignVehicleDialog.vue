@@ -41,10 +41,8 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import type {
-  LessonDto,
-  VehicleDto,
-} from "@driving-school-booking/shared-types";
+import type { VehicleDto } from "@driving-school-booking/shared-types";
+import type { LessonModel } from "@/lessons/lessons.models";
 import { toast } from "vue-sonner";
 import { useLessonStore } from "@/lessons/lessons.store";
 import api from "@/api/api";
@@ -67,7 +65,7 @@ import {
 
 const open = defineModel<boolean>("open", { required: true });
 const props = defineProps<{
-  lesson: LessonDto | null;
+  lesson: LessonModel | null;
 }>();
 const emit = defineEmits<{ assigned: [] }>();
 

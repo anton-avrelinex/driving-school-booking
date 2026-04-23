@@ -16,9 +16,9 @@
     </PopoverTrigger>
     <PopoverContent class="w-auto p-0">
       <Calendar
-        :model-value="calendarValue"
-        :min-value="minDate"
-        :max-value="maxDate"
+        :model-value="model ?? undefined"
+        :min-value="min"
+        :max-value="max"
         @update:model-value="handleSelect"
       />
     </PopoverContent>
@@ -28,7 +28,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { CalendarIcon } from "lucide-vue-next";
-import { parseDate, type DateValue } from "@internationalized/date";
+import {
+  type CalendarDate,
+  type DateValue,
+  getLocalTimeZone,
+  toCalendarDate,
+} from "@internationalized/date";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -38,31 +43,24 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-const props = defineProps<{
-  min?: string;
-  max?: string;
+defineProps<{
+  min?: CalendarDate;
+  max?: CalendarDate;
   placeholder?: string;
 }>();
 
-const model = defineModel<string | null>();
+const model = defineModel<CalendarDate | null>();
 
-const calendarValue = computed(() =>
-  model.value ? parseDate(model.value) : undefined,
+const formatted = computed(() =>
+  model.value ? model.value.toDate(getLocalTimeZone()).toLocaleDateString() : "",
 );
-const minDate = computed(() => (props.min ? parseDate(props.min) : undefined));
-const maxDate = computed(() => (props.max ? parseDate(props.max) : undefined));
 
-const formatted = computed(() => {
-  if (!model.value) return "";
-  return new Date(`${model.value}T00:00:00`).toLocaleDateString();
-});
-
-function handleSelect(v: DateValue | DateValue[] | undefined) {
+function handleSelect(v: DateValue | DateValue[] | null | undefined) {
   if (!v) {
     model.value = null;
     return;
   }
-  const date = Array.isArray(v) ? v[0] : v;
-  model.value = date ? date.toString() : null;
+  const d = Array.isArray(v) ? v[0] : v;
+  model.value = d ? toCalendarDate(d) : null;
 }
 </script>

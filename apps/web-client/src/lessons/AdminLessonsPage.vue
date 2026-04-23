@@ -53,11 +53,11 @@
       <TableBody>
         <TableRow v-for="lesson in lessonStore.lessons" :key="lesson.id">
           <TableCell>
-            {{ new Date(lesson.startTime).toLocaleDateString() }}
+            {{ lesson.startTime.toDate().toLocaleDateString() }}
           </TableCell>
           <TableCell>
             {{
-              new Date(lesson.startTime).toLocaleTimeString([], {
+              lesson.startTime.toDate().toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })
@@ -111,14 +111,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { toast } from "vue-sonner";
 import {
   LESSON_STATUSES,
-  type LessonDto,
   type LessonStatus,
 } from "@driving-school-booking/shared-types";
+import type { LessonModel } from "@/lessons/lessons.models";
 import { useLessonStore } from "@/lessons/lessons.store";
 import { Button } from "@/components/ui/button";
 import {
@@ -139,9 +139,7 @@ import {
 import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
 
-function lessonStatusVariant(
-  status: LessonStatus,
-): BadgeVariants["variant"] {
+function lessonStatusVariant(status: LessonStatus): BadgeVariants["variant"] {
   switch (status) {
     case LESSON_STATUSES.SCHEDULED:
       return "info";
@@ -157,7 +155,7 @@ const lessonStore = useLessonStore();
 
 const statusFilter = ref<LessonStatus | null>(null);
 const showAssignVehicleDialog = ref(false);
-const assignVehicleLesson = ref<LessonDto | null>(null);
+const assignVehicleLesson = ref(null) as Ref<LessonModel | null>;
 
 function applyFilters() {
   void lessonStore.fetchLessons(
@@ -185,7 +183,7 @@ async function handleCancel(lessonId: string) {
   }
 }
 
-function openAssignVehicle(lesson: LessonDto) {
+function openAssignVehicle(lesson: LessonModel) {
   assignVehicleLesson.value = lesson;
   showAssignVehicleDialog.value = true;
 }

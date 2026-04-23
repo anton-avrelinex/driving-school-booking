@@ -24,12 +24,9 @@
         </Button>
       </div>
       <div v-if="mode === 'daily'" class="flex flex-col gap-1.5">
-        <Input
-          v-model="selectedDate"
-          type="date"
-          class="w-40"
-          @change="fetchDaily"
-        />
+        <div class="w-40">
+          <DatePicker v-model="selectedDate" @update:model-value="fetchDaily" />
+        </div>
       </div>
       <div v-if="mode === 'daily'" class="flex gap-1">
         <Button
@@ -78,7 +75,7 @@
         <TableBody>
           <TableRow v-for="(check, i) in filteredChecks" :key="i">
             <TableCell class="text-xs">
-              {{ new Date(check.timestamp).toLocaleTimeString() }}
+              {{ check.timestamp.toDate().toLocaleTimeString() }}
             </TableCell>
             <TableCell class="text-sm">{{ check.component }}</TableCell>
             <TableCell>
@@ -107,15 +104,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   HEALTH_COMPONENTS,
   type HealthComponent,
 } from "@driving-school-booking/shared-types";
+import {
+  type CalendarDate,
+  getLocalTimeZone,
+  today,
+} from "@internationalized/date";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { dateEnd, dateStart } from "@/lib/date-utils";
 import {
   Table,
   TableBody,
@@ -139,7 +142,7 @@ const ranges = [
 ];
 
 const selectedDays = ref(30);
-const selectedDate = ref(formatDateForInput(new Date()));
+const selectedDate = ref(today(getLocalTimeZone())) as Ref<CalendarDate>;
 
 const componentNames = Object.values(HEALTH_COMPONENTS);
 const activeComponents = ref<Set<HealthComponent>>(new Set(componentNames));
@@ -160,10 +163,6 @@ const filteredChecks = computed(() =>
   store.checks.filter((c) => activeComponents.value.has(c.component)),
 );
 
-function formatDateForInput(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
 interface DayHealth {
   date: string;
   uptimePercent: number;
@@ -182,13 +181,14 @@ const dailyData = computed(() => {
 
   for (const agg of store.aggregates) {
     if (!agg.healthSummary) continue;
+    const dateStr = agg.date.toString();
     for (const hs of agg.healthSummary) {
       if (!result[hs.component]) continue;
 
-      const key = `${agg.date}:${hs.component}`;
+      const key = `${dateStr}:${hs.component}`;
       coveredDays.add(key);
       result[hs.component]!.push({
-        date: agg.date,
+        date: dateStr,
         uptimePercent: hs.uptimePercent,
         totalDowntimeMinutes: hs.totalDowntimeMinutes,
         incidentCount: hs.incidentCount,
@@ -197,13 +197,14 @@ const dailyData = computed(() => {
   }
 
   for (const daySummary of store.recentSummaries) {
+    const dateStr = daySummary.date.toString();
     for (const hs of daySummary.summaries) {
-      const key = `${daySummary.date}:${hs.component}`;
+      const key = `${dateStr}:${hs.component}`;
       if (coveredDays.has(key)) continue;
       if (!result[hs.component]) continue;
 
       result[hs.component]!.push({
-        date: daySummary.date,
+        date: dateStr,
         uptimePercent: hs.uptimePercent,
         totalDowntimeMinutes: hs.totalDowntimeMinutes,
         incidentCount: hs.incidentCount,
@@ -221,19 +222,18 @@ const dailyData = computed(() => {
 });
 
 function buildRangeFilters() {
-  const to = new Date();
-  const from = new Date();
-  from.setDate(from.getDate() - selectedDays.value);
+  const to = today(getLocalTimeZone());
+  const from = to.subtract({ days: selectedDays.value });
   return {
-    from: from.toISOString().slice(0, 10) + "T00:00:00.000Z",
-    to: to.toISOString().slice(0, 10) + "T23:59:59.999Z",
+    from: dateStart(from),
+    to: dateEnd(to),
   };
 }
 
 function buildDailyFilters() {
   return {
-    from: selectedDate.value + "T00:00:00.000Z",
-    to: selectedDate.value + "T23:59:59.999Z",
+    from: dateStart(selectedDate.value),
+    to: dateEnd(selectedDate.value),
   };
 }
 

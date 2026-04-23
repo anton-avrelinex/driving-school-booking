@@ -2,12 +2,16 @@
   <div class="space-y-6">
     <div class="flex flex-wrap items-end gap-4">
       <div class="flex flex-col gap-1.5">
-        <Label for="filter-from">{{ t("monitoring_filter_from") }}</Label>
-        <Input id="filter-from" v-model="filterFrom" type="date" class="w-40" />
+        <Label>{{ t("monitoring_filter_from") }}</Label>
+        <div class="w-40">
+          <DatePicker v-model="filterFrom" />
+        </div>
       </div>
       <div class="flex flex-col gap-1.5">
-        <Label for="filter-to">{{ t("monitoring_filter_to") }}</Label>
-        <Input id="filter-to" v-model="filterTo" type="date" class="w-40" />
+        <Label>{{ t("monitoring_filter_to") }}</Label>
+        <div class="w-40">
+          <DatePicker v-model="filterTo" />
+        </div>
       </div>
       <div class="flex flex-col gap-1.5">
         <Label>{{ t("monitoring_filter_granularity") }}</Label>
@@ -88,11 +92,17 @@ import {
   type TimeSeriesFilters,
 } from "@driving-school-booking/shared-types";
 
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
+import {
+  type CalendarDate,
+  getLocalTimeZone,
+  today,
+} from "@internationalized/date";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
+import { dateEnd, dateStart } from "@/lib/date-utils";
 import {
   Select,
   SelectContent,
@@ -118,22 +128,16 @@ const CHART_COLORS = [
 
 const store = useMonitoringStore();
 
-const now = new Date();
-const sevenDaysAgo = new Date(now);
-sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-const filterFrom = ref(formatDateForInput(sevenDaysAgo));
-const filterTo = ref(formatDateForInput(now));
+const filterFrom = ref(
+  today(getLocalTimeZone()).subtract({ days: 7 }),
+) as Ref<CalendarDate>;
+const filterTo = ref(today(getLocalTimeZone())) as Ref<CalendarDate>;
 const granularity = ref<Granularity>(GRANULARITIES.DAY);
-
-function formatDateForInput(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
 
 function buildFilters(): TimeSeriesFilters {
   return {
-    from: new Date(filterFrom.value).toISOString(),
-    to: new Date(filterTo.value + "T23:59:59.999Z").toISOString(),
+    from: dateStart(filterFrom.value),
+    to: dateEnd(filterTo.value),
     granularity: granularity.value,
   };
 }
@@ -202,7 +206,7 @@ const bySchoolConfig = computed<ChartConfig>(() => {
 
 const errorRateData = computed<Record<string, unknown>[]>(() =>
   store.errorRate.map((d) => ({
-    bucket: d.bucket,
+    bucket: d.bucket.toDate(),
     rate: d.rate,
   })),
 );
@@ -215,7 +219,7 @@ const errorRateConfig = computed<ChartConfig>(() => ({
 
 const latencyData = computed<Record<string, unknown>[]>(() =>
   store.latency.map((d) => ({
-    bucket: d.bucket,
+    bucket: d.bucket.toDate(),
     p50: d.p50,
     p95: d.p95,
     p99: d.p99,

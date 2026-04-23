@@ -1,20 +1,26 @@
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
 import { defineStore } from "pinia";
 import { useI18n } from "vue-i18n";
 import type {
-  LessonDto,
-  CreateLessonDto,
-  AvailableSlotDto,
   AvailableInstructorDto,
+  AvailableSlotDto,
+  CreateLessonDto,
+  LessonDto,
 } from "@driving-school-booking/shared-types";
 import api from "@/api/api";
+import {
+  type AvailableSlotModel,
+  type LessonModel,
+  toAvailableSlotModel,
+  toLessonModel,
+} from "@/lessons/lessons.models";
 
 export const useLessonStore = defineStore("lessons", () => {
   const { t } = useI18n();
 
-  const lessons = ref<LessonDto[]>([]);
+  const lessons = ref<LessonModel[]>([]) as Ref<LessonModel[]>;
   const availableInstructors = ref<AvailableInstructorDto[]>([]);
-  const availableSlots = ref<AvailableSlotDto[]>([]);
+  const availableSlots = ref([]) as Ref<AvailableSlotModel[]>;
   const loading = ref(false);
   const saving = ref(false);
   const error = ref<string | null>(null);
@@ -30,7 +36,7 @@ export const useLessonStore = defineStore("lessons", () => {
       const { data } = await api.get<LessonDto[]>("/lessons", {
         params: filters,
       });
-      lessons.value = data;
+      lessons.value = data.map(toLessonModel);
     } catch {
       error.value = t("lesson_fetch_failed");
     } finally {
@@ -66,7 +72,7 @@ export const useLessonStore = defineStore("lessons", () => {
         "/lessons/available-slots",
         { params: { enrollmentId, instructorId, date } },
       );
-      availableSlots.value = data;
+      availableSlots.value = data.map(toAvailableSlotModel);
     } catch {
       error.value = t("lesson_fetch_failed");
     } finally {
@@ -74,40 +80,40 @@ export const useLessonStore = defineStore("lessons", () => {
     }
   }
 
-  async function bookLesson(dto: CreateLessonDto): Promise<LessonDto> {
+  async function bookLesson(dto: CreateLessonDto): Promise<LessonModel> {
     saving.value = true;
     try {
       const { data } = await api.post<LessonDto>("/lessons", dto);
-      return data;
+      return toLessonModel(data);
     } finally {
       saving.value = false;
     }
   }
 
-  async function completeLesson(lessonId: string): Promise<LessonDto> {
+  async function completeLesson(lessonId: string): Promise<LessonModel> {
     const { data } = await api.patch<LessonDto>(
       `/lessons/${lessonId}/complete`,
     );
     await fetchLessons();
-    return data;
+    return toLessonModel(data);
   }
 
-  async function cancelLesson(lessonId: string): Promise<LessonDto> {
+  async function cancelLesson(lessonId: string): Promise<LessonModel> {
     const { data } = await api.patch<LessonDto>(`/lessons/${lessonId}/cancel`);
     await fetchLessons();
-    return data;
+    return toLessonModel(data);
   }
 
   async function assignVehicle(
     lessonId: string,
     vehicleId: string,
-  ): Promise<LessonDto> {
+  ): Promise<LessonModel> {
     const { data } = await api.patch<LessonDto>(
       `/lessons/${lessonId}/vehicle`,
       { vehicleId },
     );
     await fetchLessons();
-    return data;
+    return toLessonModel(data);
   }
 
   return {

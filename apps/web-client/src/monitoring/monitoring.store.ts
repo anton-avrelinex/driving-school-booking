@@ -1,13 +1,10 @@
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { defineStore } from "pinia";
 import type {
+  RequestsBySchoolDto,
   TimeSeriesFilters,
   TopEndpointDto,
-  RequestsBySchoolDto,
-  VolumePointDto,
-  ErrorRatePointDto,
-  LatencyPointDto,
 } from "@driving-school-booking/shared-types";
 import {
   getTopEndpoints,
@@ -16,14 +13,22 @@ import {
   getErrorRate,
   getLatency,
 } from "./monitoring.api";
+import {
+  type ErrorRatePointModel,
+  type LatencyPointModel,
+  type VolumePointModel,
+  toErrorRatePointModel,
+  toLatencyPointModel,
+  toVolumePointModel,
+} from "./monitoring.models";
 
 export const useMonitoringStore = defineStore("monitoring", () => {
   const { t } = useI18n();
   const topEndpoints = ref<TopEndpointDto[]>([]);
   const bySchool = ref<RequestsBySchoolDto[]>([]);
-  const volume = ref<VolumePointDto[]>([]);
-  const errorRate = ref<ErrorRatePointDto[]>([]);
-  const latency = ref<LatencyPointDto[]>([]);
+  const volume = ref([]) as Ref<VolumePointModel[]>;
+  const errorRate = ref([]) as Ref<ErrorRatePointModel[]>;
+  const latency = ref([]) as Ref<LatencyPointModel[]>;
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -46,9 +51,9 @@ export const useMonitoringStore = defineStore("monitoring", () => {
       ]);
       topEndpoints.value = topEndpointsData;
       bySchool.value = bySchoolData;
-      volume.value = volumeData;
-      errorRate.value = errorRateData;
-      latency.value = latencyData;
+      volume.value = volumeData.map(toVolumePointModel);
+      errorRate.value = errorRateData.map(toErrorRatePointModel);
+      latency.value = latencyData.map(toLatencyPointModel);
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : t("monitoring_fetch_failed");

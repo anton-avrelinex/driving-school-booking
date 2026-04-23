@@ -3,11 +3,15 @@
     <div class="flex flex-wrap items-end gap-4">
       <div class="flex flex-col gap-1.5">
         <Label>{{ t("monitoring_filter_from") }}</Label>
-        <Input v-model="filterFrom" type="date" class="w-40" />
+        <div class="w-40">
+          <DatePicker v-model="filterFrom" />
+        </div>
       </div>
       <div class="flex flex-col gap-1.5">
         <Label>{{ t("monitoring_filter_to") }}</Label>
-        <Input v-model="filterTo" type="date" class="w-40" />
+        <div class="w-40">
+          <DatePicker v-model="filterTo" />
+        </div>
       </div>
       <div class="flex flex-col gap-1.5">
         <Label>{{ t("monitoring_filter_granularity") }}</Label>
@@ -208,11 +212,18 @@ import {
   type Granularity,
   type TimeSeriesFilters,
 } from "@driving-school-booking/shared-types";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
+import {
+  type CalendarDate,
+  getLocalTimeZone,
+  today,
+} from "@internationalized/date";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { dateEnd, dateStart } from "@/lib/date-utils";
 import {
   Select,
   SelectContent,
@@ -245,24 +256,18 @@ const CHART_COLORS = [
 const { t } = useI18n();
 const store = useAnalyticsStore();
 
-const now = new Date();
-const sevenDaysAgo = new Date(now);
-sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-const filterFrom = ref(formatDate(sevenDaysAgo));
-const filterTo = ref(formatDate(now));
+const filterFrom = ref(
+  today(getLocalTimeZone()).subtract({ days: 7 }),
+) as Ref<CalendarDate>;
+const filterTo = ref(today(getLocalTimeZone())) as Ref<CalendarDate>;
 const granularity = ref<Granularity>(GRANULARITIES.DAY);
 const filterSchoolId = ref("");
 const filterUserId = ref("");
 
-function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
 function buildFilters(): TimeSeriesFilters {
   const filters: TimeSeriesFilters = {
-    from: filterFrom.value + "T00:00:00.000Z",
-    to: filterTo.value + "T23:59:59.999Z",
+    from: dateStart(filterFrom.value),
+    to: dateEnd(filterTo.value),
     granularity: granularity.value,
   };
   if (filterSchoolId.value.trim())
@@ -307,8 +312,9 @@ const eventSeriesKeys = computed(() => {
 const eventSeriesData = computed<Record<string, unknown>[]>(() => {
   const bucketMap = new Map<string, Record<string, unknown>>();
   for (const d of store.eventCountSeries) {
-    if (!bucketMap.has(d.bucket)) bucketMap.set(d.bucket, { bucket: d.bucket });
-    bucketMap.get(d.bucket)![d.event] = d.count;
+    const key = d.bucket.toAbsoluteString();
+    if (!bucketMap.has(key)) bucketMap.set(key, { bucket: d.bucket.toDate() });
+    bucketMap.get(key)![d.event] = d.count;
   }
   return [...bucketMap.values()];
 });
@@ -342,15 +348,21 @@ const pageViewSeriesData = computed<Record<string, unknown>[]>(() => {
       : store.pageViewSeries.filter((d) => d.route === selectedRoute.value);
 
   if (selectedRoute.value !== "all") {
-    return filtered.map((d) => ({ bucket: d.bucket, count: d.count }));
+    return filtered.map((d) => ({
+      bucket: d.bucket.toDate(),
+      count: d.count,
+    }));
   }
 
   // Aggregate all routes per bucket
-  const bucketMap = new Map<string, number>();
+  const bucketMap = new Map<string, { bucket: Date; count: number }>();
   for (const d of filtered) {
-    bucketMap.set(d.bucket, (bucketMap.get(d.bucket) ?? 0) + d.count);
+    const key = d.bucket.toAbsoluteString();
+    const entry = bucketMap.get(key) ?? { bucket: d.bucket.toDate(), count: 0 };
+    entry.count += d.count;
+    bucketMap.set(key, entry);
   }
-  return [...bucketMap.entries()].map(([bucket, count]) => ({ bucket, count }));
+  return [...bucketMap.values()];
 });
 
 const pageViewSeriesConfig = computed<ChartConfig>(() => ({
@@ -370,20 +382,28 @@ const pageLoadSeriesData = computed<Record<string, unknown>[]>(() => {
 
   if (selectedRoute.value !== "all") {
     return filtered.map((d) => ({
-      bucket: d.bucket,
+      bucket: d.bucket.toDate(),
       avgLoadTimeMs: d.avgLoadTimeMs,
     }));
   }
 
   // Average across routes per bucket
-  const bucketMap = new Map<string, { sum: number; count: number }>();
+  const bucketMap = new Map<
+    string,
+    { bucket: Date; sum: number; count: number }
+  >();
   for (const d of filtered) {
-    const entry = bucketMap.get(d.bucket) ?? { sum: 0, count: 0 };
+    const key = d.bucket.toAbsoluteString();
+    const entry = bucketMap.get(key) ?? {
+      bucket: d.bucket.toDate(),
+      sum: 0,
+      count: 0,
+    };
     entry.sum += d.avgLoadTimeMs;
     entry.count++;
-    bucketMap.set(d.bucket, entry);
+    bucketMap.set(key, entry);
   }
-  return [...bucketMap.entries()].map(([bucket, { sum, count }]) => ({
+  return [...bucketMap.values()].map(({ bucket, sum, count }) => ({
     bucket,
     avgLoadTimeMs: Math.round(sum / count),
   }));

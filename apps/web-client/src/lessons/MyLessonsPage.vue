@@ -17,64 +17,60 @@
       {{ $t("common_no_results") }}
     </p>
 
-    <table v-else class="w-full text-sm">
-      <thead>
-        <tr class="border-b text-left">
-          <th class="px-3 py-2">{{ $t("lesson_date") }}</th>
-          <th class="px-3 py-2">{{ $t("lesson_time") }}</th>
-          <th class="px-3 py-2">{{ $t("lesson_course") }}</th>
-          <th v-if="!authStore.isInstructor" class="px-3 py-2">
+    <Table v-else>
+      <TableHeader>
+        <TableRow>
+          <TableHead>{{ $t("lesson_date") }}</TableHead>
+          <TableHead>{{ $t("lesson_time") }}</TableHead>
+          <TableHead>{{ $t("lesson_course") }}</TableHead>
+          <TableHead v-if="!authStore.isInstructor">
             {{ $t("lesson_instructor") }}
-          </th>
-          <th v-if="authStore.isInstructor" class="px-3 py-2">
+          </TableHead>
+          <TableHead v-if="authStore.isInstructor">
             {{ $t("lesson_student") }}
-          </th>
-          <th v-if="authStore.isInstructor" class="px-3 py-2">
+          </TableHead>
+          <TableHead v-if="authStore.isInstructor">
             {{ $t("lesson_vehicle") }}
-          </th>
-          <th class="px-3 py-2">{{ $t("lesson_status") }}</th>
-          <th class="px-3 py-2">{{ $t("common_actions") }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="lesson in lessonStore.lessons"
-          :key="lesson.id"
-          class="border-b"
-        >
-          <td class="px-3 py-2">
-            {{ new Date(lesson.startTime).toLocaleDateString() }}
-          </td>
-          <td class="px-3 py-2">
+          </TableHead>
+          <TableHead>{{ $t("lesson_status") }}</TableHead>
+          <TableHead>{{ $t("common_actions") }}</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow v-for="lesson in lessonStore.lessons" :key="lesson.id">
+          <TableCell>
+            {{ lesson.startTime.toDate().toLocaleDateString() }}
+          </TableCell>
+          <TableCell>
             {{
-              new Date(lesson.startTime).toLocaleTimeString([], {
+              lesson.startTime.toDate().toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })
             }}-{{
-              new Date(lesson.endTime).toLocaleTimeString([], {
+              lesson.endTime.toDate().toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })
             }}
-          </td>
-          <td class="px-3 py-2">{{ lesson.courseName }}</td>
-          <td v-if="!authStore.isInstructor" class="px-3 py-2">
+          </TableCell>
+          <TableCell>{{ lesson.courseName }}</TableCell>
+          <TableCell v-if="!authStore.isInstructor">
             {{ lesson.instructorName }}
-          </td>
-          <td v-if="authStore.isInstructor" class="px-3 py-2">
+          </TableCell>
+          <TableCell v-if="authStore.isInstructor">
             {{ lesson.studentName }}
-          </td>
-          <td v-if="authStore.isInstructor" class="px-3 py-2">
+          </TableCell>
+          <TableCell v-if="authStore.isInstructor">
             {{ lesson.vehicleName ?? "—" }}
-          </td>
-          <td class="px-3 py-2">
+          </TableCell>
+          <TableCell>
             <Badge :variant="lessonStatusVariant(lesson.status)">
               {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
             </Badge>
-          </td>
-          <td class="px-3 py-2 space-x-2">
-            <template v-if="lesson.status === 'SCHEDULED'">
+          </TableCell>
+          <TableCell class="space-x-2">
+            <template v-if="lesson.status === LESSON_STATUSES.SCHEDULED">
               <template v-if="authStore.isInstructor">
                 <Button size="sm" @click="handleComplete(lesson.id)">
                   {{ $t("lesson_mark_complete") }}
@@ -87,28 +83,19 @@
                 >
                   {{ $t("lesson_assign_vehicle") }}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  @click="handleCancel(lesson.id)"
-                >
-                  {{ $t("lesson_cancel") }}
-                </Button>
               </template>
-              <template v-else>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  @click="handleCancel(lesson.id)"
-                >
-                  {{ $t("lesson_cancel") }}
-                </Button>
-              </template>
+              <Button
+                size="sm"
+                variant="destructive"
+                @click="handleCancel(lesson.id)"
+              >
+                {{ $t("lesson_cancel") }}
+              </Button>
             </template>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
 
     <AssignVehicleDialog
       v-model:open="vehicleDialogOpen"
@@ -119,18 +106,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   LESSON_STATUSES,
-  type LessonDto,
   type LessonStatus,
 } from "@driving-school-booking/shared-types";
+import type { LessonModel } from "@/lessons/lessons.models";
 import { toast } from "vue-sonner";
 import { useAuthStore } from "@/auth/auth.store";
 import { useLessonStore } from "@/lessons/lessons.store";
 import { Button } from "@/components/ui/button";
 import { Badge, type BadgeVariants } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
 
 function lessonStatusVariant(
@@ -151,7 +146,7 @@ const authStore = useAuthStore();
 const lessonStore = useLessonStore();
 
 const vehicleDialogOpen = ref(false);
-const selectedLesson = ref<LessonDto | null>(null);
+const selectedLesson = ref(null) as Ref<LessonModel | null>;
 
 onMounted(async () => {
   await lessonStore.fetchLessons();
@@ -175,7 +170,7 @@ async function handleCancel(lessonId: string) {
   }
 }
 
-function openAssignVehicle(lesson: LessonDto) {
+function openAssignVehicle(lesson: LessonModel) {
   selectedLesson.value = lesson;
   vehicleDialogOpen.value = true;
 }

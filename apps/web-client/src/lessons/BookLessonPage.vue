@@ -91,12 +91,17 @@
         <div v-else class="flex flex-wrap gap-2">
           <Button
             v-for="slot in lessonStore.availableSlots"
-            :key="slot.startTime"
-            :variant="selectedSlot === slot.startTime ? 'default' : 'outline'"
+            :key="timeToString(slot.startTime)"
+            :variant="
+              selectedSlot && selectedSlot.compare(slot.startTime) === 0
+                ? 'default'
+                : 'outline'
+            "
             size="sm"
             @click="selectedSlot = slot.startTime"
           >
-            {{ slot.startTime }} - {{ slot.endTime }}
+            {{ timeToString(slot.startTime) }} -
+            {{ timeToString(slot.endTime) }}
           </Button>
         </div>
       </div>
@@ -112,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, type Ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
@@ -131,6 +136,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  type CalendarDate,
+  type Time,
+  getLocalTimeZone,
+  today,
+} from "@internationalized/date";
+import { combineDateTime, timeToString } from "@/lib/date-utils";
 import api from "@/api/api";
 
 const { t } = useI18n();
@@ -144,8 +156,8 @@ const enrollments = ref<UserDto["studentProfile"]>();
 
 const selectedEnrollmentId = ref<string | null>(null);
 const selectedInstructorId = ref<string | null>(null);
-const selectedDate = ref<string | null>(null);
-const selectedSlot = ref("");
+const selectedDate = ref(null) as Ref<CalendarDate | null>;
+const selectedSlot = ref(null) as Ref<Time | null>;
 
 const activeEnrollments = computed(() => {
   if (!enrollments.value?.enrollments) return [];
@@ -154,17 +166,12 @@ const activeEnrollments = computed(() => {
   );
 });
 
-const minDate = computed(() => {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toISOString().slice(0, 10);
-});
-
-const maxDate = computed(() => {
-  const max = new Date();
-  max.setDate(max.getDate() + 28);
-  return max.toISOString().slice(0, 10);
-});
+const minDate = computed(() =>
+  today(getLocalTimeZone()).add({ days: 1 }),
+);
+const maxDate = computed(() =>
+  today(getLocalTimeZone()).add({ days: 28 }),
+);
 
 onMounted(async () => {
   loadingEnrollments.value = true;
@@ -182,18 +189,18 @@ onMounted(async () => {
 function onEnrollmentChange() {
   selectedInstructorId.value = null;
   selectedDate.value = null;
-  selectedSlot.value = "";
+  selectedSlot.value = null;
   if (!selectedEnrollmentId.value) return;
   void lessonStore.fetchAvailableInstructors(selectedEnrollmentId.value);
 }
 
 function onInstructorChange() {
   selectedDate.value = null;
-  selectedSlot.value = "";
+  selectedSlot.value = null;
 }
 
 function onDateChange() {
-  selectedSlot.value = "";
+  selectedSlot.value = null;
   if (
     !selectedEnrollmentId.value ||
     !selectedInstructorId.value ||
@@ -204,7 +211,7 @@ function onDateChange() {
   void lessonStore.fetchAvailableSlots(
     selectedEnrollmentId.value,
     selectedInstructorId.value,
-    selectedDate.value,
+    selectedDate.value.toString(),
   );
 }
 
@@ -212,14 +219,16 @@ async function handleBook() {
   if (
     !selectedEnrollmentId.value ||
     !selectedInstructorId.value ||
-    !selectedDate.value
+    !selectedDate.value ||
+    !selectedSlot.value
   ) {
     return;
   }
   try {
-    const startTime = new Date(
-      `${selectedDate.value}T${selectedSlot.value}:00Z`,
-    ).toISOString();
+    const startTime = combineDateTime(
+      selectedDate.value,
+      selectedSlot.value,
+    );
 
     await lessonStore.bookLesson({
       enrollmentId: selectedEnrollmentId.value,

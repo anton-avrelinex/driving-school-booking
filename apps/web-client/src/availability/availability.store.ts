@@ -1,16 +1,18 @@
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
 import { defineStore } from "pinia";
 import { useI18n } from "vue-i18n";
-import type {
-  InstructorAvailabilityDto,
-  SetInstructorAvailabilityDto,
-} from "@driving-school-booking/shared-types";
+import type { InstructorAvailabilityDto } from "@driving-school-booking/shared-types";
 import api from "@/api/api";
+import {
+  type AvailabilityBlockModel,
+  toAvailabilityBlockDto,
+  toAvailabilityBlockModel,
+} from "@/availability/availability.models";
 
 export const useAvailabilityStore = defineStore("availability", () => {
   const { t } = useI18n();
 
-  const slots = ref<InstructorAvailabilityDto[]>([]);
+  const slots = ref([]) as Ref<AvailabilityBlockModel[]>;
   const loading = ref(false);
   const saving = ref(false);
   const error = ref<string | null>(null);
@@ -23,7 +25,7 @@ export const useAvailabilityStore = defineStore("availability", () => {
       const { data } = await api.get<InstructorAvailabilityDto[]>(
         `/users/instructors/${userId}/availability`,
       );
-      slots.value = data;
+      slots.value = data.map(toAvailabilityBlockModel);
     } catch {
       error.value = t("teacher_availability_fetch_failed");
     } finally {
@@ -33,18 +35,18 @@ export const useAvailabilityStore = defineStore("availability", () => {
 
   async function setAvailability(
     userId: string,
-    payload: SetInstructorAvailabilityDto,
+    blocks: AvailabilityBlockModel[],
   ) {
     saving.value = true;
     const { data } = await api.put<InstructorAvailabilityDto[]>(
       `/users/instructors/${userId}/availability`,
-      payload,
+      { slots: blocks.map(toAvailabilityBlockDto) },
     );
 
-    slots.value = data;
+    slots.value = data.map(toAvailabilityBlockModel);
     saving.value = false;
 
-    return data;
+    return slots.value;
   }
 
   return {

@@ -71,7 +71,7 @@
 
 <script setup lang="ts">
 import type { ChartConfig } from "@/components/ui/chart";
-import type { VolumePointDto } from "@driving-school-booking/shared-types";
+import type { VolumePointModel } from "@/monitoring/monitoring.models";
 
 import { VisAxis, VisGroupedBar, VisXYContainer } from "@unovis/vue";
 import { computed } from "vue";
@@ -99,7 +99,7 @@ interface ChartDataItem {
 const props = defineProps<{
   title: string;
   description: string;
-  data: VolumePointDto[];
+  data: VolumePointModel[];
 }>();
 
 const { t } = useI18n();
@@ -113,7 +113,7 @@ const chartConfig = computed<ChartConfig>(() => ({
 
 const chartData = computed<ChartDataItem[]>(() =>
   props.data.map((d) => ({
-    date: new Date(d.bucket),
+    date: d.bucket.toDate(),
     count: d.count,
   })),
 );

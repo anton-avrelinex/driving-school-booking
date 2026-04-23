@@ -129,7 +129,7 @@ const visibleKeys = computed(() =>
 );
 
 function xAccessor(d: Record<string, unknown>): Date {
-  return new Date(d.bucket as string);
+  return d.bucket as Date;
 }
 
 function formatXTick(d: number): string {

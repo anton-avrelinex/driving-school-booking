@@ -28,14 +28,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
-import type {
-  UserDto,
-  InstructorAvailabilityDto,
-} from "@driving-school-booking/shared-types";
+import type { UserDto } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { useAvailabilityStore } from "@/availability/availability.store";
+import type { AvailabilityBlockModel } from "@/availability/availability.models";
 import AvailabilityForm from "@/availability/AvailabilityForm.vue";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,7 +52,7 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const availabilityStore = useAvailabilityStore();
-const formSlots = ref<InstructorAvailabilityDto[]>([]);
+const formSlots = ref([]) as Ref<AvailabilityBlockModel[]>;
 
 watch(
   () => [open.value, props.user] as const,
@@ -71,9 +69,7 @@ async function handleSave() {
   if (!props.user) return;
 
   try {
-    await availabilityStore.setAvailability(props.user.id, {
-      slots: formSlots.value,
-    });
+    await availabilityStore.setAvailability(props.user.id, formSlots.value);
 
     open.value = false;
     toast.success(t("teacher_availability_updated"));

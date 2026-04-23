@@ -27,22 +27,18 @@
         :key="index"
         class="flex items-center gap-2"
       >
-        <Input
-          type="time"
+        <TimePicker
           :model-value="block.startTime"
           @update:model-value="
-            updateBlock(day - 1, index, 'startTime', $event as string)
+            (v) => v && updateBlock(day - 1, index, 'startTime', v)
           "
-          class="w-32"
         />
         <span class="text-muted-foreground">—</span>
-        <Input
-          type="time"
+        <TimePicker
           :model-value="block.endTime"
           @update:model-value="
-            updateBlock(day - 1, index, 'endTime', $event as string)
+            (v) => v && updateBlock(day - 1, index, 'endTime', v)
           "
-          class="w-32"
         />
         <Button
           variant="ghost"
@@ -58,20 +54,21 @@
 </template>
 
 <script setup lang="ts">
-import type { InstructorAvailabilityDto } from "@driving-school-booking/shared-types";
+import { Time } from "@internationalized/date";
+import type { AvailabilityBlockModel } from "@/availability/availability.models";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { TimePicker } from "@/components/ui/time-picker";
 
-const model = defineModel<InstructorAvailabilityDto[]>({ required: true });
+const model = defineModel<AvailabilityBlockModel[]>({ required: true });
 
-function getBlocksForDay(dayOfWeek: number): InstructorAvailabilityDto[] {
+function getBlocksForDay(dayOfWeek: number): AvailabilityBlockModel[] {
   return model.value.filter((s) => s.dayOfWeek === dayOfWeek);
 }
 
 function addBlock(dayOfWeek: number) {
   model.value = [
     ...model.value,
-    { dayOfWeek, startTime: "08:00", endTime: "18:00" },
+    { dayOfWeek, startTime: new Time(8, 0), endTime: new Time(18, 0) },
   ];
 }
 
@@ -85,7 +82,7 @@ function updateBlock(
   dayOfWeek: number,
   index: number,
   field: "startTime" | "endTime",
-  value: string,
+  value: Time,
 ) {
   const dayBlocks = model.value.filter((s) => s.dayOfWeek === dayOfWeek);
   const target = dayBlocks[index];

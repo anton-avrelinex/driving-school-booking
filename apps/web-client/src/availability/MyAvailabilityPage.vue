@@ -26,19 +26,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
-import type { InstructorAvailabilityDto } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
 import { useAuthStore } from "@/auth/auth.store";
 import { useAvailabilityStore } from "@/availability/availability.store";
+import type { AvailabilityBlockModel } from "@/availability/availability.models";
 import AvailabilityForm from "@/availability/AvailabilityForm.vue";
 import { Button } from "@/components/ui/button";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
 const availabilityStore = useAvailabilityStore();
-const formSlots = ref<InstructorAvailabilityDto[]>([]);
+const formSlots = ref([]) as Ref<AvailabilityBlockModel[]>;
 
 onMounted(async () => {
   const userId = authStore.user!.id;
@@ -51,9 +51,7 @@ async function handleSave() {
   const userId = authStore.user!.id;
 
   try {
-    await availabilityStore.setAvailability(userId, {
-      slots: formSlots.value,
-    });
+    await availabilityStore.setAvailability(userId, formSlots.value);
     formSlots.value = [...availabilityStore.slots];
     toast.success(t("teacher_availability_updated"));
   } catch {
