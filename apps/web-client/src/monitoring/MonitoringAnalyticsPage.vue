@@ -243,7 +243,7 @@ import {
 import { useAnalyticsStore } from "./analytics.store";
 import PieChart from "./PieChart.vue";
 import type { PieItem } from "./PieChart.vue";
-import LineChart from "./LineChart.vue";
+import LineChart from "@/components/LineChart.vue";
 
 const CHART_COLORS = [
   "var(--chart-1)",

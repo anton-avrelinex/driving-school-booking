@@ -36,3 +36,12 @@ export const LESSON_STATUSES = {
 
 export type LessonStatus =
   (typeof LESSON_STATUSES)[keyof typeof LESSON_STATUSES];
+
+export const RECENT_ACTIVITY_TYPES = {
+  BOOKED: "BOOKED",
+  COMPLETED: "COMPLETED",
+  CANCELLED: "CANCELLED",
+} as const;
+
+export type RecentActivityType =
+  (typeof RECENT_ACTIVITY_TYPES)[keyof typeof RECENT_ACTIVITY_TYPES];

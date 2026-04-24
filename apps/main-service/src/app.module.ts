@@ -24,6 +24,7 @@ import { CategoryModule } from "./category/category.module";
 import { VehicleModule } from "./vehicle/vehicle.module";
 import { CourseModule } from "./course/course.module";
 import { LessonModule } from "./lesson/lesson.module";
+import { StatsModule } from "./stats/stats.module";
 
 let logQueue: Queue | null = null;
 function getLogQueue(): Queue {
@@ -64,6 +65,7 @@ function getLogQueue(): Queue {
     CourseModule,
     VehicleModule,
     LessonModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService, RequestLogInterceptor],

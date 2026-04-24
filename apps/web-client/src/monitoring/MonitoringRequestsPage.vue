@@ -114,7 +114,7 @@ import { useMonitoringStore } from "./monitoring.store";
 import PieChart from "./PieChart.vue";
 import type { PieItem } from "./PieChart.vue";
 import BarChart from "./BarChart.vue";
-import LineChart from "./LineChart.vue";
+import LineChart from "@/components/LineChart.vue";
 
 const { t } = useI18n();
 
