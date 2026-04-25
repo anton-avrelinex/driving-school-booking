@@ -1,11 +1,14 @@
 <template>
-  <RouterView />
-  <Toaster rich-colors />
+  <TooltipProvider>
+    <RouterView />
+    <Toaster rich-colors />
+  </TooltipProvider>
 </template>
 
 <script setup lang="ts">
 import "vue-sonner/style.css";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "vue-sonner";
 import { onErrorCaptured } from "vue";
 import { useI18n } from "vue-i18n";
