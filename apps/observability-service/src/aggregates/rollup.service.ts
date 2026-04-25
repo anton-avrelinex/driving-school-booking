@@ -15,18 +15,16 @@ import { Log } from "../schemas/log.schema";
 import { AnalyticsEvent } from "../schemas/analytics-event.schema";
 import { DailyAggregate } from "../schemas/daily-aggregate.schema";
 import { HealthCheck } from "../schemas/health-check.schema";
+import {
+  addUtcDays,
+  dayEndUtc,
+  dayStartUtc,
+  isoDateUtc,
+} from "../common/date-utils";
 
 function roundTo(value: number, decimals: number): number {
   const factor = 10 ** decimals;
   return Math.round(value * factor) / factor;
-}
-
-function dayBounds(dateStr: string): { start: Date; end: Date } {
-  const start = new Date(`${dateStr}T00:00:00.000Z`);
-  const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 1);
-  end.setTime(end.getTime() - 1);
-  return { start, end };
 }
 
 @Injectable()
@@ -46,15 +44,14 @@ export class RollupService {
 
   @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async handleDailyRollup(): Promise<void> {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const dateStr = yesterday.toISOString().slice(0, 10);
+    const yesterday = addUtcDays(new Date(), -1);
+    const dateStr = isoDateUtc(yesterday);
 
     this.logger.log(`Starting daily rollup for ${dateStr}`);
 
     for (const service of Object.values(SERVICES)) {
       try {
-        await this.rollupForServiceAndDate(service, dateStr);
+        await this.rollupForServiceAndDate(service, yesterday);
       } catch (err) {
         this.logger.error(`Rollup failed for ${service} on ${dateStr}`, err);
       }
@@ -63,9 +60,11 @@ export class RollupService {
 
   async rollupForServiceAndDate(
     service: string,
-    dateStr: string,
+    day: Date,
   ): Promise<void> {
-    const { start: dayStart, end: dayEnd } = dayBounds(dateStr);
+    const dayStart = dayStartUtc(day);
+    const dayEnd = dayEndUtc(day);
+    const dateStr = isoDateUtc(day);
     const timeMatch = {
       timestamp: { $gte: dayStart, $lte: dayEnd },
       service,

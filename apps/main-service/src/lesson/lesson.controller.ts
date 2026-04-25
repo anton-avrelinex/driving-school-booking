@@ -56,7 +56,7 @@ export class LessonController {
       req.user.schoolId,
       enrollmentId,
       instructorId,
-      date,
+      new Date(date),
       studentProfileId,
     );
   }

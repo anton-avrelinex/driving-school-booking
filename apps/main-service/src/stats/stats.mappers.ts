@@ -4,13 +4,7 @@ import {
   type RecentActivityEntryDto,
 } from "@driving-school-booking/shared-types";
 import { LessonStatus } from "../generated/prisma/enums";
-
-export function toIsoDate(d: Date): string {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
+import { addUtcDays, dayStartUtc, isoDateUtc } from "../common/date-utils";
 
 export function bucketLessonsByDay(
   lessons: { startTime: Date; status: string }[],
@@ -19,19 +13,17 @@ export function bucketLessonsByDay(
 ): LessonsOverTimeEntryDto[] {
   const buckets = new Map<string, LessonsOverTimeEntryDto>();
 
-  const cursor = new Date(from);
-  cursor.setHours(0, 0, 0, 0);
-  const boundary = new Date(to);
-  boundary.setHours(0, 0, 0, 0);
+  let cursor = dayStartUtc(from);
+  const boundary = dayStartUtc(to);
 
   while (cursor <= boundary) {
-    const key = toIsoDate(cursor);
+    const key = isoDateUtc(cursor);
     buckets.set(key, { date: key, scheduled: 0, completed: 0, cancelled: 0 });
-    cursor.setDate(cursor.getDate() + 1);
+    cursor = addUtcDays(cursor, 1);
   }
 
   for (const lesson of lessons) {
-    const key = toIsoDate(lesson.startTime);
+    const key = isoDateUtc(lesson.startTime);
     const bucket = buckets.get(key);
     if (!bucket) continue;
     if (lesson.status === LessonStatus.SCHEDULED) bucket.scheduled++;

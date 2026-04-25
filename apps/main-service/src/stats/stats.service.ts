@@ -2,6 +2,12 @@ import { Injectable } from "@nestjs/common";
 import type { AdminDashboardStatsDto } from "@driving-school-booking/shared-types";
 import { LessonStatus, Role, UserStatus } from "../generated/prisma/enums";
 import { PrismaService } from "../prisma/prisma.service";
+import {
+  addUtcDays,
+  dayStartUtc,
+  endOfUtcWeek,
+  startOfUtcWeek,
+} from "../common/date-utils";
 import { RECENT_ACTIVITY_SELECT } from "./stats.selects";
 import { bucketLessonsByDay, toRecentActivityEntry } from "./stats.mappers";
 
@@ -16,9 +22,9 @@ export class StatsService {
     schoolId: string,
   ): Promise<AdminDashboardStatsDto> {
     const now = new Date();
-    const weekStart = startOfWeek(now);
-    const weekEnd = endOfWeek(now);
-    const chartFrom = startOfDaysAgo(now, CHART_DAYS - 1);
+    const weekStart = startOfUtcWeek(now);
+    const weekEnd = endOfUtcWeek(now);
+    const chartFrom = dayStartUtc(addUtcDays(now, -(CHART_DAYS - 1)));
 
     const [
       activeStudents,
@@ -86,26 +92,3 @@ export class StatsService {
   }
 }
 
-function startOfWeek(d: Date): Date {
-  const result = new Date(d);
-  result.setHours(0, 0, 0, 0);
-  const day = result.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  result.setDate(result.getDate() + diff);
-  return result;
-}
-
-function endOfWeek(d: Date): Date {
-  const start = startOfWeek(d);
-  const result = new Date(start);
-  result.setDate(start.getDate() + 6);
-  result.setHours(23, 59, 59, 999);
-  return result;
-}
-
-function startOfDaysAgo(d: Date, daysAgo: number): Date {
-  const result = new Date(d);
-  result.setHours(0, 0, 0, 0);
-  result.setDate(result.getDate() - daysAgo);
-  return result;
-}

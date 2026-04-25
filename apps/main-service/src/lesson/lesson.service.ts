@@ -11,6 +11,11 @@ import type {
 } from "@driving-school-booking/shared-types";
 import { LessonStatus, Role } from "../generated/prisma/enums";
 import { PrismaService } from "../prisma/prisma.service";
+import {
+  dayEndUtc,
+  dayStartUtc,
+  utcAtMinuteOfDay,
+} from "../common/date-utils";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { AssignVehicleDto } from "./dto/assign-vehicle.dto";
 import { LESSON_SELECT } from "./lesson.selects";
@@ -72,7 +77,7 @@ export class LessonService {
     schoolId: string,
     enrollmentId: string,
     instructorUserId: string,
-    date: string,
+    date: Date,
     studentProfileId: string,
   ): Promise<AvailableSlotDto[]> {
     const enrollment = await this.prisma.enrollment.findUnique({
@@ -118,8 +123,7 @@ export class LessonService {
 
     const durationMin = schoolConfig?.defaultLessonDurationMin ?? 120;
 
-    const targetDate = new Date(date);
-    const jsDay = targetDate.getUTCDay();
+    const jsDay = date.getUTCDay();
     const dayOfWeek = jsDay === 0 ? 6 : jsDay - 1;
 
     const availability = await this.prisma.instructorAvailability.findMany({
@@ -131,12 +135,8 @@ export class LessonService {
       return [];
     }
 
-    // Build day start/end in UTC based on the target date
-    const datePrefix = date.slice(0, 10); // "YYYY-MM-DD"
-
-    // Get existing SCHEDULED lessons for this instructor on that day
-    const dayStart = new Date(`${datePrefix}T00:00:00.000Z`);
-    const dayEnd = new Date(`${datePrefix}T23:59:59.999Z`);
+    const dayStart = dayStartUtc(date);
+    const dayEnd = dayEndUtc(date);
 
     const existingLessons = await this.prisma.lesson.findMany({
       where: {
@@ -196,12 +196,8 @@ export class LessonService {
       ) {
         const slotEnd = slotStart + durationMin;
 
-        const slotStartTime = new Date(
-          `${datePrefix}T${pad(Math.floor(slotStart / 60))}:${pad(slotStart % 60)}:00.000Z`,
-        );
-        const slotEndTime = new Date(
-          `${datePrefix}T${pad(Math.floor(slotEnd / 60))}:${pad(slotEnd % 60)}:00.000Z`,
-        );
+        const slotStartTime = utcAtMinuteOfDay(date, slotStart);
+        const slotEndTime = utcAtMinuteOfDay(date, slotEnd);
 
         // Check instructor conflict
         const hasInstructorConflict = existingLessons.some(

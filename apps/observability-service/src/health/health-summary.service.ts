@@ -11,6 +11,7 @@ import {
   type HealthSummaryFilters,
 } from "@driving-school-booking/shared-types";
 import { HealthCheck } from "../schemas/health-check.schema";
+import { isoDateUtc } from "../common/date-utils";
 
 type HealthCheckDoc = FlattenMaps<HealthCheck>;
 
@@ -62,7 +63,7 @@ export class HealthSummaryService {
   ): Map<string, Map<string, HealthCheckDoc[]>> {
     const grouped = new Map<string, Map<string, HealthCheckDoc[]>>();
     for (const check of checks) {
-      const date = check.timestamp.toISOString().slice(0, 10);
+      const date = isoDateUtc(check.timestamp);
 
       if (!grouped.has(date)) grouped.set(date, new Map());
       const dayMap = grouped.get(date)!;
