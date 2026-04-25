@@ -7,13 +7,17 @@
     <CardContent class="p-6">
       <div v-if="lesson" class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
         <div class="shrink-0">
-          <div class="text-4xl font-bold tracking-tight">{{ dayLabel }}</div>
+          <div class="text-4xl font-bold tracking-tight">
+            {{ $d(startDate, "dayOnly") }}
+          </div>
           <div class="text-sm text-muted-foreground uppercase mt-1">
-            {{ monthLabel }}
+            {{ $d(startDate, "monthShort") }}
           </div>
         </div>
         <div class="flex-1 min-w-0">
-          <div class="text-xl font-semibold">{{ timeRange }}</div>
+          <div class="text-xl font-semibold">
+            {{ $d(startDate, "time") }} — {{ $d(endDate, "time") }}
+          </div>
           <div class="text-sm text-muted-foreground mt-1 truncate">
             {{ $t("lesson_instructor") }}: {{ lesson.instructorName }}
           </div>
@@ -47,7 +51,6 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useI18n } from "vue-i18n";
 import { CalendarIcon } from "lucide-vue-next";
 import type { DashboardLesson } from "@/dashboard/dashboard.models";
 import { Card, CardContent } from "@/components/ui/card";
@@ -57,32 +60,6 @@ const props = defineProps<{
   lesson: DashboardLesson | null;
 }>();
 
-const { locale } = useI18n();
-
-const dayLabel = computed(() => {
-  if (!props.lesson) return "";
-  return props.lesson.startTime.toDate().toLocaleDateString(locale.value, {
-    day: "numeric",
-  });
-});
-
-const monthLabel = computed(() => {
-  if (!props.lesson) return "";
-  return props.lesson.startTime.toDate().toLocaleDateString(locale.value, {
-    month: "short",
-  });
-});
-
-const timeRange = computed(() => {
-  if (!props.lesson) return "";
-  const start = props.lesson.startTime.toDate().toLocaleTimeString(locale.value, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const end = props.lesson.endTime.toDate().toLocaleTimeString(locale.value, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return `${start} — ${end}`;
-});
+const startDate = computed(() => props.lesson?.startTime.toDate() ?? new Date());
+const endDate = computed(() => props.lesson?.endTime.toDate() ?? new Date());
 </script>

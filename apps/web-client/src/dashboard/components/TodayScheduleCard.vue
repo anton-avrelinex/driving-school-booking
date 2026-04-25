@@ -3,7 +3,7 @@
     <div class="bg-primary/5 border-b px-6 py-3 flex items-center gap-2">
       <ClockIcon class="size-4 text-primary" />
       <span class="text-sm font-medium">
-        {{ $t("dashboard_today_title", { date: todayLabel }) }}
+        {{ $t("dashboard_today_title", { date: $d(todayDate, "dateLong") }) }}
       </span>
     </div>
     <CardContent class="p-6">
@@ -28,7 +28,7 @@
           class="flex items-center gap-4 rounded-md border p-3"
         >
           <div class="text-sm font-semibold w-20 shrink-0 tabular-nums">
-            {{ formatTime(lesson.startTime) }}
+            {{ $d(lesson.startTime.toDate(), "time") }}
           </div>
           <div class="min-w-0 flex-1">
             <div class="text-sm font-medium truncate">
@@ -49,13 +49,8 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useI18n } from "vue-i18n";
 import { ClockIcon } from "lucide-vue-next";
-import {
-  type ZonedDateTime,
-  getLocalTimeZone,
-  now,
-} from "@internationalized/date";
+import { getLocalTimeZone, now } from "@internationalized/date";
 import { LESSON_STATUSES } from "@driving-school-booking/shared-types";
 import type { DashboardLesson } from "@/dashboard/dashboard.models";
 import { Card, CardContent } from "@/components/ui/card";
@@ -65,22 +60,5 @@ defineProps<{
   lessons: DashboardLesson[];
 }>();
 
-const { locale } = useI18n();
-
-const todayLabel = computed(() =>
-  now(getLocalTimeZone())
-    .toDate()
-    .toLocaleDateString(locale.value, {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    }),
-);
-
-function formatTime(zoned: ZonedDateTime): string {
-  return zoned.toDate().toLocaleTimeString(locale.value, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+const todayDate = computed(() => now(getLocalTimeZone()).toDate());
 </script>

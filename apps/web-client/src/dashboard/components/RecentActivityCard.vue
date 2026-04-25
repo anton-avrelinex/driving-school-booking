@@ -63,7 +63,7 @@ import {
 
 defineProps<{ entries: RecentActivityEntryDto[] }>();
 
-const { locale } = useI18n();
+const { d } = useI18n();
 
 function iconFor(type: RecentActivityType): LucideIcon {
   switch (type) {
@@ -97,9 +97,6 @@ function formatRelative(iso: string): string {
   if (diffHours < 24) return `${diffHours}h ago`;
   const diffDays = Math.floor(diffHours / 24);
   if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString(locale.value, {
-    month: "short",
-    day: "numeric",
-  });
+  return d(date, "dateShort");
 }
 </script>

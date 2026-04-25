@@ -112,7 +112,7 @@
         <TableBody>
           <TableRow v-for="(log, i) in store.result.items" :key="i">
             <TableCell class="text-xs whitespace-nowrap">
-              {{ log.timestamp.toDate().toLocaleString() }}
+              {{ $d(log.timestamp.toDate(), "datetime") }}
             </TableCell>
             <TableCell>
               <Badge

@@ -24,7 +24,8 @@
               {{ lesson.studentName }}
             </div>
             <div class="text-xs text-muted-foreground truncate">
-              {{ formatDateTime(lesson.startTime) }} · {{ lesson.courseName }}
+              {{ $d(lesson.startTime.toDate(), "datetimeShort") }} ·
+              {{ lesson.courseName }}
             </div>
           </div>
           <Button size="sm" @click="$emit('goToLessons')">
@@ -37,8 +38,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-import type { ZonedDateTime } from "@internationalized/date";
 import type { DashboardLesson } from "@/dashboard/dashboard.models";
 import {
   Card,
@@ -51,17 +50,4 @@ import { Button } from "@/components/ui/button";
 
 defineProps<{ lessons: DashboardLesson[] }>();
 defineEmits<{ (e: "goToLessons"): void }>();
-
-const { locale } = useI18n();
-
-function formatDateTime(zoned: ZonedDateTime): string {
-  const d = zoned.toDate();
-  return `${d.toLocaleDateString(locale.value, {
-    month: "short",
-    day: "numeric",
-  })}, ${d.toLocaleTimeString(locale.value, {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}`;
-}
 </script>

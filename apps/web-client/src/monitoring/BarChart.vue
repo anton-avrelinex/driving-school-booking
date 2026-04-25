@@ -52,12 +52,8 @@
           <ChartCrosshair
             :template="
               componentToString(chartConfig, ChartTooltipContent, {
-                labelFormatter(d) {
-                  return new Date(d).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  });
+                labelFormatter(value) {
+                  return d(new Date(value), 'dateShortYear');
                 },
               })
             "
@@ -102,7 +98,7 @@ const props = defineProps<{
   data: VolumePointModel[];
 }>();
 
-const { t } = useI18n();
+const { t, d } = useI18n();
 
 const chartConfig = computed<ChartConfig>(() => ({
   count: {
@@ -122,11 +118,7 @@ const totalCount = computed(() =>
   props.data.reduce((acc, curr) => acc + curr.count, 0),
 );
 
-function formatXTick(d: number): string {
-  const date = new Date(d);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
+function formatXTick(value: number): string {
+  return d(new Date(value), "dateShort");
 }
 </script>

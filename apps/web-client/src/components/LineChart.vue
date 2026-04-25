@@ -65,12 +65,8 @@
           <ChartCrosshair
             :template="
               componentToString(chartConfig, ChartTooltipContent, {
-                labelFormatter(d) {
-                  return new Date(d).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  });
+                labelFormatter(value) {
+                  return d(new Date(value), 'dateShortYear');
                 },
               })
             "
@@ -91,6 +87,7 @@ import type { ChartConfig } from "@/components/ui/chart";
 
 import { VisAxis, VisLine, VisXYContainer } from "@unovis/vue";
 import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import {
   Card,
   CardContent,
@@ -120,6 +117,8 @@ const props = withDefaults(
   },
 );
 
+const { d } = useI18n();
+
 const activeKey = ref(
   props.lineKeys.length > 1 ? "all" : (props.lineKeys[0] ?? ""),
 );
@@ -128,18 +127,15 @@ const visibleKeys = computed(() =>
   activeKey.value === "all" ? props.lineKeys : [activeKey.value],
 );
 
-function xAccessor(d: Record<string, unknown>): Date {
-  return d.bucket as Date;
+function xAccessor(datum: Record<string, unknown>): Date {
+  return datum.bucket as Date;
 }
 
-function formatXTick(d: number): string {
-  return new Date(d).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
+function formatXTick(value: number): string {
+  return d(new Date(value), "dateShort");
 }
 
-function yTickFormat(d: number): string {
-  return props.unit ? `${d}${props.unit}` : String(d);
+function yTickFormat(value: number): string {
+  return props.unit ? `${value}${props.unit}` : String(value);
 }
 </script>

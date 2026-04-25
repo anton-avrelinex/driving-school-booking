@@ -40,7 +40,7 @@
               >
                 <div class="min-w-0">
                   <div class="text-sm font-medium truncate">
-                    {{ formatDateTime(lesson.startTime) }}
+                    {{ $d(lesson.startTime.toDate(), "datetimeMedium") }}
                   </div>
                   <div class="text-xs text-muted-foreground truncate">
                     {{ lesson.courseName }} · {{ lesson.instructorName }}
@@ -74,7 +74,7 @@
             >
               <div class="min-w-0">
                 <div class="text-sm font-medium truncate">
-                  {{ formatDateTime(lesson.startTime) }}
+                  {{ $d(lesson.startTime.toDate(), "datetimeMedium") }}
                 </div>
                 <div class="text-xs text-muted-foreground truncate">
                   {{ lesson.courseName }} · {{ lesson.instructorName }}
@@ -94,7 +94,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { type ZonedDateTime, getLocalTimeZone, now } from "@internationalized/date";
+import { getLocalTimeZone, now } from "@internationalized/date";
 import {
   ENROLLMENT_STATUSES,
   LESSON_STATUSES,
@@ -117,7 +117,7 @@ import EnrollmentProgressCard from "@/dashboard/components/EnrollmentProgressCar
 const UPCOMING_COUNT = 3;
 const RECENT_COUNT = 3;
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const auth = useAuthStore();
 const store = useDashboardStore();
 
@@ -172,18 +172,6 @@ function byStartTimeAsc(a: DashboardLesson, b: DashboardLesson): number {
 
 function byStartTimeDesc(a: DashboardLesson, b: DashboardLesson): number {
   return b.startTime.compare(a.startTime);
-}
-
-function formatDateTime(zoned: ZonedDateTime): string {
-  const d = zoned.toDate();
-  return `${d.toLocaleDateString(locale.value, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  })}, ${d.toLocaleTimeString(locale.value, {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}`;
 }
 
 onMounted(async () => {

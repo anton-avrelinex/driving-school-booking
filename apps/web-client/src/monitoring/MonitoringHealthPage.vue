@@ -75,7 +75,7 @@
         <TableBody>
           <TableRow v-for="(check, i) in filteredChecks" :key="i">
             <TableCell class="text-xs">
-              {{ check.timestamp.toDate().toLocaleTimeString() }}
+              {{ $d(check.timestamp.toDate(), "timeFull") }}
             </TableCell>
             <TableCell class="text-sm">{{ check.component }}</TableCell>
             <TableCell>

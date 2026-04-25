@@ -39,19 +39,11 @@
       <TableBody>
         <TableRow v-for="lesson in lessonStore.lessons" :key="lesson.id">
           <TableCell>
-            {{ lesson.startTime.toDate().toLocaleDateString() }}
+            {{ $d(lesson.startTime.toDate(), "date") }}
           </TableCell>
           <TableCell>
-            {{
-              lesson.startTime.toDate().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            }}-{{
-              lesson.endTime.toDate().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
+            {{ $d(lesson.startTime.toDate(), "time") }}-{{
+              $d(lesson.endTime.toDate(), "time")
             }}
           </TableCell>
           <TableCell>{{ lesson.courseName }}</TableCell>

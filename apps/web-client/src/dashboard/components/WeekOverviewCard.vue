@@ -13,10 +13,10 @@
           :class="{ 'border-primary bg-primary/5': day.isToday }"
         >
           <div class="text-xs text-muted-foreground uppercase">
-            {{ day.weekdayLabel }}
+            {{ $d(day.date, "weekdayShort") }}
           </div>
           <div class="text-lg font-semibold tabular-nums">
-            {{ day.dayLabel }}
+            {{ $d(day.date, "dayOnly") }}
           </div>
           <div
             class="mt-1 text-xs font-medium"
@@ -32,7 +32,6 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useI18n } from "vue-i18n";
 import {
   type CalendarDate,
   getLocalTimeZone,
@@ -52,8 +51,6 @@ const props = defineProps<{
   lessons: DashboardLesson[];
 }>();
 
-const { locale } = useI18n();
-
 const days = computed(() => {
   const tz = getLocalTimeZone();
   const todayDate = today(tz);
@@ -69,14 +66,10 @@ const days = computed(() => {
       return sameDay(l.startTime, date);
     }).length;
 
-    const nativeDate = date.toDate(tz);
     result.push({
       iso,
       isToday: iso === todayIso,
-      weekdayLabel: nativeDate.toLocaleDateString(locale.value, {
-        weekday: "short",
-      }),
-      dayLabel: nativeDate.toLocaleDateString(locale.value, { day: "numeric" }),
+      date: date.toDate(tz),
       count,
     });
   }
