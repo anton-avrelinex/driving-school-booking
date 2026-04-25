@@ -80,7 +80,9 @@
             <TableCell class="text-sm">{{ check.component }}</TableCell>
             <TableCell>
               <Badge
-                :variant="check.status === 'healthy' ? 'success' : 'destructive'"
+                :variant="
+                  check.status === 'healthy' ? 'success' : 'destructive'
+                "
               >
                 {{
                   check.status === "healthy"

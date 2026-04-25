@@ -2,7 +2,9 @@
   <AlertDialog v-model:open="open">
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>{{ $t("student_deactivate_title") }}</AlertDialogTitle>
+        <AlertDialogTitle>
+          {{ $t("student_deactivate_title") }}
+        </AlertDialogTitle>
         <AlertDialogDescription>
           {{
             $t("student_deactivate_confirm", {

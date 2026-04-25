@@ -2,92 +2,95 @@
   <div class="space-y-6">
     <h1 class="text-2xl font-bold">{{ $t("lesson_list_title") }}</h1>
 
-    <p v-if="lessonStore.loading" class="text-muted-foreground">
-      {{ $t("common_loading") }}
-    </p>
+    <Transition name="fade" mode="out-in">
+      <TableSkeleton
+        v-if="lessonStore.loading && lessonStore.lessons.length === 0"
+        :columns="authStore.isInstructor ? 7 : 6"
+      />
 
-    <p v-else-if="lessonStore.error" class="text-destructive">
-      {{ lessonStore.error }}
-    </p>
+      <p v-else-if="lessonStore.error" class="text-destructive">
+        {{ lessonStore.error }}
+      </p>
 
-    <p
-      v-else-if="lessonStore.lessons.length === 0"
-      class="text-muted-foreground"
-    >
-      {{ $t("common_no_results") }}
-    </p>
+      <EmptyState
+        v-else-if="lessonStore.lessons.length === 0"
+        :title="$t('lesson_no_lessons')"
+        :description="$t('lesson_no_lessons_description')"
+        :icon="CalendarIcon"
+      />
 
-    <Table v-else>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{{ $t("lesson_date") }}</TableHead>
-          <TableHead>{{ $t("lesson_time") }}</TableHead>
-          <TableHead>{{ $t("lesson_course") }}</TableHead>
-          <TableHead v-if="!authStore.isInstructor">
-            {{ $t("lesson_instructor") }}
-          </TableHead>
-          <TableHead v-if="authStore.isInstructor">
-            {{ $t("lesson_student") }}
-          </TableHead>
-          <TableHead v-if="authStore.isInstructor">
-            {{ $t("lesson_vehicle") }}
-          </TableHead>
-          <TableHead>{{ $t("lesson_status") }}</TableHead>
-          <TableHead>{{ $t("common_actions") }}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow v-for="lesson in lessonStore.lessons" :key="lesson.id">
-          <TableCell>
-            {{ $d(lesson.startTime.toDate(), "date") }}
-          </TableCell>
-          <TableCell>
-            {{ $d(lesson.startTime.toDate(), "time") }}-{{
-              $d(lesson.endTime.toDate(), "time")
-            }}
-          </TableCell>
-          <TableCell>{{ lesson.courseName }}</TableCell>
-          <TableCell v-if="!authStore.isInstructor">
-            {{ lesson.instructorName }}
-          </TableCell>
-          <TableCell v-if="authStore.isInstructor">
-            {{ lesson.studentName }}
-          </TableCell>
-          <TableCell v-if="authStore.isInstructor">
-            {{ lesson.vehicleName ?? "—" }}
-          </TableCell>
-          <TableCell>
-            <Badge :variant="lessonStatusVariant(lesson.status)">
-              {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
-            </Badge>
-          </TableCell>
-          <TableCell class="space-x-2">
-            <template v-if="lesson.status === LESSON_STATUSES.SCHEDULED">
-              <template v-if="authStore.isInstructor">
-                <Button size="sm" @click="handleComplete(lesson.id)">
-                  {{ $t("lesson_mark_complete") }}
-                </Button>
+      <Table v-else>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{{ $t("lesson_date") }}</TableHead>
+            <TableHead>{{ $t("lesson_time") }}</TableHead>
+            <TableHead>{{ $t("lesson_course") }}</TableHead>
+            <TableHead v-if="!authStore.isInstructor">
+              {{ $t("lesson_instructor") }}
+            </TableHead>
+            <TableHead v-if="authStore.isInstructor">
+              {{ $t("lesson_student") }}
+            </TableHead>
+            <TableHead v-if="authStore.isInstructor">
+              {{ $t("lesson_vehicle") }}
+            </TableHead>
+            <TableHead>{{ $t("lesson_status") }}</TableHead>
+            <TableHead>{{ $t("common_actions") }}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow v-for="lesson in lessonStore.lessons" :key="lesson.id">
+            <TableCell>
+              {{ $d(lesson.startTime.toDate(), "date") }}
+            </TableCell>
+            <TableCell>
+              {{ $d(lesson.startTime.toDate(), "time") }}-{{
+                $d(lesson.endTime.toDate(), "time")
+              }}
+            </TableCell>
+            <TableCell>{{ lesson.courseName }}</TableCell>
+            <TableCell v-if="!authStore.isInstructor">
+              {{ lesson.instructorName }}
+            </TableCell>
+            <TableCell v-if="authStore.isInstructor">
+              {{ lesson.studentName }}
+            </TableCell>
+            <TableCell v-if="authStore.isInstructor">
+              {{ lesson.vehicleName ?? "—" }}
+            </TableCell>
+            <TableCell>
+              <Badge :variant="lessonStatusVariant(lesson.status)">
+                {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
+              </Badge>
+            </TableCell>
+            <TableCell class="space-x-2">
+              <template v-if="lesson.status === LESSON_STATUSES.SCHEDULED">
+                <template v-if="authStore.isInstructor">
+                  <Button size="sm" @click="handleComplete(lesson.id)">
+                    {{ $t("lesson_mark_complete") }}
+                  </Button>
+                  <Button
+                    v-if="!lesson.vehicleId"
+                    size="sm"
+                    variant="outline"
+                    @click="openAssignVehicle(lesson)"
+                  >
+                    {{ $t("lesson_assign_vehicle") }}
+                  </Button>
+                </template>
                 <Button
-                  v-if="!lesson.vehicleId"
                   size="sm"
-                  variant="outline"
-                  @click="openAssignVehicle(lesson)"
+                  variant="destructive"
+                  @click="handleCancel(lesson.id)"
                 >
-                  {{ $t("lesson_assign_vehicle") }}
+                  {{ $t("lesson_cancel") }}
                 </Button>
               </template>
-              <Button
-                size="sm"
-                variant="destructive"
-                @click="handleCancel(lesson.id)"
-              >
-                {{ $t("lesson_cancel") }}
-              </Button>
-            </template>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </Transition>
 
     <AssignVehicleDialog
       v-model:open="vehicleDialogOpen"
@@ -106,6 +109,7 @@ import {
 } from "@driving-school-booking/shared-types";
 import type { LessonModel } from "@/lessons/lessons.models";
 import { toast } from "vue-sonner";
+import { CalendarIcon } from "lucide-vue-next";
 import { useAuthStore } from "@/auth/auth.store";
 import { useLessonStore } from "@/lessons/lessons.store";
 import { Button } from "@/components/ui/button";
@@ -118,11 +122,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import EmptyState from "@/components/EmptyState.vue";
+import TableSkeleton from "@/components/TableSkeleton.vue";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
 
-function lessonStatusVariant(
-  status: LessonStatus,
-): BadgeVariants["variant"] {
+function lessonStatusVariant(status: LessonStatus): BadgeVariants["variant"] {
   switch (status) {
     case LESSON_STATUSES.SCHEDULED:
       return "info";

@@ -29,7 +29,7 @@ export const useMonitoringStore = defineStore("monitoring", () => {
   const volume = ref([]) as Ref<VolumePointModel[]>;
   const errorRate = ref([]) as Ref<ErrorRatePointModel[]>;
   const latency = ref([]) as Ref<LatencyPointModel[]>;
-  const loading = ref(false);
+  const loading = ref(true);
   const error = ref<string | null>(null);
 
   async function fetchAll(filters: TimeSeriesFilters) {

@@ -38,7 +38,11 @@
               {{ lesson.courseName }}
             </div>
           </div>
-          <Badge :variant="lesson.status === LESSON_STATUSES.COMPLETED ? 'success' : 'info'">
+          <Badge
+            :variant="
+              lesson.status === LESSON_STATUSES.COMPLETED ? 'success' : 'info'
+            "
+          >
             {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
           </Badge>
         </li>

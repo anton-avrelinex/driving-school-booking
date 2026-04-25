@@ -5,23 +5,30 @@
       :description="$t('dashboard_instructor_description')"
     />
 
-    <p v-if="store.loading" class="text-muted-foreground">
-      {{ $t("common_loading") }}
-    </p>
-    <p v-else-if="store.error" class="text-destructive">
-      {{ store.error }}
-    </p>
+    <Transition name="fade" mode="out-in">
+      <div
+        v-if="store.loading && store.lessons.length === 0"
+        class="flex flex-col gap-6"
+      >
+        <Skeleton class="h-48 w-full" />
+        <Skeleton class="h-56 w-full" />
+        <Skeleton class="h-40 w-full" />
+      </div>
+      <p v-else-if="store.error" class="text-destructive">
+        {{ store.error }}
+      </p>
 
-    <div v-else class="flex flex-col gap-6">
-      <TodayScheduleCard :lessons="todayLessons" />
+      <div v-else class="flex flex-col gap-6">
+        <TodayScheduleCard :lessons="todayLessons" />
 
-      <WeekOverviewCard :lessons="store.lessons" />
+        <WeekOverviewCard :lessons="store.lessons" />
 
-      <PendingCompletionsCard
-        :lessons="pendingCompletions"
-        @go-to-lessons="$router.push('/instructor/lessons')"
-      />
-    </div>
+        <PendingCompletionsCard
+          :lessons="pendingCompletions"
+          @go-to-lessons="$router.push('/instructor/lessons')"
+        />
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -37,6 +44,7 @@ import { LESSON_STATUSES } from "@driving-school-booking/shared-types";
 import { useDashboardStore } from "@/dashboard/dashboard.store";
 import type { DashboardLesson } from "@/dashboard/dashboard.models";
 import PageHeader from "@/components/PageHeader.vue";
+import { Skeleton } from "@/components/ui/skeleton";
 import TodayScheduleCard from "@/dashboard/components/TodayScheduleCard.vue";
 import WeekOverviewCard from "@/dashboard/components/WeekOverviewCard.vue";
 import PendingCompletionsCard from "@/dashboard/components/PendingCompletionsCard.vue";

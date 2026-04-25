@@ -32,7 +32,7 @@ export const useAnalyticsStore = defineStore("analytics", () => {
   const eventCountSeries = ref([]) as Ref<EventCountTimeSeriesModel[]>;
   const pageViewSeries = ref([]) as Ref<PageViewTimeSeriesModel[]>;
   const pageLoadSeries = ref([]) as Ref<PageLoadTimeSeriesModel[]>;
-  const loading = ref(false);
+  const loading = ref(true);
   const error = ref<string | null>(null);
 
   async function fetchAll(filters: TimeSeriesFilters) {

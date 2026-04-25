@@ -24,78 +24,81 @@
       </Select>
     </div>
 
-    <p v-if="lessonStore.loading" class="text-muted-foreground">
-      {{ $t("common_loading") }}
-    </p>
-    <p v-else-if="lessonStore.error" class="text-destructive">
-      {{ lessonStore.error }}
-    </p>
-    <p
-      v-else-if="lessonStore.lessons.length === 0"
-      class="text-muted-foreground"
-    >
-      {{ $t("lesson_no_lessons") }}
-    </p>
+    <Transition name="fade" mode="out-in">
+      <TableSkeleton
+        v-if="lessonStore.loading && lessonStore.lessons.length === 0"
+        :columns="8"
+      />
+      <p v-else-if="lessonStore.error" class="text-destructive">
+        {{ lessonStore.error }}
+      </p>
+      <EmptyState
+        v-else-if="lessonStore.lessons.length === 0"
+        :title="$t('lesson_no_lessons')"
+        :description="$t('lesson_no_lessons_description')"
+        :icon="CalendarIcon"
+      />
 
-    <Table v-else>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{{ $t("lesson_date") }}</TableHead>
-          <TableHead>{{ $t("lesson_time") }}</TableHead>
-          <TableHead>{{ $t("lesson_course") }}</TableHead>
-          <TableHead>{{ $t("lesson_instructor") }}</TableHead>
-          <TableHead>{{ $t("lesson_student") }}</TableHead>
-          <TableHead>{{ $t("lesson_vehicle") }}</TableHead>
-          <TableHead>{{ $t("common_status") }}</TableHead>
-          <TableHead class="text-right">{{ $t("common_actions") }}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow v-for="lesson in lessonStore.lessons" :key="lesson.id">
-          <TableCell>
-            {{ $d(lesson.startTime.toDate(), "date") }}
-          </TableCell>
-          <TableCell>
-            {{ $d(lesson.startTime.toDate(), "time") }}
-          </TableCell>
-          <TableCell>{{ lesson.courseName }}</TableCell>
-          <TableCell>{{ lesson.instructorName }}</TableCell>
-          <TableCell>{{ lesson.studentName }}</TableCell>
-          <TableCell>{{ lesson.vehicleName ?? "—" }}</TableCell>
-          <TableCell>
-            <Badge :variant="lessonStatusVariant(lesson.status)">
-              {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
-            </Badge>
-          </TableCell>
-          <TableCell class="text-right space-x-2">
-            <template v-if="lesson.status === LESSON_STATUSES.SCHEDULED">
-              <Button
-                variant="outline"
-                size="sm"
-                @click="handleComplete(lesson.id)"
-              >
-                {{ $t("lesson_mark_complete") }}
-              </Button>
-              <Button
-                v-if="!lesson.vehicleId"
-                variant="outline"
-                size="sm"
-                @click="openAssignVehicle(lesson)"
-              >
-                {{ $t("lesson_assign_vehicle") }}
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                @click="handleCancel(lesson.id)"
-              >
-                {{ $t("lesson_cancel") }}
-              </Button>
-            </template>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+      <Table v-else>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{{ $t("lesson_date") }}</TableHead>
+            <TableHead>{{ $t("lesson_time") }}</TableHead>
+            <TableHead>{{ $t("lesson_course") }}</TableHead>
+            <TableHead>{{ $t("lesson_instructor") }}</TableHead>
+            <TableHead>{{ $t("lesson_student") }}</TableHead>
+            <TableHead>{{ $t("lesson_vehicle") }}</TableHead>
+            <TableHead>{{ $t("common_status") }}</TableHead>
+            <TableHead class="text-right">{{ $t("common_actions") }}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow v-for="lesson in lessonStore.lessons" :key="lesson.id">
+            <TableCell>
+              {{ $d(lesson.startTime.toDate(), "date") }}
+            </TableCell>
+            <TableCell>
+              {{ $d(lesson.startTime.toDate(), "time") }}
+            </TableCell>
+            <TableCell>{{ lesson.courseName }}</TableCell>
+            <TableCell>{{ lesson.instructorName }}</TableCell>
+            <TableCell>{{ lesson.studentName }}</TableCell>
+            <TableCell>{{ lesson.vehicleName ?? "—" }}</TableCell>
+            <TableCell>
+              <Badge :variant="lessonStatusVariant(lesson.status)">
+                {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
+              </Badge>
+            </TableCell>
+            <TableCell class="text-right space-x-2">
+              <template v-if="lesson.status === LESSON_STATUSES.SCHEDULED">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  @click="handleComplete(lesson.id)"
+                >
+                  {{ $t("lesson_mark_complete") }}
+                </Button>
+                <Button
+                  v-if="!lesson.vehicleId"
+                  variant="outline"
+                  size="sm"
+                  @click="openAssignVehicle(lesson)"
+                >
+                  {{ $t("lesson_assign_vehicle") }}
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  @click="handleCancel(lesson.id)"
+                >
+                  {{ $t("lesson_cancel") }}
+                </Button>
+              </template>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </Transition>
 
     <AssignVehicleDialog
       v-model:open="showAssignVehicleDialog"
@@ -114,6 +117,7 @@ import {
   type LessonStatus,
 } from "@driving-school-booking/shared-types";
 import type { LessonModel } from "@/lessons/lessons.models";
+import { CalendarIcon } from "lucide-vue-next";
 import { useLessonStore } from "@/lessons/lessons.store";
 import { Button } from "@/components/ui/button";
 import {
@@ -124,6 +128,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import EmptyState from "@/components/EmptyState.vue";
+import TableSkeleton from "@/components/TableSkeleton.vue";
 import {
   Select,
   SelectContent,

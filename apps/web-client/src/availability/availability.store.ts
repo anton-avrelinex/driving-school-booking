@@ -13,7 +13,7 @@ export const useAvailabilityStore = defineStore("availability", () => {
   const { t } = useI18n();
 
   const slots = ref([]) as Ref<AvailabilityBlockModel[]>;
-  const loading = ref(false);
+  const loading = ref(true);
   const saving = ref(false);
   const error = ref<string | null>(null);
 

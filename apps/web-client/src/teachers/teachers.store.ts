@@ -14,7 +14,7 @@ export const useTeacherStore = defineStore("teachers", () => {
   const { t } = useI18n();
 
   const teachers = ref<UserDto[]>([]);
-  const loading = ref(false);
+  const loading = ref(true);
   const error = ref<string | null>(null);
 
   async function fetchTeachers() {

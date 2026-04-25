@@ -5,7 +5,10 @@
       <span class="text-sm font-medium">{{ $t("dashboard_next_lesson") }}</span>
     </div>
     <CardContent class="p-6">
-      <div v-if="lesson" class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+      <div
+        v-if="lesson"
+        class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6"
+      >
         <div class="shrink-0">
           <div class="text-4xl font-bold tracking-tight">
             {{ $d(startDate, "dayOnly") }}
@@ -60,6 +63,8 @@ const props = defineProps<{
   lesson: DashboardLesson | null;
 }>();
 
-const startDate = computed(() => props.lesson?.startTime.toDate() ?? new Date());
+const startDate = computed(
+  () => props.lesson?.startTime.toDate() ?? new Date(),
+);
 const endDate = computed(() => props.lesson?.endTime.toDate() ?? new Date());
 </script>

@@ -21,7 +21,7 @@ export const useLessonStore = defineStore("lessons", () => {
   const lessons = ref<LessonModel[]>([]) as Ref<LessonModel[]>;
   const availableInstructors = ref<AvailableInstructorDto[]>([]);
   const availableSlots = ref([]) as Ref<AvailableSlotModel[]>;
-  const loading = ref(false);
+  const loading = ref(true);
   const saving = ref(false);
   const error = ref<string | null>(null);
 

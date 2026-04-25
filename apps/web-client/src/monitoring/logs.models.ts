@@ -41,9 +41,7 @@ export interface LogSearchResultModel {
   limit: number;
 }
 
-export function toLogItemModel(
-  dto: RequestLogDto | AppLogDto,
-): LogItemModel {
+export function toLogItemModel(dto: RequestLogDto | AppLogDto): LogItemModel {
   if (dto.type === "request") {
     return {
       type: "request",

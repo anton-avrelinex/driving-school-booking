@@ -8,9 +8,7 @@
         </DialogDescription>
       </DialogHeader>
 
-      <p v-if="loading" class="text-muted-foreground">
-        {{ $t("common_loading") }}
-      </p>
+      <Skeleton v-if="loading" class="h-9 w-full" />
 
       <div v-else>
         <Select v-model="selectedVehicleId">
@@ -23,7 +21,9 @@
               :key="vehicle.id"
               :value="vehicle.id"
             >
-              {{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.licensePlate }})
+              {{ vehicle.make }} {{ vehicle.model }} ({{
+                vehicle.licensePlate
+              }})
             </SelectItem>
           </SelectContent>
         </Select>

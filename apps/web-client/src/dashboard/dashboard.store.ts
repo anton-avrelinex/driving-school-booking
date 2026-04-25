@@ -19,7 +19,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
   const lessons = ref<DashboardLesson[]>([]) as Ref<DashboardLesson[]>;
   const adminStats = ref<AdminDashboardStatsDto | null>(null);
 
-  const loading = ref(false);
+  const loading = ref(true);
   const error = ref<string | null>(null);
 
   async function loadStudentDashboard(userId: string) {

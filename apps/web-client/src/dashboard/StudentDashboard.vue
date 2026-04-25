@@ -5,36 +5,79 @@
       :description="$t('dashboard_student_description')"
     />
 
-    <p v-if="store.loading" class="text-muted-foreground">
-      {{ $t("common_loading") }}
-    </p>
-    <p v-else-if="store.error" class="text-destructive">
-      {{ store.error }}
-    </p>
+    <Transition name="fade" mode="out-in">
+      <div
+        v-if="store.loading && !store.studentProfile"
+        class="flex flex-col gap-6"
+      >
+        <Skeleton class="h-32 w-full" />
+        <div class="grid gap-6 md:grid-cols-2">
+          <Skeleton class="h-48 w-full" />
+          <Skeleton class="h-48 w-full" />
+        </div>
+        <Skeleton class="h-48 w-full" />
+      </div>
+      <p v-else-if="store.error" class="text-destructive">
+        {{ store.error }}
+      </p>
 
-    <div v-else class="flex flex-col gap-6">
-      <NextLessonCard :lesson="nextLesson" />
+      <div v-else class="flex flex-col gap-6">
+        <NextLessonCard :lesson="nextLesson" />
 
-      <div class="grid gap-6 md:grid-cols-2">
-        <EnrollmentProgressCard :enrollments="activeEnrollments" />
+        <div class="grid gap-6 md:grid-cols-2">
+          <EnrollmentProgressCard :enrollments="activeEnrollments" />
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{{ $t("dashboard_upcoming_title") }}</CardTitle>
+              <CardDescription>
+                {{ $t("dashboard_upcoming_description") }}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div
+                v-if="upcomingLessons.length === 0"
+                class="text-sm text-muted-foreground py-2"
+              >
+                {{ $t("dashboard_no_upcoming") }}
+              </div>
+              <ul v-else class="flex flex-col gap-3">
+                <li
+                  v-for="lesson in upcomingLessons"
+                  :key="lesson.id"
+                  class="flex items-center justify-between gap-4"
+                >
+                  <div class="min-w-0">
+                    <div class="text-sm font-medium truncate">
+                      {{ $d(lesson.startTime.toDate(), "datetimeMedium") }}
+                    </div>
+                    <div class="text-xs text-muted-foreground truncate">
+                      {{ lesson.courseName }} · {{ lesson.instructorName }}
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>{{ $t("dashboard_upcoming_title") }}</CardTitle>
+            <CardTitle>{{ $t("dashboard_recent_title") }}</CardTitle>
             <CardDescription>
-              {{ $t("dashboard_upcoming_description") }}
+              {{ $t("dashboard_recent_description") }}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div
-              v-if="upcomingLessons.length === 0"
+              v-if="recentLessons.length === 0"
               class="text-sm text-muted-foreground py-2"
             >
-              {{ $t("dashboard_no_upcoming") }}
+              {{ $t("dashboard_no_recent") }}
             </div>
             <ul v-else class="flex flex-col gap-3">
               <li
-                v-for="lesson in upcomingLessons"
+                v-for="lesson in recentLessons"
                 :key="lesson.id"
                 class="flex items-center justify-between gap-4"
               >
@@ -46,48 +89,15 @@
                     {{ lesson.courseName }} · {{ lesson.instructorName }}
                   </div>
                 </div>
+                <Badge variant="success">
+                  {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
+                </Badge>
               </li>
             </ul>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{{ $t("dashboard_recent_title") }}</CardTitle>
-          <CardDescription>
-            {{ $t("dashboard_recent_description") }}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div
-            v-if="recentLessons.length === 0"
-            class="text-sm text-muted-foreground py-2"
-          >
-            {{ $t("dashboard_no_recent") }}
-          </div>
-          <ul v-else class="flex flex-col gap-3">
-            <li
-              v-for="lesson in recentLessons"
-              :key="lesson.id"
-              class="flex items-center justify-between gap-4"
-            >
-              <div class="min-w-0">
-                <div class="text-sm font-medium truncate">
-                  {{ $d(lesson.startTime.toDate(), "datetimeMedium") }}
-                </div>
-                <div class="text-xs text-muted-foreground truncate">
-                  {{ lesson.courseName }} · {{ lesson.instructorName }}
-                </div>
-              </div>
-              <Badge variant="success">
-                {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
-              </Badge>
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -111,6 +121,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import NextLessonCard from "@/dashboard/components/NextLessonCard.vue";
 import EnrollmentProgressCard from "@/dashboard/components/EnrollmentProgressCard.vue";
 
@@ -130,9 +141,7 @@ const title = computed(() => {
 
 const activeEnrollments = computed(() => {
   const enrollments = store.studentProfile?.studentProfile?.enrollments ?? [];
-  return enrollments.filter(
-    (e) => e.status === ENROLLMENT_STATUSES.ACTIVE,
-  );
+  return enrollments.filter((e) => e.status === ENROLLMENT_STATUSES.ACTIVE);
 });
 
 const scheduledLessons = computed(() =>
@@ -145,9 +154,8 @@ const scheduledLessons = computed(() =>
 const nextLesson = computed<DashboardLesson | null>(() => {
   const nowZoned = now(getLocalTimeZone());
   return (
-    scheduledLessons.value.find(
-      (l) => l.startTime.compare(nowZoned) >= 0,
-    ) ?? null
+    scheduledLessons.value.find((l) => l.startTime.compare(nowZoned) >= 0) ??
+    null
   );
 });
 

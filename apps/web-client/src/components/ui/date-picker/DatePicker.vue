@@ -52,7 +52,9 @@ defineProps<{
 const model = defineModel<CalendarDate | null>();
 
 const formatted = computed(() =>
-  model.value ? model.value.toDate(getLocalTimeZone()).toLocaleDateString() : "",
+  model.value
+    ? model.value.toDate(getLocalTimeZone()).toLocaleDateString()
+    : "",
 );
 
 function handleSelect(v: DateValue | DateValue[] | null | undefined) {

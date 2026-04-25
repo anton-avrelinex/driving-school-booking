@@ -4,24 +4,26 @@
       <h1 class="text-2xl font-bold">{{ $t("nav_my_availability") }}</h1>
     </div>
 
-    <p v-if="availabilityStore.loading" class="text-muted-foreground">
-      {{ $t("common_loading") }}
-    </p>
-    <p v-else-if="availabilityStore.error" class="text-destructive">
-      {{ availabilityStore.error }}
-    </p>
-
-    <form v-else @submit.prevent="handleSave" class="flex flex-col gap-4">
-      <AvailabilityForm v-model="formSlots" />
-
-      <div>
-        <Button type="submit" :disabled="availabilityStore.saving">
-          {{
-            availabilityStore.saving ? $t("common_saving") : $t("common_save")
-          }}
-        </Button>
+    <Transition name="fade" mode="out-in">
+      <div v-if="availabilityStore.loading" class="flex flex-col gap-3">
+        <Skeleton v-for="i in 7" :key="i" class="h-12 w-full" />
       </div>
-    </form>
+      <p v-else-if="availabilityStore.error" class="text-destructive">
+        {{ availabilityStore.error }}
+      </p>
+
+      <form v-else @submit.prevent="handleSave" class="flex flex-col gap-4">
+        <AvailabilityForm v-model="formSlots" />
+
+        <div>
+          <Button type="submit" :disabled="availabilityStore.saving">
+            {{
+              availabilityStore.saving ? $t("common_saving") : $t("common_save")
+            }}
+          </Button>
+        </div>
+      </form>
+    </Transition>
   </div>
 </template>
 
@@ -34,6 +36,7 @@ import { useAvailabilityStore } from "@/availability/availability.store";
 import type { AvailabilityBlockModel } from "@/availability/availability.models";
 import AvailabilityForm from "@/availability/AvailabilityForm.vue";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const { t } = useI18n();
 const authStore = useAuthStore();

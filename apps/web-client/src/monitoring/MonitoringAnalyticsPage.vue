@@ -53,155 +53,165 @@
       <Button @click="applyFilters">{{ t("monitoring_apply") }}</Button>
     </div>
 
-    <div v-if="store.loading" class="text-muted-foreground py-12 text-center">
-      {{ t("analytics_loading") }}
-    </div>
-
-    <div v-else-if="store.error" class="text-destructive py-12 text-center">
-      {{ store.error }}
-    </div>
-
-    <div v-else class="space-y-6">
-      <!-- Event Trends -->
-      <LineChart
-        v-if="eventSeriesData.length > 0"
-        :title="t('analytics_title_event_trends')"
-        :description="''"
-        :data="eventSeriesData"
-        :chart-config="eventSeriesConfig"
-        :line-keys="eventSeriesKeys"
-      />
-
-      <!-- Event Counts -->
-      <PieChart
-        v-if="store.eventCounts.length > 0"
-        :title="t('analytics_title_events')"
-        :description="''"
-        :items="eventItems"
-        :chart-config="eventConfig"
-        :central-sub-label="'events'"
-      />
-      <Card v-else>
-        <CardContent class="py-4">
-          <p class="text-muted-foreground text-sm text-center">
-            {{ t("common_no_results") }}
-          </p>
-        </CardContent>
-      </Card>
-
-      <!-- Page Views Table -->
-      <Card>
-        <CardHeader>
-          <CardTitle>{{ t("analytics_title_page_views") }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table v-if="store.pageViews.length > 0">
-            <TableHeader>
-              <TableRow>
-                <TableHead>{{ t("analytics_col_route") }}</TableHead>
-                <TableHead class="text-right">
-                  {{ t("analytics_col_count") }}
-                </TableHead>
-                <TableHead class="text-right">
-                  {{ t("analytics_col_duration") }}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="pv in store.pageViews" :key="pv.route">
-                <TableCell class="text-sm font-mono">{{ pv.route }}</TableCell>
-                <TableCell class="text-sm text-right">{{ pv.count }}</TableCell>
-                <TableCell class="text-sm text-right">
-                  {{ Math.round(pv.avgDurationMs) }}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <p v-else class="text-muted-foreground text-sm py-4 text-center">
-            {{ t("common_no_results") }}
-          </p>
-        </CardContent>
-      </Card>
-
-      <!-- Performance Table -->
-      <Card>
-        <CardHeader>
-          <CardTitle>{{ t("analytics_title_performance") }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table v-if="store.performance.length > 0">
-            <TableHeader>
-              <TableRow>
-                <TableHead>{{ t("analytics_col_route") }}</TableHead>
-                <TableHead class="text-right">
-                  {{ t("analytics_col_avg") }}
-                </TableHead>
-                <TableHead class="text-right">
-                  {{ t("analytics_col_p50") }}
-                </TableHead>
-                <TableHead class="text-right">
-                  {{ t("analytics_col_p95") }}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="p in store.performance" :key="p.route">
-                <TableCell class="text-sm font-mono">{{ p.route }}</TableCell>
-                <TableCell class="text-sm text-right">
-                  {{ Math.round(p.avg) }}
-                </TableCell>
-                <TableCell class="text-sm text-right">
-                  {{ Math.round(p.p50) }}
-                </TableCell>
-                <TableCell class="text-sm text-right">
-                  {{ Math.round(p.p95) }}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <p v-else class="text-muted-foreground text-sm py-4 text-center">
-            {{ t("common_no_results") }}
-          </p>
-        </CardContent>
-      </Card>
-
-      <!-- Route selector for per-route trends -->
-      <div v-if="allRoutes.length > 0" class="flex items-center gap-2">
-        <Label>{{ t("analytics_col_route") }}</Label>
-        <Select v-model="selectedRoute">
-          <SelectTrigger class="w-64">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{{ t("common_all") }}</SelectItem>
-            <SelectItem v-for="route in allRoutes" :key="route" :value="route">
-              {{ route }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+    <Transition name="fade" mode="out-in">
+      <div v-if="store.loading" class="flex flex-col gap-6">
+        <Skeleton class="h-72 w-full" />
+        <Skeleton class="h-64 w-full" />
+        <Skeleton class="h-64 w-full" />
       </div>
 
-      <!-- Page View Trends (selected route) -->
-      <LineChart
-        v-if="pageViewSeriesData.length > 0"
-        :title="t('analytics_title_page_view_trends')"
-        :description="selectedRoute === 'all' ? t('common_all') : selectedRoute"
-        :data="pageViewSeriesData"
-        :chart-config="pageViewSeriesConfig"
-        :line-keys="['count']"
-      />
+      <div v-else-if="store.error" class="text-destructive py-12 text-center">
+        {{ store.error }}
+      </div>
 
-      <!-- Page Load Trends (selected route) -->
-      <LineChart
-        v-if="pageLoadSeriesData.length > 0"
-        :title="t('analytics_title_page_load_trends')"
-        :description="selectedRoute === 'all' ? t('common_all') : selectedRoute"
-        :data="pageLoadSeriesData"
-        :chart-config="pageLoadSeriesConfig"
-        :line-keys="['avgLoadTimeMs']"
-        unit="ms"
-      />
-    </div>
+      <div v-else class="space-y-6">
+        <!-- Event Trends -->
+        <LineChart
+          v-if="eventSeriesData.length > 0"
+          :title="t('analytics_title_event_trends')"
+          :description="''"
+          :data="eventSeriesData"
+          :chart-config="eventSeriesConfig"
+          :line-keys="eventSeriesKeys"
+        />
+
+        <!-- Event Counts -->
+        <PieChart
+          v-if="store.eventCounts.length > 0"
+          :title="t('analytics_title_events')"
+          :description="''"
+          :items="eventItems"
+          :chart-config="eventConfig"
+          :central-sub-label="'events'"
+        />
+        <Card v-else>
+          <CardContent>
+            <EmptyState :title="t('common_no_results')" />
+          </CardContent>
+        </Card>
+
+        <!-- Page Views Table -->
+        <Card>
+          <CardHeader>
+            <CardTitle>{{ t("analytics_title_page_views") }}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table v-if="store.pageViews.length > 0">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{{ t("analytics_col_route") }}</TableHead>
+                  <TableHead class="text-right">
+                    {{ t("analytics_col_count") }}
+                  </TableHead>
+                  <TableHead class="text-right">
+                    {{ t("analytics_col_duration") }}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow v-for="pv in store.pageViews" :key="pv.route">
+                  <TableCell class="text-sm font-mono">{{
+                    pv.route
+                  }}</TableCell>
+                  <TableCell class="text-sm text-right">{{
+                    pv.count
+                  }}</TableCell>
+                  <TableCell class="text-sm text-right">
+                    {{ Math.round(pv.avgDurationMs) }}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+            <EmptyState v-else :title="t('common_no_results')" />
+          </CardContent>
+        </Card>
+
+        <!-- Performance Table -->
+        <Card>
+          <CardHeader>
+            <CardTitle>{{ t("analytics_title_performance") }}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table v-if="store.performance.length > 0">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{{ t("analytics_col_route") }}</TableHead>
+                  <TableHead class="text-right">
+                    {{ t("analytics_col_avg") }}
+                  </TableHead>
+                  <TableHead class="text-right">
+                    {{ t("analytics_col_p50") }}
+                  </TableHead>
+                  <TableHead class="text-right">
+                    {{ t("analytics_col_p95") }}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow v-for="p in store.performance" :key="p.route">
+                  <TableCell class="text-sm font-mono">{{ p.route }}</TableCell>
+                  <TableCell class="text-sm text-right">
+                    {{ Math.round(p.avg) }}
+                  </TableCell>
+                  <TableCell class="text-sm text-right">
+                    {{ Math.round(p.p50) }}
+                  </TableCell>
+                  <TableCell class="text-sm text-right">
+                    {{ Math.round(p.p95) }}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+            <EmptyState v-else :title="t('common_no_results')" />
+          </CardContent>
+        </Card>
+
+        <!-- Route selector for per-route trends -->
+        <div v-if="allRoutes.length > 0" class="flex items-center gap-2">
+          <Label>{{ t("analytics_col_route") }}</Label>
+          <Select v-model="selectedRoute">
+            <SelectTrigger class="w-64">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{{ t("common_all") }}</SelectItem>
+              <SelectItem
+                v-for="route in allRoutes"
+                :key="route"
+                :value="route"
+              >
+                {{ route }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <!-- Page View Trends (selected route) -->
+        <LineChart
+          v-if="pageViewSeriesData.length > 0"
+          :title="t('analytics_title_page_view_trends')"
+          :description="
+            selectedRoute === 'all' ? t('common_all') : selectedRoute
+          "
+          :data="pageViewSeriesData"
+          :chart-config="pageViewSeriesConfig"
+          :line-keys="['count']"
+        />
+
+        <!-- Page Load Trends (selected route) -->
+        <LineChart
+          v-if="pageLoadSeriesData.length > 0"
+          :title="t('analytics_title_page_load_trends')"
+          :description="
+            selectedRoute === 'all' ? t('common_all') : selectedRoute
+          "
+          :data="pageLoadSeriesData"
+          :chart-config="pageLoadSeriesConfig"
+          :line-keys="['avgLoadTimeMs']"
+          unit="ms"
+        />
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -223,6 +233,8 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import EmptyState from "@/components/EmptyState.vue";
 import { dateEnd, dateStart } from "@/lib/date-utils";
 import {
   Select,

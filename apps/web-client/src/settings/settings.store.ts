@@ -11,7 +11,7 @@ export const useSettingsStore = defineStore("settings", () => {
   const { t } = useI18n();
 
   const profile = ref<UserDto | null>(null);
-  const loading = ref(false);
+  const loading = ref(true);
   const saving = ref(false);
   const error = ref<string | null>(null);
 

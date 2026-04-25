@@ -22,7 +22,15 @@
             class="mt-1 text-xs font-medium"
             :class="day.count > 0 ? 'text-primary' : 'text-muted-foreground'"
           >
-            {{ day.count === 0 ? "—" : $t("dashboard_week_lesson_count", { count: day.count }, day.count) }}
+            {{
+              day.count === 0
+                ? "—"
+                : $t(
+                    "dashboard_week_lesson_count",
+                    { count: day.count },
+                    day.count,
+                  )
+            }}
           </div>
         </div>
       </div>

@@ -35,52 +35,58 @@
       <Button @click="applyFilters">{{ t("monitoring_apply") }}</Button>
     </div>
 
-    <div v-if="store.loading" class="text-muted-foreground py-12 text-center">
-      {{ t("monitoring_loading") }}
-    </div>
+    <Transition name="fade" mode="out-in">
+      <div v-if="store.loading" class="grid gap-6 lg:grid-cols-2">
+        <Skeleton class="h-72 w-full" />
+        <Skeleton class="h-72 w-full" />
+        <Skeleton class="h-64 w-full lg:col-span-2" />
+        <Skeleton class="h-64 w-full" />
+        <Skeleton class="h-64 w-full" />
+      </div>
 
-    <div v-else-if="store.error" class="text-destructive py-12 text-center">
-      {{ store.error }}
-    </div>
+      <div v-else-if="store.error" class="text-destructive py-12 text-center">
+        {{ store.error }}
+      </div>
 
-    <div v-else class="grid gap-6 lg:grid-cols-2">
-      <PieChart
-        :title="t('monitoring_title_top_endpoints')"
-        :description="t('monitoring_description_top_endpoints')"
-        :items="topEndpointItems"
-        :chart-config="topEndpointConfig"
-        :central-sub-label="t('monitoring_requests')"
-      />
-      <PieChart
-        :title="t('monitoring_title_by_school')"
-        :description="t('monitoring_description_by_school')"
-        :items="bySchoolItems"
-        :chart-config="bySchoolConfig"
-        :central-sub-label="t('monitoring_requests')"
-      />
-      <div class="lg:col-span-2">
-        <BarChart
-          :title="t('monitoring_title_volume')"
-          :description="t('monitoring_description_volume')"
-          :data="store.volume"
+      <div v-else class="grid gap-6 lg:grid-cols-2">
+        <PieChart
+          :title="t('monitoring_title_top_endpoints')"
+          :description="t('monitoring_description_top_endpoints')"
+          :items="topEndpointItems"
+          :chart-config="topEndpointConfig"
+          :central-sub-label="t('monitoring_requests')"
+        />
+        <PieChart
+          :title="t('monitoring_title_by_school')"
+          :description="t('monitoring_description_by_school')"
+          :items="bySchoolItems"
+          :chart-config="bySchoolConfig"
+          :central-sub-label="t('monitoring_requests')"
+        />
+        <div class="lg:col-span-2">
+          <BarChart
+            :title="t('monitoring_title_volume')"
+            :description="t('monitoring_description_volume')"
+            :data="store.volume"
+          />
+        </div>
+        <LineChart
+          :title="t('monitoring_title_error_rate')"
+          :description="t('monitoring_description_error_rate')"
+          :data="errorRateData"
+          :chart-config="errorRateConfig"
+          :line-keys="['rate']"
+        />
+        <LineChart
+          :title="t('monitoring_title_latency')"
+          :description="t('monitoring_description_latency')"
+          :data="latencyData"
+          :chart-config="latencyConfig"
+          :line-keys="['p50', 'p95', 'p99']"
+          unit="ms"
         />
       </div>
-      <LineChart
-        :title="t('monitoring_title_error_rate')"
-        :description="t('monitoring_description_error_rate')"
-        :data="errorRateData"
-        :chart-config="errorRateConfig"
-        :line-keys="['rate']"
-      />
-      <LineChart
-        :title="t('monitoring_title_latency')"
-        :description="t('monitoring_description_latency')"
-        :data="latencyData"
-        :chart-config="latencyConfig"
-        :line-keys="['p50', 'p95', 'p99']"
-        unit="ms"
-      />
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -102,6 +108,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { dateEnd, dateStart } from "@/lib/date-utils";
 import {
   Select,

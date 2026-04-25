@@ -14,7 +14,9 @@
         <SelectValue :placeholder="'--'" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem v-for="m in minutes" :key="m" :value="m">{{ m }}</SelectItem>
+        <SelectItem v-for="m in minutes" :key="m" :value="m">
+          {{ m }}
+        </SelectItem>
       </SelectContent>
     </Select>
   </div>
@@ -56,9 +58,7 @@ const minutes = computed(() => {
   return result;
 });
 
-const hourStr = computed(() =>
-  model.value ? pad(model.value.hour) : null,
-);
+const hourStr = computed(() => (model.value ? pad(model.value.hour) : null));
 const minuteStr = computed(() =>
   model.value ? pad(model.value.minute) : null,
 );

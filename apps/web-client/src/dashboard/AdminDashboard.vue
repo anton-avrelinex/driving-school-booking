@@ -5,42 +5,48 @@
       :description="$t('dashboard_admin_description')"
     />
 
-    <p v-if="store.loading" class="text-muted-foreground">
-      {{ $t("common_loading") }}
-    </p>
-    <p v-else-if="store.error" class="text-destructive">
-      {{ store.error }}
-    </p>
-
-    <div v-else-if="stats" class="flex flex-col gap-6">
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          :label="$t('dashboard_stat_students')"
-          :value="stats.activeStudents"
-          :icon="UsersIcon"
-        />
-        <StatCard
-          :label="$t('dashboard_stat_instructors')"
-          :value="stats.activeInstructors"
-          :icon="GraduationCapIcon"
-        />
-        <StatCard
-          :label="$t('dashboard_stat_lessons_this_week')"
-          :value="stats.lessonsThisWeek"
-          :icon="CalendarIcon"
-        />
-        <StatCard
-          :label="$t('dashboard_stat_completion_rate')"
-          :value="completionRateDisplay"
-          :hint="$t('dashboard_stat_completion_rate_hint')"
-          :icon="CheckCircleIcon"
-        />
+    <Transition name="fade" mode="out-in">
+      <div v-if="store.loading && !stats" class="flex flex-col gap-6">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton v-for="i in 4" :key="i" class="h-24 w-full" />
+        </div>
+        <Skeleton class="h-72 w-full" />
+        <Skeleton class="h-48 w-full" />
       </div>
+      <p v-else-if="store.error" class="text-destructive">
+        {{ store.error }}
+      </p>
 
-      <LessonsOverTimeChart :entries="stats.lessonsOverTime" />
+      <div v-else-if="stats" class="flex flex-col gap-6">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            :label="$t('dashboard_stat_students')"
+            :value="stats.activeStudents"
+            :icon="UsersIcon"
+          />
+          <StatCard
+            :label="$t('dashboard_stat_instructors')"
+            :value="stats.activeInstructors"
+            :icon="GraduationCapIcon"
+          />
+          <StatCard
+            :label="$t('dashboard_stat_lessons_this_week')"
+            :value="stats.lessonsThisWeek"
+            :icon="CalendarIcon"
+          />
+          <StatCard
+            :label="$t('dashboard_stat_completion_rate')"
+            :value="completionRateDisplay"
+            :hint="$t('dashboard_stat_completion_rate_hint')"
+            :icon="CheckCircleIcon"
+          />
+        </div>
 
-      <RecentActivityCard :entries="stats.recentActivity" />
-    </div>
+        <LessonsOverTimeChart :entries="stats.lessonsOverTime" />
+
+        <RecentActivityCard :entries="stats.recentActivity" />
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -54,6 +60,7 @@ import {
 } from "lucide-vue-next";
 import { useDashboardStore } from "@/dashboard/dashboard.store";
 import PageHeader from "@/components/PageHeader.vue";
+import { Skeleton } from "@/components/ui/skeleton";
 import StatCard from "@/dashboard/components/StatCard.vue";
 import LessonsOverTimeChart from "@/dashboard/components/LessonsOverTimeChart.vue";
 import RecentActivityCard from "@/dashboard/components/RecentActivityCard.vue";

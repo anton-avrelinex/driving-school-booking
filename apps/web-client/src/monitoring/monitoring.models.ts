@@ -40,9 +40,7 @@ export function toErrorRatePointModel(
   };
 }
 
-export function toLatencyPointModel(
-  dto: LatencyPointDto,
-): LatencyPointModel {
+export function toLatencyPointModel(dto: LatencyPointDto): LatencyPointModel {
   return {
     bucket: parseISOToZoned(dto.bucket),
     p50: dto.p50,

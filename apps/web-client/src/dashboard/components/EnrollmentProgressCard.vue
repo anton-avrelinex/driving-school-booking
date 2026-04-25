@@ -7,7 +7,10 @@
       </CardDescription>
     </CardHeader>
     <CardContent>
-      <div v-if="enrollments.length === 0" class="text-sm text-muted-foreground py-4">
+      <div
+        v-if="enrollments.length === 0"
+        class="text-sm text-muted-foreground py-4"
+      >
         {{ $t("dashboard_no_enrollments") }}
       </div>
       <div v-else class="flex flex-col gap-5">
@@ -46,9 +49,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-type Enrollment = NonNullable<
-  UserDto["studentProfile"]
->["enrollments"][number];
+type Enrollment = NonNullable<UserDto["studentProfile"]>["enrollments"][number];
 
 defineProps<{
   enrollments: Enrollment[];
