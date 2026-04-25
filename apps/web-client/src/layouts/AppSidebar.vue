@@ -84,6 +84,7 @@ import {
   LogOutIcon,
   MoonIcon,
   PlusCircleIcon,
+  SchoolIcon,
   SettingsIcon,
   SunIcon,
   UsersIcon,
@@ -166,6 +167,11 @@ const sections = computed<NavSection[]>(() => {
           to: "/admin/lessons",
           label: t("nav_lessons"),
           icon: markRaw(CalendarIcon),
+        },
+        {
+          to: "/admin/school-setup",
+          label: t("nav_school_setup"),
+          icon: markRaw(SchoolIcon),
         },
         {
           to: "/admin/monitoring",

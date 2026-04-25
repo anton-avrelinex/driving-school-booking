@@ -2,20 +2,7 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">{{ $t("teacher_manage_title") }}</h1>
-      <div class="space-x-2">
-        <Button variant="outline" @click="showCategoriesDialog = true">
-          {{ $t("category_manage") }}
-        </Button>
-        <Button variant="outline" @click="showCoursesDialog = true">
-          {{ $t("course_manage") }}
-        </Button>
-        <Button variant="outline" @click="showVehiclesDialog = true">
-          {{ $t("vehicle_manage") }}
-        </Button>
-        <Button @click="showCreateDialog = true">
-          {{ $t("teacher_add") }}
-        </Button>
-      </div>
+      <Button @click="showCreateDialog = true">{{ $t("teacher_add") }}</Button>
     </div>
 
     <Transition name="fade" mode="out-in">
@@ -124,12 +111,6 @@
       :user="deactivatingUser"
     />
 
-    <ManageCategoriesDialog v-model:open="showCategoriesDialog" />
-
-    <ManageCoursesDialog v-model:open="showCoursesDialog" />
-
-    <ManageVehiclesDialog v-model:open="showVehiclesDialog" />
-
     <SetAvailabilityDialog
       v-model:open="showAvailabilityDialog"
       :user="availabilityUser"
@@ -141,7 +122,6 @@
 import { onMounted, ref } from "vue";
 import { useTeacherStore } from "@/teachers/teachers.store";
 import { useCourseStore } from "@/courses/courses.store";
-import { useCategoryStore } from "@/categories/categories.store";
 import { useVehicleStore } from "@/vehicles/vehicles.store";
 import {
   USER_STATUSES,
@@ -165,14 +145,10 @@ import CreateTeacherDialog from "@/teachers/CreateTeacherDialog.vue";
 import TempPasswordDialog from "@/teachers/TempPasswordDialog.vue";
 import EditTeacherDialog from "@/teachers/EditTeacherDialog.vue";
 import DeactivateTeacherDialog from "@/teachers/DeactivateTeacherDialog.vue";
-import ManageCategoriesDialog from "@/categories/ManageCategoriesDialog.vue";
-import ManageCoursesDialog from "@/courses/ManageCoursesDialog.vue";
-import ManageVehiclesDialog from "@/vehicles/ManageVehiclesDialog.vue";
 import SetAvailabilityDialog from "@/availability/SetAvailabilityDialog.vue";
 
 const teacherStore = useTeacherStore();
 const courseStore = useCourseStore();
-const categoryStore = useCategoryStore();
 const vehicleStore = useVehicleStore();
 
 const showCreateDialog = ref(false);
@@ -186,18 +162,12 @@ const editingUser = ref<UserDto | null>(null);
 const showDeactivateDialog = ref(false);
 const deactivatingUser = ref<UserDto | null>(null);
 
-const showCategoriesDialog = ref(false);
-const showCoursesDialog = ref(false);
-const showVehiclesDialog = ref(false);
-
 const showAvailabilityDialog = ref(false);
 const availabilityUser = ref<UserDto | null>(null);
 
 onMounted(async () => {
   await Promise.all([
     teacherStore.fetchTeachers(),
-    categoryStore.fetchAllCategories(),
-    categoryStore.fetchSchoolCategories(),
     courseStore.fetchCourses(),
     vehicleStore.fetchVehicles(),
   ]);
