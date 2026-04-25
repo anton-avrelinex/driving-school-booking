@@ -58,10 +58,7 @@ export class RollupService {
     }
   }
 
-  async rollupForServiceAndDate(
-    service: string,
-    day: Date,
-  ): Promise<void> {
+  async rollupForServiceAndDate(service: string, day: Date): Promise<void> {
     const dayStart = dayStartUtc(day);
     const dayEnd = dayEndUtc(day);
     const dateStr = isoDateUtc(day);

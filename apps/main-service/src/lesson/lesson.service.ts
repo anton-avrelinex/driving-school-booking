@@ -11,11 +11,7 @@ import type {
 } from "@driving-school-booking/shared-types";
 import { LessonStatus, Role } from "../generated/prisma/enums";
 import { PrismaService } from "../prisma/prisma.service";
-import {
-  dayEndUtc,
-  dayStartUtc,
-  utcAtMinuteOfDay,
-} from "../common/date-utils";
+import { dayEndUtc, dayStartUtc, utcAtMinuteOfDay } from "../common/date-utils";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { AssignVehicleDto } from "./dto/assign-vehicle.dto";
 import { LESSON_SELECT } from "./lesson.selects";
