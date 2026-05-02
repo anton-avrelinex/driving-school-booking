@@ -3,5 +3,6 @@ export * from "./constants";
 export * from "./auth";
 export * from "./user";
 export * from "./lesson";
+export * from "./school-config";
 export * from "./observability";
 export * from "./stats";

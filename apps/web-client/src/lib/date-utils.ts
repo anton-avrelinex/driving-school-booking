@@ -2,7 +2,7 @@ import {
   type CalendarDate,
   Time,
   getLocalTimeZone,
-  parseAbsoluteToLocal,
+  parseAbsolute,
   parseDate,
   parseTime,
   toCalendarDateTime,
@@ -19,29 +19,40 @@ export function parseTimeString(s: string): Time {
 }
 
 export function parseISOToZoned(iso: string): ZonedDateTime {
-  return parseAbsoluteToLocal(iso);
+  return parseAbsolute(iso, getLocalTimeZone());
 }
 
 export function timeToString(t: Time): string {
   return `${pad(t.hour)}:${pad(t.minute)}`;
 }
 
-export function dateStart(d: CalendarDate, tz = getLocalTimeZone()): string {
-  return d.toDate(tz).toISOString();
+export function dateStart(d: CalendarDate, timezone = getLocalTimeZone()): string {
+  return d.toDate(timezone).toISOString();
 }
 
-export function dateEnd(d: CalendarDate, tz = getLocalTimeZone()): string {
+export function dateEnd(d: CalendarDate, timezone = getLocalTimeZone()): string {
   return toCalendarDateTime(d, new Time(23, 59, 59, 999))
-    .toDate(tz)
+    .toDate(timezone)
     .toISOString();
 }
 
-export function combineDateTime(
-  date: CalendarDate,
-  time: Time,
-  tz = getLocalTimeZone(),
-): string {
-  return toCalendarDateTime(date, time).toDate(tz).toISOString();
+// Display-only convention. Stored dayOfWeek always follows JS/Postgres
+// (Sunday = 0); these constants only affect rendering order.
+export const WEEK_STARTS_ON = 1; // Monday
+export const WEEK_LOCALE = "en-GB"; // Monday-first locale for startOfWeek
+export const WEEK_ORDER: readonly number[] = Array.from(
+  { length: 7 },
+  (_, i) => (WEEK_STARTS_ON + i) % 7,
+);
+
+export function isoLocalDate(zdt: ZonedDateTime): string {
+  return `${zdt.year}-${pad(zdt.month)}-${pad(zdt.day)}`;
+}
+
+export function sameLocalDay(zdt: ZonedDateTime, date: CalendarDate): boolean {
+  return (
+    zdt.year === date.year && zdt.month === date.month && zdt.day === date.day
+  );
 }
 
 function pad(n: number): string {

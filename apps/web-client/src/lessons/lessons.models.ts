@@ -1,10 +1,10 @@
-import type { Time, ZonedDateTime } from "@internationalized/date";
+import type { ZonedDateTime } from "@internationalized/date";
 import type {
   AvailableSlotDto,
   LessonDto,
   LessonStatus,
 } from "@driving-school-booking/shared-types";
-import { parseISOToZoned, parseTimeString } from "@/lib/date-utils";
+import { parseISOToZoned } from "@/lib/date-utils";
 
 export interface LessonModel {
   id: string;
@@ -22,9 +22,10 @@ export interface LessonModel {
   createdAt: ZonedDateTime;
 }
 
-export interface AvailableSlotModel {
-  startTime: Time;
-  endTime: Time;
+export interface SlotModel {
+  startTime: ZonedDateTime;
+  endTime: ZonedDateTime;
+  instructorIds: string[];
 }
 
 export function toLessonModel(dto: LessonDto): LessonModel {
@@ -45,11 +46,10 @@ export function toLessonModel(dto: LessonDto): LessonModel {
   };
 }
 
-export function toAvailableSlotModel(
-  dto: AvailableSlotDto,
-): AvailableSlotModel {
+export function toSlotModel(dto: AvailableSlotDto): SlotModel {
   return {
-    startTime: parseTimeString(dto.startTime),
-    endTime: parseTimeString(dto.endTime),
+    startTime: parseISOToZoned(dto.startTime),
+    endTime: parseISOToZoned(dto.endTime),
+    instructorIds: dto.instructorIds,
   };
 }

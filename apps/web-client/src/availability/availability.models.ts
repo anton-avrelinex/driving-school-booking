@@ -2,6 +2,8 @@ import type { Time } from "@internationalized/date";
 import type { InstructorAvailabilityDto } from "@driving-school-booking/shared-types";
 import { parseTimeString, timeToString } from "@/lib/date-utils";
 
+// HH:MM is school-local wall time (interpreted in SchoolConfig.timezone by
+// the backend slot SQL). No FE-side TZ conversion — the form passes through.
 export interface AvailabilityBlockModel {
   dayOfWeek: number;
   startTime: Time;

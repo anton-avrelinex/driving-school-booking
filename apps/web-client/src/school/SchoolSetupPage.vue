@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="flex flex-col gap-8">
     <PageHeader
       :title="$t('school_setup_title')"
       :description="$t('school_setup_description')"
@@ -85,6 +85,8 @@
       </Card>
     </div>
 
+    <SchoolConfigForm />
+
     <ManageCategoriesDialog v-model:open="categoriesOpen" />
     <ManageCoursesDialog v-model:open="coursesOpen" />
     <ManageVehiclesDialog v-model:open="vehiclesOpen" />
@@ -110,6 +112,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import ManageCategoriesDialog from "@/categories/ManageCategoriesDialog.vue";
 import ManageCoursesDialog from "@/courses/ManageCoursesDialog.vue";
 import ManageVehiclesDialog from "@/vehicles/ManageVehiclesDialog.vue";
+import SchoolConfigForm from "@/school-config/SchoolConfigForm.vue";
 
 const categoryStore = useCategoryStore();
 const courseStore = useCourseStore();

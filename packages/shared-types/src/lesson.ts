@@ -25,12 +25,20 @@ export interface CreateLessonDto {
 export interface AvailableSlotDto {
   startTime: string;
   endTime: string;
+  instructorIds: string[];
 }
 
 export interface AvailableInstructorDto {
   id: string;
   firstName: string;
   lastName: string;
+}
+
+export interface AvailabilityRangeQueryDto {
+  enrollmentId: string;
+  from: string;
+  to: string;
+  instructorId?: string;
 }
 
 export interface AssignVehicleDto {

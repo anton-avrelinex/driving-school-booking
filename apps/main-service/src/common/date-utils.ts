@@ -4,12 +4,6 @@ export function dayStartUtc(d: Date): Date {
   return result;
 }
 
-export function dayEndUtc(d: Date): Date {
-  const result = new Date(d);
-  result.setUTCHours(23, 59, 59, 999);
-  return result;
-}
-
 export function addUtcDays(d: Date, n: number): Date {
   const result = new Date(d);
   result.setUTCDate(result.getUTCDate() + n);
@@ -25,7 +19,9 @@ export function startOfUtcWeek(d: Date): Date {
 }
 
 export function endOfUtcWeek(d: Date): Date {
-  return dayEndUtc(addUtcDays(startOfUtcWeek(d), 6));
+  const result = addUtcDays(startOfUtcWeek(d), 7);
+  result.setUTCMilliseconds(result.getUTCMilliseconds() - 1);
+  return result;
 }
 
 export function isoDateUtc(d: Date): string {
@@ -33,8 +29,4 @@ export function isoDateUtc(d: Date): string {
   const month = String(d.getUTCMonth() + 1).padStart(2, "0");
   const day = String(d.getUTCDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
-}
-
-export function utcAtMinuteOfDay(d: Date, minuteOfDay: number): Date {
-  return new Date(dayStartUtc(d).getTime() + minuteOfDay * 60_000);
 }

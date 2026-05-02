@@ -11,11 +11,11 @@ import type {
 } from "@driving-school-booking/shared-types";
 import { LessonStatus, Role } from "../generated/prisma/enums";
 import { PrismaService } from "../prisma/prisma.service";
-import { dayEndUtc, dayStartUtc, utcAtMinuteOfDay } from "../common/date-utils";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { AssignVehicleDto } from "./dto/assign-vehicle.dto";
 import { LESSON_SELECT } from "./lesson.selects";
 import { toLessonDto } from "./lesson.mappers";
+import { slotsQuery } from "./lesson.queries";
 
 @Injectable()
 export class LessonService {
@@ -39,18 +39,11 @@ export class LessonService {
     enrollmentId: string,
     studentProfileId: string,
   ): Promise<AvailableInstructorDto[]> {
-    const enrollment = await this.prisma.enrollment.findUnique({
-      where: { id: enrollmentId, schoolId },
-      select: { studentProfileId: true, courseId: true },
-    });
-
-    if (!enrollment) {
-      throw new NotFoundException("Enrollment not found");
-    }
-
-    if (enrollment.studentProfileId !== studentProfileId) {
-      throw new ForbiddenException("Enrollment does not belong to student");
-    }
+    const enrollment = await this.assertEnrollment(
+      schoolId,
+      enrollmentId,
+      studentProfileId,
+    );
 
     const instructors = await this.prisma.instructorProfile.findMany({
       where: {
@@ -69,199 +62,53 @@ export class LessonService {
     }));
   }
 
-  async getAvailableSlots(
+  async getSlots(
     schoolId: string,
     enrollmentId: string,
-    instructorUserId: string,
-    date: Date,
     studentProfileId: string,
+    from: Date,
+    to: Date,
+    instructorUserId?: string,
   ): Promise<AvailableSlotDto[]> {
-    const enrollment = await this.prisma.enrollment.findUnique({
-      where: { id: enrollmentId, schoolId },
-      select: {
-        studentProfileId: true,
-        status: true,
-        courseId: true,
-        course: { select: { categoryId: true, transmission: true } },
-      },
-    });
-
-    if (!enrollment) {
-      throw new NotFoundException("Enrollment not found");
-    }
-
-    if (enrollment.studentProfileId !== studentProfileId) {
-      throw new ForbiddenException("Enrollment does not belong to student");
-    }
-
-    if (enrollment.status !== "ACTIVE") {
-      throw new BadRequestException("Enrollment is not active");
-    }
-
-    const instructorProfile = await this.prisma.instructorProfile.findFirst({
-      where: {
-        user: { id: instructorUserId, schoolId },
-        courses: { some: { id: enrollment.courseId } },
-      },
-      select: { id: true },
-    });
-
-    if (!instructorProfile) {
-      throw new NotFoundException(
-        "Instructor not found or does not teach this course",
-      );
-    }
+    const enrollment = await this.assertEnrollment(
+      schoolId,
+      enrollmentId,
+      studentProfileId,
+      { requireActive: true },
+    );
 
     const schoolConfig = await this.prisma.schoolConfig.findUnique({
       where: { schoolId },
-      select: { defaultLessonDurationMin: true },
+      select: { defaultLessonDurationMin: true, timezone: true },
     });
 
-    const durationMin = schoolConfig?.defaultLessonDurationMin ?? 120;
-
-    const jsDay = date.getUTCDay();
-    const dayOfWeek = jsDay === 0 ? 6 : jsDay - 1;
-
-    const availability = await this.prisma.instructorAvailability.findMany({
-      where: { instructorId: instructorProfile.id, dayOfWeek },
-      orderBy: { startTime: "asc" },
-    });
-
-    if (availability.length === 0) {
-      return [];
-    }
-
-    const dayStart = dayStartUtc(date);
-    const dayEnd = dayEndUtc(date);
-
-    const existingLessons = await this.prisma.lesson.findMany({
-      where: {
-        instructorId: instructorProfile.id,
-        status: LessonStatus.SCHEDULED,
-        startTime: { gte: dayStart },
-        endTime: { lte: dayEnd },
-      },
-      select: { startTime: true, endTime: true, vehicleId: true },
-    });
-
-    // Count total vehicles matching course category + transmission for this school
-    const totalVehicles = await this.prisma.vehicle.count({
-      where: {
+    return this.prisma.$queryRaw<AvailableSlotDto[]>(
+      slotsQuery({
         schoolId,
+        courseId: enrollment.courseId,
+        from,
+        to,
+        instructorUserId: instructorUserId ?? null,
+        studentProfileId,
         categoryId: enrollment.course.categoryId,
         transmission: enrollment.course.transmission,
-      },
-    });
-
-    // Get all scheduled lessons for the day in this school (for vehicle availability)
-    const schoolLessonsForDay = await this.prisma.lesson.findMany({
-      where: {
-        schoolId,
-        status: LessonStatus.SCHEDULED,
-        startTime: { lt: dayEnd },
-        endTime: { gt: dayStart },
-        vehicleId: { not: null },
-      },
-      select: { startTime: true, endTime: true },
-    });
-
-    // Get existing SCHEDULED lessons for this student on that day
-    const studentLessons = await this.prisma.lesson.findMany({
-      where: {
-        enrollment: { studentProfileId },
-        status: LessonStatus.SCHEDULED,
-        startTime: { gte: dayStart },
-        endTime: { lte: dayEnd },
-      },
-      select: { startTime: true, endTime: true },
-    });
-
-    const slots: AvailableSlotDto[] = [];
-
-    for (const window of availability) {
-      const [startH, startM] = window.startTime.split(":").map(Number);
-      const [endH, endM] = window.endTime.split(":").map(Number);
-
-      const windowStartMin = startH * 60 + startM;
-      const windowEndMin = endH * 60 + endM;
-
-      for (
-        let slotStart = windowStartMin;
-        slotStart + durationMin <= windowEndMin;
-        slotStart += durationMin
-      ) {
-        const slotEnd = slotStart + durationMin;
-
-        const slotStartTime = utcAtMinuteOfDay(date, slotStart);
-        const slotEndTime = utcAtMinuteOfDay(date, slotEnd);
-
-        // Check instructor conflict
-        const hasInstructorConflict = existingLessons.some(
-          (lesson) =>
-            slotStartTime < lesson.endTime && slotEndTime > lesson.startTime,
-        );
-
-        if (hasInstructorConflict) {
-          continue;
-        }
-
-        // Check student conflict
-        const hasStudentConflict = studentLessons.some(
-          (lesson) =>
-            slotStartTime < lesson.endTime && slotEndTime > lesson.startTime,
-        );
-
-        if (hasStudentConflict) {
-          continue;
-        }
-
-        // Check vehicle availability
-        const bookedVehicles = schoolLessonsForDay.filter(
-          (lesson) =>
-            slotStartTime < lesson.endTime && slotEndTime > lesson.startTime,
-        ).length;
-
-        if (totalVehicles - bookedVehicles <= 0) {
-          continue;
-        }
-
-        slots.push({
-          startTime: `${pad(Math.floor(slotStart / 60))}:${pad(slotStart % 60)}`,
-          endTime: `${pad(Math.floor(slotEnd / 60))}:${pad(slotEnd % 60)}`,
-        });
-      }
-    }
-
-    return slots;
+        durationMin: schoolConfig?.defaultLessonDurationMin ?? 120,
+        schoolTz: schoolConfig?.timezone ?? "UTC",
+      }),
+    );
   }
 
   async create(
     schoolId: string,
-    userId: string,
     studentProfileId: string,
     dto: CreateLessonDto,
   ): Promise<LessonDto> {
-    const enrollment = await this.prisma.enrollment.findUnique({
-      where: { id: dto.enrollmentId, schoolId },
-      select: {
-        studentProfileId: true,
-        status: true,
-        courseId: true,
-        course: { select: { categoryId: true, transmission: true } },
-      },
-    });
-
-    if (!enrollment) {
-      throw new NotFoundException("Enrollment not found");
-    }
-
-    if (enrollment.studentProfileId !== studentProfileId) {
-      throw new ForbiddenException("Enrollment does not belong to student");
-    }
-
-    if (enrollment.status !== "ACTIVE") {
-      throw new BadRequestException("Enrollment is not active");
-    }
+    const enrollment = await this.assertEnrollment(
+      schoolId,
+      dto.enrollmentId,
+      studentProfileId,
+      { requireActive: true },
+    );
 
     const instructorProfile = await this.prisma.instructorProfile.findFirst({
       where: {
@@ -281,13 +128,11 @@ export class LessonService {
       where: { schoolId },
       select: { defaultLessonDurationMin: true },
     });
-
     const durationMin = schoolConfig?.defaultLessonDurationMin ?? 120;
 
     const startTime = new Date(dto.startTime);
     const endTime = new Date(startTime.getTime() + durationMin * 60 * 1000);
 
-    // Check instructor conflict
     const instructorConflict = await this.prisma.lesson.findFirst({
       where: {
         instructorId: instructorProfile.id,
@@ -296,14 +141,12 @@ export class LessonService {
         endTime: { gt: startTime },
       },
     });
-
     if (instructorConflict) {
       throw new BadRequestException(
         "Instructor has a conflicting lesson at this time",
       );
     }
 
-    // Check student conflict
     const studentConflict = await this.prisma.lesson.findFirst({
       where: {
         enrollment: { studentProfileId },
@@ -312,14 +155,12 @@ export class LessonService {
         endTime: { gt: startTime },
       },
     });
-
     if (studentConflict) {
       throw new BadRequestException(
         "You already have a lesson scheduled at this time",
       );
     }
 
-    // Check vehicle availability
     const totalVehicles = await this.prisma.vehicle.count({
       where: {
         schoolId,
@@ -327,7 +168,6 @@ export class LessonService {
         transmission: enrollment.course.transmission,
       },
     });
-
     const bookedVehicles = await this.prisma.lesson.count({
       where: {
         schoolId,
@@ -337,7 +177,6 @@ export class LessonService {
         endTime: { gt: startTime },
       },
     });
-
     if (totalVehicles - bookedVehicles <= 0) {
       throw new BadRequestException("No vehicles available at this time");
     }
@@ -380,24 +219,16 @@ export class LessonService {
 
       where.instructorId = instructorProfile.id;
     }
-    // ADMIN sees all school lessons — no additional filter
 
     if (filters.status) {
       where.status = filters.status;
     }
 
     if (filters.from) {
-      where.startTime = {
-        ...(where.startTime as object),
-        gte: new Date(filters.from),
-      };
+      where.startTime = { gte: new Date(filters.from) };
     }
-
     if (filters.to) {
-      where.endTime = {
-        ...(where.endTime as object),
-        lte: new Date(filters.to),
-      };
+      where.endTime = { lte: new Date(filters.to) };
     }
 
     const lessons = await this.prisma.lesson.findMany({
@@ -432,14 +263,14 @@ export class LessonService {
       throw new BadRequestException("Only scheduled lessons can be completed");
     }
 
-    const durationMs = lesson.endTime.getTime() - lesson.startTime.getTime();
-    const lessonHours = durationMs / (1000 * 60 * 60);
+    const lessonHours =
+      (lesson.endTime.getTime() - lesson.startTime.getTime()) /
+      (1000 * 60 * 60);
 
     const newHoursCompleted =
       Number(lesson.enrollment.hoursCompleted) + lessonHours;
-    const hoursPurchased = Number(lesson.enrollment.hoursPurchased);
-
-    const enrollmentCompleted = newHoursCompleted >= hoursPurchased;
+    const enrollmentCompleted =
+      newHoursCompleted >= Number(lesson.enrollment.hoursPurchased);
 
     const [updatedLesson] = await this.prisma.$transaction([
       this.prisma.lesson.update({
@@ -555,7 +386,6 @@ export class LessonService {
       );
     }
 
-    // Check vehicle not booked at that time (exclude current lesson)
     const conflicting = await this.prisma.lesson.findFirst({
       where: {
         vehicleId: dto.vehicleId,
@@ -578,8 +408,32 @@ export class LessonService {
 
     return toLessonDto(updated);
   }
-}
 
-function pad(n: number): string {
-  return n.toString().padStart(2, "0");
+  private async assertEnrollment(
+    schoolId: string,
+    enrollmentId: string,
+    studentProfileId: string,
+    opts: { requireActive?: boolean } = {},
+  ) {
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: { id: enrollmentId, schoolId },
+      select: {
+        studentProfileId: true,
+        status: true,
+        courseId: true,
+        course: { select: { categoryId: true, transmission: true } },
+      },
+    });
+
+    if (!enrollment) {
+      throw new NotFoundException("Enrollment not found");
+    }
+    if (enrollment.studentProfileId !== studentProfileId) {
+      throw new ForbiddenException("Enrollment does not belong to student");
+    }
+    if (opts.requireActive && enrollment.status !== "ACTIVE") {
+      throw new BadRequestException("Enrollment is not active");
+    }
+    return enrollment;
+  }
 }

@@ -41,23 +41,25 @@ export class LessonController {
     );
   }
 
-  @Get("available-slots")
+  @Get("availability/slots")
   @Roles(Role.STUDENT)
-  async getAvailableSlots(
+  async getSlots(
     @Query("enrollmentId") enrollmentId: string,
-    @Query("instructorId") instructorId: string,
-    @Query("date") date: string,
+    @Query("from") from: string,
+    @Query("to") to: string,
+    @Query("instructorId") instructorId: string | undefined,
     @Request() req: AuthenticatedRequest,
   ) {
     const studentProfileId = await this.lessonService.getStudentProfileId(
       req.user.sub,
     );
-    return this.lessonService.getAvailableSlots(
+    return this.lessonService.getSlots(
       req.user.schoolId,
       enrollmentId,
-      instructorId,
-      new Date(date),
       studentProfileId,
+      new Date(from),
+      new Date(to),
+      instructorId,
     );
   }
 
@@ -72,7 +74,6 @@ export class LessonController {
     );
     return this.lessonService.create(
       req.user.schoolId,
-      req.user.sub,
       studentProfileId,
       dto,
     );
@@ -89,11 +90,7 @@ export class LessonController {
       req.user.schoolId,
       req.user.role,
       req.user.sub,
-      {
-        status,
-        from,
-        to,
-      },
+      { status, from, to },
     );
   }
 

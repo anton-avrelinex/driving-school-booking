@@ -9,10 +9,10 @@ import type {
 } from "@driving-school-booking/shared-types";
 import api from "@/api/api";
 import {
-  type AvailableSlotModel,
   type LessonModel,
-  toAvailableSlotModel,
+  type SlotModel,
   toLessonModel,
+  toSlotModel,
 } from "@/lessons/lessons.models";
 
 export const useLessonStore = defineStore("lessons", () => {
@@ -20,7 +20,7 @@ export const useLessonStore = defineStore("lessons", () => {
 
   const lessons = ref<LessonModel[]>([]) as Ref<LessonModel[]>;
   const availableInstructors = ref<AvailableInstructorDto[]>([]);
-  const availableSlots = ref([]) as Ref<AvailableSlotModel[]>;
+  const slots = ref([]) as Ref<SlotModel[]>;
   const loading = ref(true);
   const saving = ref(false);
   const error = ref<string | null>(null);
@@ -60,19 +60,20 @@ export const useLessonStore = defineStore("lessons", () => {
     }
   }
 
-  async function fetchAvailableSlots(
-    enrollmentId: string,
-    instructorId: string,
-    date: string,
-  ) {
+  async function fetchSlots(params: {
+    enrollmentId: string;
+    from: string;
+    to: string;
+    instructorId?: string;
+  }) {
     loading.value = true;
     error.value = null;
     try {
       const { data } = await api.get<AvailableSlotDto[]>(
-        "/lessons/available-slots",
-        { params: { enrollmentId, instructorId, date } },
+        "/lessons/availability/slots",
+        { params },
       );
-      availableSlots.value = data.map(toAvailableSlotModel);
+      slots.value = data.map(toSlotModel);
     } catch {
       error.value = t("lesson_fetch_failed");
     } finally {
@@ -119,13 +120,13 @@ export const useLessonStore = defineStore("lessons", () => {
   return {
     lessons,
     availableInstructors,
-    availableSlots,
+    slots,
     loading,
     saving,
     error,
     fetchLessons,
     fetchAvailableInstructors,
-    fetchAvailableSlots,
+    fetchSlots,
     bookLesson,
     completeLesson,
     cancelLesson,

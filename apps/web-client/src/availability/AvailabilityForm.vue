@@ -1,50 +1,54 @@
 <template>
   <div class="flex flex-col gap-6">
-    <div v-for="day in 7" :key="day - 1" class="flex flex-col gap-2">
+    <div
+      v-for="(dayOfWeek, i) in WEEK_ORDER"
+      :key="dayOfWeek"
+      class="flex flex-col gap-2"
+    >
       <div class="flex items-center justify-between">
         <span class="text-sm font-medium">
-          {{ $t(`common_days[${day - 1}]`) }}
+          {{ $t(`common_days[${i}]`) }}
         </span>
         <Button
           variant="outline"
           size="sm"
           type="button"
-          @click="addBlock(day - 1)"
+          @click="addBlock(dayOfWeek)"
         >
           {{ $t("teacher_availability_add_block") }}
         </Button>
       </div>
 
       <p
-        v-if="getBlocksForDay(day - 1).length === 0"
+        v-if="getBlocksForDay(dayOfWeek).length === 0"
         class="text-sm text-muted-foreground"
       >
         {{ $t("teacher_availability_no_blocks") }}
       </p>
 
       <div
-        v-for="(block, index) in getBlocksForDay(day - 1)"
+        v-for="(block, index) in getBlocksForDay(dayOfWeek)"
         :key="index"
         class="flex items-center gap-2"
       >
         <TimePicker
           :model-value="block.startTime"
           @update:model-value="
-            (v) => v && updateBlock(day - 1, index, 'startTime', v)
+            (v) => v && updateBlock(dayOfWeek, index, 'startTime', v)
           "
         />
         <span class="text-muted-foreground">—</span>
         <TimePicker
           :model-value="block.endTime"
           @update:model-value="
-            (v) => v && updateBlock(day - 1, index, 'endTime', v)
+            (v) => v && updateBlock(dayOfWeek, index, 'endTime', v)
           "
         />
         <Button
           variant="ghost"
           size="sm"
           type="button"
-          @click="removeBlock(day - 1, index)"
+          @click="removeBlock(dayOfWeek, index)"
         >
           {{ $t("teacher_availability_remove_block") }}
         </Button>
@@ -56,6 +60,7 @@
 <script setup lang="ts">
 import { Time } from "@internationalized/date";
 import type { AvailabilityBlockModel } from "@/availability/availability.models";
+import { WEEK_ORDER } from "@/lib/date-utils";
 import { Button } from "@/components/ui/button";
 import { TimePicker } from "@/components/ui/time-picker";
 

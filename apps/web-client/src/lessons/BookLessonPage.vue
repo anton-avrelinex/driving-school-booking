@@ -5,7 +5,7 @@
     </div>
 
     <Transition name="fade" mode="out-in">
-      <div v-if="loadingEnrollments" class="flex flex-col gap-4 max-w-md">
+      <div v-if="loadingEnrollments" class="flex flex-col gap-4 max-w-2xl">
         <Skeleton class="h-9 w-full" />
         <Skeleton class="h-9 w-full" />
       </div>
@@ -13,17 +13,17 @@
         {{ enrollmentError }}
       </p>
 
-      <div v-else class="flex flex-col gap-6 max-w-md">
-        <!-- Step 1: Select enrollment -->
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium">{{
-            $t("lesson_enrollment")
-          }}</label>
+      <div v-else class="flex flex-col gap-6">
+        <div
+          v-if="activeEnrollments.length > 1"
+          class="flex flex-col gap-2 max-w-md"
+        >
+          <Label for="enrollment">{{ $t("lesson_enrollment") }}</Label>
           <Select
             v-model="selectedEnrollmentId"
             @update:model-value="onEnrollmentChange"
           >
-            <SelectTrigger class="w-full">
+            <SelectTrigger id="enrollment" class="w-full">
               <SelectValue :placeholder="$t('lesson_select_enrollment')" />
             </SelectTrigger>
             <SelectContent>
@@ -40,89 +40,187 @@
           </Select>
         </div>
 
-        <!-- Step 2: Select instructor -->
-        <div v-if="selectedEnrollmentId" class="flex flex-col gap-2">
-          <label class="text-sm font-medium">{{
-            $t("lesson_instructor")
-          }}</label>
-          <Skeleton v-if="lessonStore.loading" class="h-9 w-full" />
-          <Select
-            v-else
-            v-model="selectedInstructorId"
-            @update:model-value="onInstructorChange"
-          >
-            <SelectTrigger class="w-full">
-              <SelectValue :placeholder="$t('lesson_select_instructor')" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="instructor in lessonStore.availableInstructors"
-                :key="instructor.id"
-                :value="instructor.id"
+        <div v-if="singleEnrollment" class="text-sm text-muted-foreground">
+          {{ $t("lesson_enrollment") }}:
+          <span class="font-medium text-foreground">
+            {{ singleEnrollment.course.name }}
+          </span>
+          ({{ singleEnrollment.hoursCompleted }}/{{
+            singleEnrollment.hoursPurchased
+          }}h)
+        </div>
+
+        <Tabs
+          v-if="selectedEnrollmentId"
+          v-model="flow"
+          @update:model-value="onFlowChange"
+        >
+          <TabsList>
+            <TabsTrigger value="instructor">
+              {{ $t("lesson_book_by_instructor") }}
+            </TabsTrigger>
+            <TabsTrigger value="time">
+              {{ $t("lesson_book_by_time") }}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="instructor">
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-2 max-w-md">
+                <Label for="instructor">{{ $t("lesson_instructor") }}</Label>
+                <Skeleton
+                  v-if="
+                    lessonStore.loading &&
+                    !lessonStore.availableInstructors.length
+                  "
+                  class="h-9 w-full"
+                />
+                <Select
+                  v-else
+                  v-model="selectedInstructorId"
+                  @update:model-value="onInstructorChange"
+                >
+                  <SelectTrigger id="instructor" class="w-full">
+                    <SelectValue
+                      :placeholder="$t('lesson_select_instructor')"
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="instructor in lessonStore.availableInstructors"
+                      :key="instructor.id"
+                      :value="instructor.id"
+                    >
+                      {{ instructor.firstName }} {{ instructor.lastName }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Card v-if="!selectedInstructorId" class="max-w-2xl">
+                <CardContent>
+                  <EmptyState
+                    :title="$t('lesson_book')"
+                    :description="$t('lesson_book_choose_setup')"
+                    :icon="CalendarIcon"
+                  />
+                </CardContent>
+              </Card>
+
+              <Card v-else class="overflow-hidden">
+                <div
+                  class="grid lg:grid-cols-[auto_320px] divide-y lg:divide-y-0 lg:divide-x"
+                >
+                  <div class="p-4 flex justify-center">
+                    <Calendar
+                      v-model:placeholder="calendarPlaceholder"
+                      :model-value="selectedDate ?? undefined"
+                      :min-value="minDate"
+                      :is-date-disabled="isDateUnavailable"
+                      :week-starts-on="WEEK_STARTS_ON"
+                      :key="`instr-${availableDays.size}`"
+                      class="text-base **:data-[slot=calendar-cell-trigger]:size-12 **:data-[slot=calendar-cell-trigger]:text-base"
+                      @update:model-value="onCalendarChange"
+                    />
+                  </div>
+
+                  <SlotPanel
+                    :selected-date="selectedDate"
+                    :selected-slot="selectedSlot"
+                    :slots="slotsForSelectedDate"
+                    :loading="lessonStore.loading"
+                    :saving="lessonStore.saving"
+                    :show-counts="false"
+                    @select-slot="selectedSlot = $event.startTime"
+                    @book="handleBook(selectedInstructorId!)"
+                  />
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="time">
+            <Card class="overflow-hidden">
+              <div
+                class="grid lg:grid-cols-[auto_320px] divide-y lg:divide-y-0 lg:divide-x"
               >
-                {{ instructor.firstName }} {{ instructor.lastName }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+                <div class="p-4 flex justify-center">
+                  <Calendar
+                    v-model:placeholder="calendarPlaceholder"
+                    :model-value="selectedDate ?? undefined"
+                    :min-value="minDate"
+                    :is-date-disabled="isDateUnavailable"
+                    :week-starts-on="1"
+                    :key="`time-${availableDays.size}`"
+                    class="text-base **:data-[slot=calendar-cell-trigger]:size-12 **:data-[slot=calendar-cell-trigger]:text-base"
+                    @update:model-value="onCalendarChange"
+                  />
+                </div>
 
-        <!-- Step 3: Select date -->
-        <div v-if="selectedInstructorId" class="flex flex-col gap-2">
-          <label class="text-sm font-medium">{{ $t("lesson_date") }}</label>
-          <div class="max-w-md">
-            <DatePicker
-              v-model="selectedDate"
-              :min="minDate"
-              :max="maxDate"
-              :placeholder="$t('lesson_select_date')"
-              @update:model-value="onDateChange"
-            />
-          </div>
-        </div>
-
-        <!-- Step 4: Select slot -->
-        <div v-if="selectedDate" class="flex flex-col gap-2">
-          <label class="text-sm font-medium">{{
-            $t("lesson_time_slot")
-          }}</label>
-          <Skeleton v-if="lessonStore.loading" class="h-9 w-full" />
-          <EmptyState
-            v-else-if="lessonStore.availableSlots.length === 0"
-            :title="$t('lesson_no_slots')"
-            :description="$t('lesson_no_slots_description')"
-            :icon="ClockIcon"
-          />
-          <div v-else class="flex flex-wrap gap-2">
-            <Button
-              v-for="slot in lessonStore.availableSlots"
-              :key="timeToString(slot.startTime)"
-              :variant="
-                selectedSlot && selectedSlot.compare(slot.startTime) === 0
-                  ? 'default'
-                  : 'outline'
-              "
-              size="sm"
-              @click="selectedSlot = slot.startTime"
-            >
-              {{ timeToString(slot.startTime) }} -
-              {{ timeToString(slot.endTime) }}
-            </Button>
-          </div>
-        </div>
-
-        <!-- Step 5: Confirm -->
-        <div v-if="selectedSlot">
-          <Button :disabled="lessonStore.saving" @click="handleBook">
-            {{ lessonStore.saving ? $t("common_saving") : $t("lesson_book") }}
-          </Button>
-        </div>
+                <SlotPanel
+                  :selected-date="selectedDate"
+                  :selected-slot="selectedSlot"
+                  :slots="slotsForSelectedDate"
+                  :loading="lessonStore.loading"
+                  :saving="lessonStore.saving"
+                  show-counts
+                  @select-slot="onAggregatedSlotPick"
+                />
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </Transition>
+
+    <Dialog v-model:open="instructorPickerOpen">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{{ $t("lesson_book_choose_instructor") }}</DialogTitle>
+          <DialogDescription v-if="selectedSlot">
+            {{ $d(selectedSlot.toDate(), "dateLong") }}
+            ·
+            {{ $d(selectedSlot.toDate(), "time") }}
+          </DialogDescription>
+        </DialogHeader>
+        <p
+          v-if="pickerInstructors.length === 1"
+          class="text-sm text-muted-foreground"
+        >
+          {{
+            $t("lesson_book_only_instructor", {
+              name: pickerInstructors[0]
+                ? `${pickerInstructors[0].firstName} ${pickerInstructors[0].lastName}`
+                : "",
+            })
+          }}
+        </p>
+        <div v-else class="flex flex-col gap-2">
+          <Button
+            v-for="instructor in pickerInstructors"
+            :key="instructor.id"
+            variant="outline"
+            class="justify-start"
+            @click="confirmInstructor(instructor.id)"
+          >
+            {{ instructor.firstName }} {{ instructor.lastName }}
+          </Button>
+        </div>
+        <DialogFooter v-if="pickerInstructors.length === 1">
+          <Button
+            :disabled="lessonStore.saving"
+            @click="confirmInstructor(pickerInstructors[0]!.id)"
+          >
+            {{ lessonStore.saving ? $t("common_saving") : $t("lesson_book") }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, type Ref } from "vue";
+import { computed, onMounted, ref, watch, type Ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
@@ -132,9 +230,21 @@ import {
 import { toast } from "vue-sonner";
 import { useAuthStore } from "@/auth/auth.store";
 import { useLessonStore } from "@/lessons/lessons.store";
-import { ClockIcon } from "lucide-vue-next";
+import type { SlotModel } from "@/lessons/lessons.models";
+import SlotPanel from "@/lessons/SlotPanel.vue";
+import { CalendarIcon } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -142,21 +252,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmptyState from "@/components/EmptyState.vue";
 import {
   type CalendarDate,
-  type Time,
+  type DateValue,
+  type ZonedDateTime,
+  endOfMonth,
   getLocalTimeZone,
+  startOfMonth,
   today,
 } from "@internationalized/date";
-import { combineDateTime, timeToString } from "@/lib/date-utils";
+import {
+  dateStart,
+  dateEnd,
+  isoLocalDate,
+  sameLocalDay,
+  WEEK_STARTS_ON,
+} from "@/lib/date-utils";
 import api from "@/api/api";
 
 const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
 const lessonStore = useLessonStore();
+
+const flow = ref<"instructor" | "time">("instructor");
 
 const loadingEnrollments = ref(true);
 const enrollmentError = ref<string | null>(null);
@@ -165,7 +287,10 @@ const enrollments = ref<UserDto["studentProfile"]>();
 const selectedEnrollmentId = ref<string | null>(null);
 const selectedInstructorId = ref<string | null>(null);
 const selectedDate = ref(null) as Ref<CalendarDate | null>;
-const selectedSlot = ref(null) as Ref<Time | null>;
+const selectedSlot = ref(null) as Ref<ZonedDateTime | null>;
+
+const instructorPickerOpen = ref(false);
+const pickerInstructorIds = ref<string[]>([]);
 
 const activeEnrollments = computed(() => {
   if (!enrollments.value?.enrollments) return [];
@@ -174,8 +299,40 @@ const activeEnrollments = computed(() => {
   );
 });
 
-const minDate = computed(() => today(getLocalTimeZone()).add({ days: 1 }));
-const maxDate = computed(() => today(getLocalTimeZone()).add({ days: 28 }));
+const singleEnrollment = computed(() =>
+  activeEnrollments.value.length === 1 ? activeEnrollments.value[0] : null,
+);
+
+const minDate = computed(() => today(getLocalTimeZone()));
+const calendarPlaceholder = ref(today(getLocalTimeZone())) as Ref<CalendarDate>;
+
+const pickerInstructors = computed(() =>
+  pickerInstructorIds.value
+    .map((id) => lessonStore.availableInstructors.find((i) => i.id === id))
+    .filter(
+      (i): i is { id: string; firstName: string; lastName: string } =>
+        i !== undefined,
+    ),
+);
+
+const availableDays = computed<Set<string>>(() => {
+  const set = new Set<string>();
+  for (const slot of lessonStore.slots) {
+    set.add(isoLocalDate(slot.startTime));
+  }
+  return set;
+});
+
+const slotsForSelectedDate = computed<SlotModel[]>(() => {
+  if (!selectedDate.value) return [];
+  const date = selectedDate.value;
+  return lessonStore.slots.filter((s) => sameLocalDay(s.startTime, date));
+});
+
+const isDateUnavailable = computed(() => {
+  const set = availableDays.value;
+  return (date: DateValue) => set.size > 0 && !set.has(date.toString());
+});
 
 onMounted(async () => {
   loadingEnrollments.value = true;
@@ -183,6 +340,10 @@ onMounted(async () => {
     const userId = authStore.user!.id;
     const { data } = await api.get<UserDto>(`/users/${userId}`);
     enrollments.value = data.studentProfile;
+    if (singleEnrollment.value) {
+      selectedEnrollmentId.value = singleEnrollment.value.id;
+      onEnrollmentChange();
+    }
   } catch {
     enrollmentError.value = t("lesson_fetch_failed");
   } finally {
@@ -196,45 +357,70 @@ function onEnrollmentChange() {
   selectedSlot.value = null;
   if (!selectedEnrollmentId.value) return;
   void lessonStore.fetchAvailableInstructors(selectedEnrollmentId.value);
+  void refreshSlots();
+}
+
+function onFlowChange() {
+  selectedDate.value = null;
+  selectedSlot.value = null;
+  void refreshSlots();
 }
 
 function onInstructorChange() {
   selectedDate.value = null;
   selectedSlot.value = null;
+  void refreshSlots();
 }
 
-function onDateChange() {
+function refreshSlots() {
+  if (!selectedEnrollmentId.value) return;
+  const timezone = getLocalTimeZone();
+  const monthStart = startOfMonth(calendarPlaceholder.value);
+  const monthEnd = endOfMonth(calendarPlaceholder.value);
+  const todayDate = today(timezone);
+  const start = monthStart.compare(todayDate) < 0 ? todayDate : monthStart;
+  return lessonStore.fetchSlots({
+    enrollmentId: selectedEnrollmentId.value,
+    from: dateStart(start, timezone),
+    to: dateEnd(monthEnd, timezone),
+    ...(flow.value === "instructor" && selectedInstructorId.value
+      ? { instructorId: selectedInstructorId.value }
+      : {}),
+  });
+}
+
+watch(calendarPlaceholder, () => {
+  void refreshSlots();
+});
+
+function onCalendarChange(value: DateValue | undefined) {
+  if (!value) {
+    selectedDate.value = null;
+    selectedSlot.value = null;
+    return;
+  }
+  selectedDate.value = value as CalendarDate;
   selectedSlot.value = null;
-  if (
-    !selectedEnrollmentId.value ||
-    !selectedInstructorId.value ||
-    !selectedDate.value
-  ) {
-    return;
-  }
-  void lessonStore.fetchAvailableSlots(
-    selectedEnrollmentId.value,
-    selectedInstructorId.value,
-    selectedDate.value.toString(),
-  );
 }
 
-async function handleBook() {
-  if (
-    !selectedEnrollmentId.value ||
-    !selectedInstructorId.value ||
-    !selectedDate.value ||
-    !selectedSlot.value
-  ) {
-    return;
-  }
-  try {
-    const startTime = combineDateTime(selectedDate.value, selectedSlot.value);
+function onAggregatedSlotPick(slot: SlotModel) {
+  selectedSlot.value = slot.startTime;
+  pickerInstructorIds.value = slot.instructorIds;
+  instructorPickerOpen.value = true;
+}
 
+async function confirmInstructor(instructorId: string) {
+  await handleBook(instructorId);
+  instructorPickerOpen.value = false;
+}
+
+async function handleBook(instructorId: string) {
+  if (!selectedEnrollmentId.value || !selectedSlot.value) return;
+  try {
     await lessonStore.bookLesson({
       enrollmentId: selectedEnrollmentId.value,
-      instructorId: selectedInstructorId.value,
-      startTime,
+      instructorId,
+      startTime: selectedSlot.value.toAbsoluteString(),
     });
 
     toast.success(t("lesson_booked"));

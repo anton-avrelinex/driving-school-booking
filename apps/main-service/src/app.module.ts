@@ -9,8 +9,6 @@ import {
   type AppLogDto,
 } from "@driving-school-booking/shared-types";
 import { ObsLoggerModule } from "@driving-school-booking/nestjs-logger";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
 import { RequestLogInterceptor } from "./request-log/request-log.interceptor";
 import { PrismaModule } from "./prisma/prisma.module";
 import { RedisModule } from "./redis/redis.module";
@@ -24,6 +22,7 @@ import { CategoryModule } from "./category/category.module";
 import { VehicleModule } from "./vehicle/vehicle.module";
 import { CourseModule } from "./course/course.module";
 import { LessonModule } from "./lesson/lesson.module";
+import { SchoolConfigModule } from "./school-config/school-config.module";
 import { StatsModule } from "./stats/stats.module";
 
 let logQueue: Queue | null = null;
@@ -65,9 +64,9 @@ function getLogQueue(): Queue {
     CourseModule,
     VehicleModule,
     LessonModule,
+    SchoolConfigModule,
     StatsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, RequestLogInterceptor],
+  providers: [RequestLogInterceptor],
 })
 export class AppModule {}
