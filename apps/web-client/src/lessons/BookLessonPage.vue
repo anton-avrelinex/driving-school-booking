@@ -132,7 +132,7 @@
                     :saving="lessonStore.saving"
                     :show-counts="false"
                     @select-slot="selectedSlot = $event.startTime"
-                    @book="handleBook(selectedInstructorId!)"
+                    @book="confirmBookingOpen = true"
                   />
                 </div>
               </Card>
@@ -172,6 +172,38 @@
         </Tabs>
       </div>
     </Transition>
+
+    <Dialog v-model:open="confirmBookingOpen">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{{ $t("lesson_book_confirm_title") }}</DialogTitle>
+          <DialogDescription v-if="selectedSlot && selectedInstructor">
+            {{
+              $t("lesson_book_confirm_description", {
+                name: `${selectedInstructor.firstName} ${selectedInstructor.lastName}`,
+                date: $d(selectedSlot.toDate(), "dateLong"),
+                time: $d(selectedSlot.toDate(), "time"),
+              })
+            }}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            :disabled="lessonStore.saving"
+            @click="confirmBookingOpen = false"
+          >
+            {{ $t("common_cancel") }}
+          </Button>
+          <Button
+            :disabled="lessonStore.saving"
+            @click="confirmBookingFromInstructorFlow"
+          >
+            {{ lessonStore.saving ? $t("common_saving") : $t("lesson_book") }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     <Dialog v-model:open="instructorPickerOpen">
       <DialogContent>
@@ -294,6 +326,13 @@ const selectedSlot = ref(null) as Ref<ZonedDateTime | null>;
 
 const instructorPickerOpen = ref(false);
 const pickerInstructorIds = ref<string[]>([]);
+const confirmBookingOpen = ref(false);
+
+const selectedInstructor = computed(() =>
+  lessonStore.availableInstructors.find(
+    (i) => i.id === selectedInstructorId.value,
+  ),
+);
 
 const activeEnrollments = computed(() => {
   if (!enrollments.value?.enrollments) return [];
@@ -419,6 +458,12 @@ function onAggregatedSlotPick(slot: SlotModel) {
 async function confirmInstructor(instructorId: string) {
   await handleBook(instructorId);
   instructorPickerOpen.value = false;
+}
+
+async function confirmBookingFromInstructorFlow() {
+  if (!selectedInstructorId.value) return;
+  await handleBook(selectedInstructorId.value);
+  confirmBookingOpen.value = false;
 }
 
 async function handleBook(instructorId: string) {
