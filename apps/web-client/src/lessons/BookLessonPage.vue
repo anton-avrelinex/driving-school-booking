@@ -260,8 +260,10 @@ import {
   type DateValue,
   type ZonedDateTime,
   endOfMonth,
+  endOfWeek,
   getLocalTimeZone,
   startOfMonth,
+  startOfWeek,
   today,
 } from "@internationalized/date";
 import {
@@ -269,6 +271,7 @@ import {
   dateEnd,
   isoLocalDate,
   sameLocalDay,
+  WEEK_LOCALE,
   WEEK_STARTS_ON,
 } from "@/lib/date-utils";
 import api from "@/api/api";
@@ -330,8 +333,9 @@ const slotsForSelectedDate = computed<SlotModel[]>(() => {
 });
 
 const isDateUnavailable = computed(() => {
-  const set = availableDays.value;
-  return (date: DateValue) => set.size > 0 && !set.has(date.toString());
+  return (date: DateValue) => {
+    return !availableDays.value.has(date.toString());
+  };
 });
 
 onMounted(async () => {
@@ -375,14 +379,17 @@ function onInstructorChange() {
 function refreshSlots() {
   if (!selectedEnrollmentId.value) return;
   const timezone = getLocalTimeZone();
-  const monthStart = startOfMonth(calendarPlaceholder.value);
-  const monthEnd = endOfMonth(calendarPlaceholder.value);
+  const gridStart = startOfWeek(
+    startOfMonth(calendarPlaceholder.value),
+    WEEK_LOCALE,
+  );
+  const gridEnd = endOfWeek(endOfMonth(calendarPlaceholder.value), WEEK_LOCALE);
   const todayDate = today(timezone);
-  const start = monthStart.compare(todayDate) < 0 ? todayDate : monthStart;
+  const start = gridStart.compare(todayDate) < 0 ? todayDate : gridStart;
   return lessonStore.fetchSlots({
     enrollmentId: selectedEnrollmentId.value,
     from: dateStart(start, timezone),
-    to: dateEnd(monthEnd, timezone),
+    to: dateEnd(gridEnd, timezone),
     ...(flow.value === "instructor" && selectedInstructorId.value
       ? { instructorId: selectedInstructorId.value }
       : {}),
