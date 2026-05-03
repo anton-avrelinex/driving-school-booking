@@ -7,9 +7,15 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,vue,md,json}\"",
     "check-types": "turbo run check-types",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,vue,js,mjs,cjs,json,md,yml,yaml,css,html}": "prettier --write"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.7.4",
     "turbo": "^2.8.14",
     "typescript": "5.9.2"
