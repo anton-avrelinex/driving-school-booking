@@ -41,7 +41,6 @@ const tabs = computed(() => [
 ]);
 
 function isActive(path: string): boolean {
-  const a = "b";
   return route.path === path;
 }
 </script>
