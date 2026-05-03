@@ -1,8 +1,9 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">{{ $t("nav_my_availability") }}</h1>
-    </div>
+    <PageHeader
+      :title="$t('nav_my_availability')"
+      :description="$t('nav_my_availability_description')"
+    />
 
     <Transition name="fade" mode="out-in">
       <div v-if="availabilityStore.loading" class="flex flex-col gap-3">
@@ -37,6 +38,7 @@ import type { AvailabilityBlockModel } from "@/availability/availability.models"
 import AvailabilityForm from "@/availability/AvailabilityForm.vue";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import PageHeader from "@/components/PageHeader.vue";
 
 const { t } = useI18n();
 const authStore = useAuthStore();

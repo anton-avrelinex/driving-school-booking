@@ -1,6 +1,9 @@
 <template>
   <div class="max-w-2xl">
-    <h1 class="text-2xl font-bold mb-6">{{ $t("settings_title") }}</h1>
+    <PageHeader
+      :title="$t('settings_title')"
+      :description="$t('settings_description')"
+    />
 
     <Transition name="fade" mode="out-in">
       <div
@@ -90,6 +93,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import PageHeader from "@/components/PageHeader.vue";
 import {
   Card,
   CardContent,

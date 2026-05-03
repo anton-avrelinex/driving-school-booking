@@ -1,9 +1,15 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">{{ $t("student_manage_title") }}</h1>
-      <Button @click="showCreateDialog = true">{{ $t("student_add") }}</Button>
-    </div>
+    <PageHeader
+      :title="$t('student_manage_title')"
+      :description="$t('student_manage_description')"
+    >
+      <template #actions>
+        <Button @click="showCreateDialog = true">
+          {{ $t("student_add") }}
+        </Button>
+      </template>
+    </PageHeader>
 
     <Transition name="fade" mode="out-in">
       <TableSkeleton
@@ -123,6 +129,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import EmptyState from "@/components/EmptyState.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import TableSkeleton from "@/components/TableSkeleton.vue";
 import CreateStudentDialog from "@/students/CreateStudentDialog.vue";
 import TempPasswordDialog from "@/students/TempPasswordDialog.vue";

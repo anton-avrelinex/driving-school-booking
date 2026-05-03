@@ -1,26 +1,30 @@
 <template>
   <div class="flex flex-col gap-6 flex-1 min-h-0">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold">{{ $t("lesson_list_title") }}</h1>
-      <div class="flex items-center gap-0.5 rounded-md border p-0.5">
-        <Button
-          :variant="view === 'list' ? 'default' : 'ghost'"
-          size="sm"
-          @click="view = 'list'"
-        >
-          <ListIcon class="size-4" />
-          {{ $t("schedule_view_list") }}
-        </Button>
-        <Button
-          :variant="view === 'calendar' ? 'default' : 'ghost'"
-          size="sm"
-          @click="view = 'calendar'"
-        >
-          <CalendarIcon class="size-4" />
-          {{ $t("schedule_view_calendar") }}
-        </Button>
-      </div>
-    </div>
+    <PageHeader
+      :title="$t('lesson_list_title')"
+      :description="$t('lesson_list_description')"
+    >
+      <template #actions>
+        <div class="flex items-center gap-0.5 rounded-md border p-0.5">
+          <Button
+            :variant="view === 'list' ? 'default' : 'ghost'"
+            size="sm"
+            @click="view = 'list'"
+          >
+            <ListIcon class="size-4" />
+            {{ $t("schedule_view_list") }}
+          </Button>
+          <Button
+            :variant="view === 'calendar' ? 'default' : 'ghost'"
+            size="sm"
+            @click="view = 'calendar'"
+          >
+            <CalendarIcon class="size-4" />
+            {{ $t("schedule_view_calendar") }}
+          </Button>
+        </div>
+      </template>
+    </PageHeader>
 
     <div class="flex flex-col flex-1 min-h-0 overflow-y-auto">
       <Transition name="fade" mode="out-in">
@@ -179,6 +183,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import EmptyState from "@/components/EmptyState.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import TableSkeleton from "@/components/TableSkeleton.vue";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
 import ScheduleView from "@/lessons/ScheduleView.vue";
