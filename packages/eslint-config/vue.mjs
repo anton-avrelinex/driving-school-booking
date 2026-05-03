@@ -4,11 +4,18 @@ import pluginVue from "eslint-plugin-vue";
 import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
 
+const extraFileExtensions = [".vue"];
+
 export function createVueConfig(tsconfigRootDir) {
   return defineConfig(
     createBaseConfig(tsconfigRootDir),
     {
       languageOptions: {
+        parserOptions: {
+          projectService: true,
+          tsconfigRootDir,
+          extraFileExtensions,
+        },
         globals: {
           window: "readonly",
           document: "readonly",
@@ -25,7 +32,7 @@ export function createVueConfig(tsconfigRootDir) {
           parser: tseslint.parser,
           projectService: true,
           tsconfigRootDir,
-          extraFileExtensions: [".vue"],
+          extraFileExtensions,
         },
       },
     },
