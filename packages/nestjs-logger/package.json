@@ -12,7 +12,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@driving-school-booking/shared-types": "workspace:^"
