@@ -182,10 +182,14 @@ const dailyData = computed(() => {
   const coveredDays = new Set<string>();
 
   for (const agg of store.aggregates) {
-    if (!agg.healthSummary) continue;
+    if (!agg.healthSummary) {
+      continue;
+    }
     const dateStr = agg.date.toString();
     for (const hs of agg.healthSummary) {
-      if (!result[hs.component]) continue;
+      if (!result[hs.component]) {
+        continue;
+      }
 
       const key = `${dateStr}:${hs.component}`;
       coveredDays.add(key);
@@ -202,8 +206,12 @@ const dailyData = computed(() => {
     const dateStr = daySummary.date.toString();
     for (const hs of daySummary.summaries) {
       const key = `${dateStr}:${hs.component}`;
-      if (coveredDays.has(key)) continue;
-      if (!result[hs.component]) continue;
+      if (coveredDays.has(key)) {
+        continue;
+      }
+      if (!result[hs.component]) {
+        continue;
+      }
 
       result[hs.component]!.push({
         date: dateStr,

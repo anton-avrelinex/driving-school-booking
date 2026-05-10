@@ -72,11 +72,7 @@ export class LessonController {
     const studentProfileId = await this.lessonService.getStudentProfileId(
       req.user.sub,
     );
-    return this.lessonService.create(
-      req.user.schoolId,
-      studentProfileId,
-      dto,
-    );
+    return this.lessonService.create(req.user.schoolId, studentProfileId, dto);
   }
 
   @Get()

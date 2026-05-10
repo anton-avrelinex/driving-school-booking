@@ -25,10 +25,16 @@ export function bucketLessonsByDay(
   for (const lesson of lessons) {
     const key = isoDateUtc(lesson.startTime);
     const bucket = buckets.get(key);
-    if (!bucket) continue;
-    if (lesson.status === LessonStatus.SCHEDULED) bucket.scheduled++;
-    else if (lesson.status === LessonStatus.COMPLETED) bucket.completed++;
-    else if (lesson.status === LessonStatus.CANCELLED) bucket.cancelled++;
+    if (!bucket) {
+      continue;
+    }
+    if (lesson.status === LessonStatus.SCHEDULED) {
+      bucket.scheduled++;
+    } else if (lesson.status === LessonStatus.COMPLETED) {
+      bucket.completed++;
+    } else if (lesson.status === LessonStatus.CANCELLED) {
+      bucket.cancelled++;
+    }
   }
 
   return Array.from(buckets.values());

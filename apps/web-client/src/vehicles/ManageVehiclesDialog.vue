@@ -312,7 +312,9 @@ function cancelEdit() {
 }
 
 async function handleUpdate(id: string) {
-  if (!editForm.categoryId) return;
+  if (!editForm.categoryId) {
+    return;
+  }
   try {
     await vehicleStore.updateVehicle(id, {
       make: editForm.make,
@@ -338,7 +340,9 @@ async function handleDelete(vehicle: VehicleDto) {
 }
 
 async function handleCreate() {
-  if (!newForm.categoryId) return;
+  if (!newForm.categoryId) {
+    return;
+  }
   try {
     await vehicleStore.createVehicle({
       make: newForm.make,

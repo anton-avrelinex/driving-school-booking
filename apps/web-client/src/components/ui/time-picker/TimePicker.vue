@@ -64,12 +64,16 @@ const minuteStr = computed(() =>
 );
 
 function setHour(v: unknown) {
-  if (typeof v !== "string") return;
+  if (typeof v !== "string") {
+    return;
+  }
   model.value = new Time(parseInt(v, 10), model.value?.minute ?? 0);
 }
 
 function setMinute(v: unknown) {
-  if (typeof v !== "string") return;
+  if (typeof v !== "string") {
+    return;
+  }
   model.value = new Time(model.value?.hour ?? 0, parseInt(v, 10));
 }
 </script>

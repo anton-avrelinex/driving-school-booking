@@ -47,7 +47,9 @@ const nestLabel = computed(
   () => Object.keys(props.payload).length === 1 && props.indicator !== "dot",
 );
 const tooltipLabel = computed(() => {
-  if (props.hideLabel) return null;
+  if (props.hideLabel) {
+    return null;
+  }
   if (props.labelFormatter && props.x !== undefined) {
     return props.labelFormatter(props.x);
   }

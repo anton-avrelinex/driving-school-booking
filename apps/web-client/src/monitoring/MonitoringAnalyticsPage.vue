@@ -282,9 +282,12 @@ function buildFilters(): TimeSeriesFilters {
     to: dateEnd(filterTo.value),
     granularity: granularity.value,
   };
-  if (filterSchoolId.value.trim())
+  if (filterSchoolId.value.trim()) {
     filters.schoolId = filterSchoolId.value.trim();
-  if (filterUserId.value.trim()) filters.userId = filterUserId.value.trim();
+  }
+  if (filterUserId.value.trim()) {
+    filters.userId = filterUserId.value.trim();
+  }
   return filters;
 }
 
@@ -325,7 +328,9 @@ const eventSeriesData = computed<Record<string, unknown>[]>(() => {
   const bucketMap = new Map<string, Record<string, unknown>>();
   for (const d of store.eventCountSeries) {
     const key = d.bucket.toAbsoluteString();
-    if (!bucketMap.has(key)) bucketMap.set(key, { bucket: d.bucket.toDate() });
+    if (!bucketMap.has(key)) {
+      bucketMap.set(key, { bucket: d.bucket.toDate() });
+    }
     bucketMap.get(key)![d.event] = d.count;
   }
   return [...bucketMap.values()];
@@ -345,8 +350,12 @@ const eventSeriesConfig = computed<ChartConfig>(() => {
 // Route selector for page view/load trends
 const allRoutes = computed(() => {
   const routes = new Set<string>();
-  for (const d of store.pageViewSeries) routes.add(d.route);
-  for (const d of store.pageLoadSeries) routes.add(d.route);
+  for (const d of store.pageViewSeries) {
+    routes.add(d.route);
+  }
+  for (const d of store.pageLoadSeries) {
+    routes.add(d.route);
+  }
   return [...routes].sort();
 });
 

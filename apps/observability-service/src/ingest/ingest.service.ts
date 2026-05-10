@@ -17,7 +17,9 @@ export class IngestService {
   ) {}
 
   async ingestLogs(logs: AppLogItemDto[], user: JwtPayload): Promise<void> {
-    if (logs.length === 0) return;
+    if (logs.length === 0) {
+      return;
+    }
 
     const docs = logs.map((log) => ({
       ...log,
@@ -35,7 +37,9 @@ export class IngestService {
     events: AnalyticsEventItemDto[],
     user: JwtPayload,
   ): Promise<void> {
-    if (events.length === 0) return;
+    if (events.length === 0) {
+      return;
+    }
 
     const docs = events.map((event) => ({
       ...event,

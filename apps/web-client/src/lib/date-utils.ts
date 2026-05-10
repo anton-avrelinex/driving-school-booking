@@ -26,11 +26,17 @@ export function timeToString(t: Time): string {
   return `${pad(t.hour)}:${pad(t.minute)}`;
 }
 
-export function dateStart(d: CalendarDate, timezone = getLocalTimeZone()): string {
+export function dateStart(
+  d: CalendarDate,
+  timezone = getLocalTimeZone(),
+): string {
   return d.toDate(timezone).toISOString();
 }
 
-export function dateEnd(d: CalendarDate, timezone = getLocalTimeZone()): string {
+export function dateEnd(
+  d: CalendarDate,
+  timezone = getLocalTimeZone(),
+): string {
   return toCalendarDateTime(d, new Time(23, 59, 59, 999))
     .toDate(timezone)
     .toISOString();

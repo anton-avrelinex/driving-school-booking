@@ -2,10 +2,16 @@
   <WeekCalendarGrid :week-anchor="weekAnchor">
     <template #cell="{ day, timeOfDayToVerticalPercent }">
       <div
-        v-for="(band, i) in bandsForDayOfWeek(day.dayOfWeek, timeOfDayToVerticalPercent)"
+        v-for="(band, i) in bandsForDayOfWeek(
+          day.dayOfWeek,
+          timeOfDayToVerticalPercent,
+        )"
         :key="`band-${i}`"
         class="absolute left-0 right-0 bg-emerald-100/40 dark:bg-emerald-900/20 pointer-events-none"
-        :style="{ top: band.topPercent + '%', height: band.heightPercent + '%' }"
+        :style="{
+          top: band.topPercent + '%',
+          height: band.heightPercent + '%',
+        }"
       />
 
       <button
@@ -14,7 +20,10 @@
         type="button"
         class="absolute left-1 right-1 rounded p-1 text-[11px] text-left overflow-hidden hover:opacity-90 transition-opacity border min-h-9"
         :class="lessonChipClass(chip.lesson.status)"
-        :style="{ top: chip.topPercent + '%', height: chip.heightPercent + '%' }"
+        :style="{
+          top: chip.topPercent + '%',
+          height: chip.heightPercent + '%',
+        }"
         @click="$emit('lesson-click', chip.lesson)"
       >
         <div class="font-medium">

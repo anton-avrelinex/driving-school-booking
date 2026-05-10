@@ -12,7 +12,10 @@
           :class="day.isToday ? 'bg-accent/40' : 'bg-muted/40'"
         >
           <slot name="header" :day="day">
-            <div class="font-medium" :class="{ 'text-foreground': day.isToday }">
+            <div
+              class="font-medium"
+              :class="{ 'text-foreground': day.isToday }"
+            >
               {{ day.shortLabel }}
             </div>
             <div

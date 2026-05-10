@@ -20,8 +20,9 @@ export class SchoolConfigService {
     schoolId: string,
     dto: UpdateSchoolConfigDto,
   ): Promise<SchoolConfigDto> {
-    if (dto.timezone !== undefined)
+    if (dto.timezone !== undefined) {
       await assertTimezoneValid(this.prisma, dto.timezone);
+    }
 
     const config = await this.prisma.schoolConfig.upsert({
       where: { schoolId },

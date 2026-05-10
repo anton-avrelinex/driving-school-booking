@@ -139,7 +139,9 @@ export class HealthCheckRunnerService {
 
   private async probeObsSelf(): Promise<void> {
     const db = this.mongoConnection.db;
-    if (!db) throw new Error("MongoDB not initialized");
+    if (!db) {
+      throw new Error("MongoDB not initialized");
+    }
     await db.admin().ping({ timeoutMS: 2000 });
     await this.probeRedis();
   }
@@ -166,7 +168,9 @@ export class HealthCheckRunnerService {
 
   private async probeMongo(): Promise<void> {
     const db = this.mongoConnection.db;
-    if (!db) throw new Error("MongoDB not initialized");
+    if (!db) {
+      throw new Error("MongoDB not initialized");
+    }
     await db.admin().ping({ timeoutMS: 2000 });
   }
 
