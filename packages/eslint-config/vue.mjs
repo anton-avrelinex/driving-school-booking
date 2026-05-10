@@ -1,8 +1,7 @@
 import { defineConfig } from "eslint/config";
-import { createBaseConfig } from "./base.mjs";
+import { createBaseConfig, prettierOverrides } from "./base.mjs";
 import pluginVue from "eslint-plugin-vue";
 import tseslint from "typescript-eslint";
-import eslintConfigPrettier from "eslint-config-prettier";
 
 const extraFileExtensions = [".vue"];
 
@@ -43,6 +42,6 @@ export function createVueConfig(tsconfigRootDir) {
         "vue/require-default-prop": "off",
       },
     },
-    eslintConfigPrettier,
+    prettierOverrides,
   );
 }
