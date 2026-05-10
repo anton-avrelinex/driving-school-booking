@@ -432,6 +432,9 @@ importers:
         specifier: ^0.2.0
         version: 0.2.2
     devDependencies:
+      '@driving-school-booking/eslint-config':
+        specifier: workspace:^
+        version: link:../eslint-config
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
@@ -457,11 +460,18 @@ importers:
         specifier: ^7.0.0
         version: 7.8.2
     devDependencies:
+      '@driving-school-booking/eslint-config':
+        specifier: workspace:^
+        version: link:../eslint-config
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
 
-  packages/shared-types: {}
+  packages/shared-types:
+    devDependencies:
+      '@driving-school-booking/eslint-config':
+        specifier: workspace:^
+        version: link:../eslint-config
 
 packages:
 

@@ -13,7 +13,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "lint": "eslint --cache ."
   },
   "dependencies": {
     "@driving-school-booking/shared-types": "workspace:^"
@@ -25,6 +26,7 @@
     "rxjs": "^7.0.0"
   },
   "devDependencies": {
+    "@driving-school-booking/eslint-config": "workspace:^",
     "@types/express": "^5.0.0"
   }
 }
