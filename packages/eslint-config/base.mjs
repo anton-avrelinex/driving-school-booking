@@ -26,6 +26,7 @@ export function createBaseConfig(tsconfigRootDir) {
         ],
         "@typescript-eslint/no-floating-promises": "error",
         "@typescript-eslint/no-explicit-any": "warn",
+        "no-console": "warn",
         eqeqeq: ["error", "always", { null: "ignore" }],
       },
     },
