@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { Router } from "vue-router";
 import {
   ANALYTICS_EVENTS,
