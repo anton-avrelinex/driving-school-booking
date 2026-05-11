@@ -80,7 +80,7 @@ import {
 } from "@internationalized/date";
 import { WEEK_LOCALE } from "@/lib/date-utils";
 
-export interface WeekDay {
+interface WeekDay {
   date: CalendarDate;
   dayOfWeek: number; // canonical JS/Postgres day-of-week (Sunday = 0..Saturday = 6)
   isToday: boolean;

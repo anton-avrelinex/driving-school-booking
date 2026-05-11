@@ -1,13 +1,15 @@
 import { ref, type Ref } from "vue";
 import { defineStore } from "pinia";
 import { useI18n } from "vue-i18n";
-import type {
-  AvailableInstructorDto,
-  AvailableSlotDto,
-  CreateLessonDto,
-  LessonDto,
+import {
+  ANALYTICS_EVENTS,
+  type AvailableInstructorDto,
+  type AvailableSlotDto,
+  type CreateLessonDto,
+  type LessonDto,
 } from "@driving-school-booking/shared-types";
 import api from "@/api/api";
+import { trackEvent } from "@/observability";
 import {
   type LessonModel,
   type SlotModel,
@@ -85,6 +87,9 @@ export const useLessonStore = defineStore("lessons", () => {
     saving.value = true;
     try {
       const { data } = await api.post<LessonDto>("/lessons", dto);
+      trackEvent(ANALYTICS_EVENTS.LESSON_BOOKED, {
+        instructorId: dto.instructorId,
+      });
       return toLessonModel(data);
     } finally {
       saving.value = false;

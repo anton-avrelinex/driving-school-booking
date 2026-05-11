@@ -1,7 +1,4 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
-
-export type HealthCheckDocument = HydratedDocument<HealthCheck>;
 
 @Schema({ collection: "health_checks", timestamps: false })
 export class HealthCheck {

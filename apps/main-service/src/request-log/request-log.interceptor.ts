@@ -8,7 +8,7 @@ import {
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
 import { Observable, tap } from "rxjs";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import {
   OBS_LOGS_QUEUE,
   LOG_TYPES,

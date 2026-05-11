@@ -6,7 +6,7 @@ import { createPinia } from "pinia";
 
 import App from "./App.vue";
 import router from "./router";
-import { initObservability } from "./observability";
+import { initObservability, logInfo } from "./observability";
 
 const datetimeFormats = {
   date: { year: "numeric", month: "numeric", day: "numeric" },
@@ -59,5 +59,6 @@ app.use(createPinia());
 app.use(router);
 
 initObservability(router);
+logInfo("App started");
 
 app.mount("#app");

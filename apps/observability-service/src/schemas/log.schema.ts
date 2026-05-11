@@ -1,12 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
 import {
   LOG_TYPES,
   type LogLevel,
   type Service,
 } from "@driving-school-booking/shared-types";
-
-export type LogDocument = HydratedDocument<Log>;
 
 @Schema({
   collection: "logs",
@@ -36,7 +33,7 @@ LogSchema.index({ message: "text" }, { sparse: true });
 LogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });
 
 @Schema()
-export class RequestLogEntry {
+class RequestLogEntry {
   @Prop({ required: true })
   method!: string;
 
@@ -54,7 +51,7 @@ export const RequestLogEntrySchema =
   SchemaFactory.createForClass(RequestLogEntry);
 
 @Schema()
-export class AppLogEntry {
+class AppLogEntry {
   @Prop({ required: true })
   level!: LogLevel;
 

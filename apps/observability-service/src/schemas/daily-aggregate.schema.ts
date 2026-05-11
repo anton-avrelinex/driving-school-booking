@@ -1,12 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
 import type {
   DailyAggregateMetrics,
   HealthSummaryDto,
   TopEndpointAggregate,
 } from "@driving-school-booking/shared-types";
-
-export type DailyAggregateDocument = HydratedDocument<DailyAggregate>;
 
 @Schema({ collection: "daily_aggregates", timestamps: false })
 export class DailyAggregate {

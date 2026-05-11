@@ -17,7 +17,7 @@ export interface SchoolHandle {
   ): Promise<StudentHandle>;
 }
 
-export interface InstructorHandle {
+interface InstructorHandle {
   userId: string;
   instructorProfileId: string;
   setAvailability(
@@ -27,7 +27,7 @@ export interface InstructorHandle {
   ): Promise<void>;
 }
 
-export interface StudentHandle {
+interface StudentHandle {
   userId: string;
   studentProfileId: string;
   enrollmentId: string;

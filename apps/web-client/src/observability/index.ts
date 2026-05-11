@@ -4,6 +4,7 @@ import {
   LOG_LEVELS,
   LOG_TYPES,
   SERVICES,
+  type AnalyticsEventName,
   type AppLogDto,
   type AnalyticsEventDto,
 } from "@driving-school-booking/shared-types";
@@ -48,7 +49,7 @@ function bufferLog(
 }
 
 function bufferAnalyticsEvent(
-  event: string,
+  event: AnalyticsEventName,
   properties?: Record<string, unknown>,
 ): void {
   analyticsBuffer.push({
@@ -110,7 +111,7 @@ export function logInfo(
 }
 
 export function trackEvent(
-  event: string,
+  event: AnalyticsEventName,
   properties?: Record<string, unknown>,
 ): void {
   bufferAnalyticsEvent(event, properties);

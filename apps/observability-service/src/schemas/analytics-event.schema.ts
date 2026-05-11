@@ -1,8 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
 import type { Service } from "@driving-school-booking/shared-types";
-
-export type AnalyticsEventDocument = HydratedDocument<AnalyticsEvent>;
 
 @Schema({ collection: "analytics_events", timestamps: false })
 export class AnalyticsEvent {

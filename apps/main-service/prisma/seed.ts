@@ -76,6 +76,7 @@ async function main() {
     });
   }
 
+  // eslint-disable-next-line no-console
   console.log(
     `Seed complete: admin@demo.com / admin123, ${categoryNames.length} categories`,
   );
@@ -83,6 +84,7 @@ async function main() {
 
 main()
   .catch((e) => {
+    // eslint-disable-next-line no-console
     console.error(e);
     process.exit(1);
   })
