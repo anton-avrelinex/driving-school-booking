@@ -11,6 +11,9 @@ import { USER_SELECT } from "./user.selects";
 import { toUserDto } from "./user.mappers";
 import { ListUsersQueryDto } from "./dto/list-users-query.dto";
 import { UserStatus } from "../generated/prisma/enums";
+import { BCRYPT_ROUNDS } from "../common/auth-constants";
+
+const TEMP_PASSWORD_LENGTH = 12;
 
 @Injectable()
 export class UserService {
@@ -35,8 +38,10 @@ export class UserService {
       throw new ConflictException("A user with this email already exists");
     }
 
-    const temporaryPassword = randomBytes(9).toString("base64url").slice(0, 12);
-    const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+    const temporaryPassword = randomBytes(9)
+      .toString("base64url")
+      .slice(0, TEMP_PASSWORD_LENGTH);
+    const passwordHash = await bcrypt.hash(temporaryPassword, BCRYPT_ROUNDS);
 
     const user = await this.prisma.user.create({
       data: {

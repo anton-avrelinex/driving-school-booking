@@ -16,6 +16,8 @@ import { ROLES } from "@driving-school-booking/shared-types";
 import { HealthSummaryService } from "./health-summary.service";
 import { HealthSummaryFiltersDto } from "./dto/health-summary-filters.dto";
 
+const HEALTH_CHECK_TIMEOUT_MS = 500;
+
 @Controller("health")
 export class HealthController {
   constructor(
@@ -31,7 +33,7 @@ export class HealthController {
         throw new Error("Database not initialized");
       }
 
-      await db.admin().ping({ timeoutMS: 500 });
+      await db.admin().ping({ timeoutMS: HEALTH_CHECK_TIMEOUT_MS });
       return { status: "ok", db: "connected" };
     } catch {
       throw new ServiceUnavailableException({

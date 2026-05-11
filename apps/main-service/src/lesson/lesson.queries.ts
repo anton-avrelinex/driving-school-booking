@@ -1,4 +1,5 @@
 import { Prisma } from "../generated/prisma/client";
+import { LessonStatus, UserStatus } from "../generated/prisma/enums";
 
 // SQL queries powering /lessons/availability/*. Behavioral spec lives in
 // lesson.queries.spec.ts — read the test names first if you're new here.
@@ -53,7 +54,7 @@ export function slotsQuery(p: SlotsParams): Prisma.Sql {
       JOIN users u ON u.id = ip."userId"
       JOIN "_CourseToInstructorProfile" cip ON cip."B" = ip.id
       WHERE u."schoolId" = ${p.schoolId}
-        AND u.status = 'ACTIVE'
+        AND u.status = ${UserStatus.ACTIVE}::"UserStatus"
         AND cip."A" = ${p.courseId}
         AND (${p.instructorUserId}::text IS NULL OR u.id = ${p.instructorUserId}::text)
     ),
@@ -105,7 +106,7 @@ export function slotsQuery(p: SlotsParams): Prisma.Sql {
       -- Drop slots overlapping a lesson the same instructor is already on.
       AND NOT EXISTS (
         SELECT 1 FROM lessons l
-        WHERE l.status = 'SCHEDULED'
+        WHERE l.status = ${LessonStatus.SCHEDULED}::"LessonStatus"
           AND l."instructorId" = cs."instructorId"
           AND l."startTime" < cs.slot_end
           AND l."endTime" > cs.slot_start
@@ -114,7 +115,7 @@ export function slotsQuery(p: SlotsParams): Prisma.Sql {
       AND NOT EXISTS (
         SELECT 1 FROM lessons sl
         JOIN enrollments e ON e.id = sl."enrollmentId"
-        WHERE sl.status = 'SCHEDULED'
+        WHERE sl.status = ${LessonStatus.SCHEDULED}::"LessonStatus"
           AND e."studentProfileId" = ${p.studentProfileId}
           AND sl."startTime" < cs.slot_end
           AND sl."endTime" > cs.slot_start
@@ -122,7 +123,7 @@ export function slotsQuery(p: SlotsParams): Prisma.Sql {
       -- Require at least one matching vehicle free at this time.
       AND (SELECT n FROM total_vehicles) - (
         SELECT COUNT(*) FROM lessons vl
-        WHERE vl.status = 'SCHEDULED'
+        WHERE vl.status = ${LessonStatus.SCHEDULED}::"LessonStatus"
           AND vl."schoolId" = ${p.schoolId}
           AND vl."vehicleId" IS NOT NULL
           AND vl."startTime" < cs.slot_end

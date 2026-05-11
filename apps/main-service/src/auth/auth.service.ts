@@ -16,6 +16,7 @@ import { USER_SELECT } from "../user/user.selects";
 import { toUserDto } from "../user/user.mappers";
 import type { UserModel } from "../generated/prisma/models/User";
 import { UserStatus } from "../generated/prisma/enums";
+import { BCRYPT_ROUNDS } from "../common/auth-constants";
 
 @Injectable()
 export class AuthService {
@@ -70,7 +71,7 @@ export class AuthService {
       throw new UnauthorizedException("Current password is incorrect");
     }
 
-    const passwordHash = await bcrypt.hash(newPassword, 10);
+    const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
 
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },

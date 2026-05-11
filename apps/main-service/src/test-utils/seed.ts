@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient, Prisma } from "../generated/prisma/client";
+import { Role, Transmission, UserStatus } from "../generated/prisma/enums";
 
 export interface SchoolHandle {
   id: string;
@@ -65,7 +66,7 @@ export async function seedSchool(
       price: 100,
       hours: 30,
       categoryId: category.id,
-      transmission: "AUTOMATIC",
+      transmission: Transmission.AUTOMATIC,
     },
   });
 
@@ -98,7 +99,7 @@ async function createVehicle(
       make: "VW",
       model: "Golf",
       licensePlate: `PL-${randomUUID().slice(0, 6)}`,
-      transmission: "AUTOMATIC",
+      transmission: Transmission.AUTOMATIC,
       ...overrides,
     },
   });
@@ -118,8 +119,8 @@ async function createInstructor(
       passwordHash: "x",
       firstName: "Inst",
       lastName: "Ructor",
-      role: "INSTRUCTOR",
-      status: "ACTIVE",
+      role: Role.INSTRUCTOR,
+      status: UserStatus.ACTIVE,
       mustChangePassword: false,
       ...overrides,
       instructorProfile: {
@@ -159,8 +160,8 @@ async function createStudent(
       passwordHash: "x",
       firstName: "Stu",
       lastName: "Dent",
-      role: "STUDENT",
-      status: "ACTIVE",
+      role: Role.STUDENT,
+      status: UserStatus.ACTIVE,
       mustChangePassword: false,
       ...overrides,
       studentProfile: { create: {} },
