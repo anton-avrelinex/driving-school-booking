@@ -1,6 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient, Prisma } from "../generated/prisma/client";
-import { Role, Transmission, UserStatus } from "../generated/prisma/enums";
+import {
+  EnrollmentStatus,
+  LessonStatus,
+  Role,
+  Transmission,
+  UserStatus,
+} from "../generated/prisma/enums";
 
 export interface SchoolHandle {
   id: string;
@@ -177,7 +183,7 @@ async function createStudent(
       courseId,
       hoursPurchased: 30,
       hoursCompleted: 0,
-      status: "ACTIVE",
+      status: EnrollmentStatus.ACTIVE,
     },
   });
 
@@ -194,7 +200,7 @@ async function createStudent(
           vehicleId: args.vehicleId ?? null,
           startTime: args.startTime,
           endTime: args.endTime,
-          status: "SCHEDULED",
+          status: LessonStatus.SCHEDULED,
         },
       });
       return lesson.id;
