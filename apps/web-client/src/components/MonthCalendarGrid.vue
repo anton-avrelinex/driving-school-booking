@@ -47,7 +47,7 @@ import {
 } from "@internationalized/date";
 import { WEEK_LOCALE } from "@/lib/date-utils";
 
-export interface MonthDay {
+interface MonthDay {
   date: CalendarDate;
   inMonth: boolean;
   isToday: boolean;

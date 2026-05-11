@@ -2,6 +2,8 @@ import { Controller, Get, ServiceUnavailableException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { RedisService } from "../redis/redis.service";
 
+const HEALTH_CHECK_TIMEOUT_MS = 500;
+
 @Controller("health")
 export class HealthController {
   constructor(
@@ -24,7 +26,10 @@ export class HealthController {
       await Promise.race([
         this.redis.ping(),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("timeout")), 500),
+          setTimeout(
+            () => reject(new Error("timeout")),
+            HEALTH_CHECK_TIMEOUT_MS,
+          ),
         ),
       ]);
       health.redis = "connected";

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "tags": ["-lintignore"],
+  "ignoreBinaries": ["eslint", "nest", "tsx"],
+  "ignoreDependencies": ["eslint"],
+  "workspaces": {
+    "apps/main-service": {
+      "entry": ["src/main.ts!", "src/**/*.spec.ts", "eslint.config.mjs"],
+      "ignore": ["src/test-utils/**", "prisma/seed.ts"],
+      "ignoreDependencies": [
+        "@prisma/client",
+        "dotenv",
+        "pg",
+        "source-map-support",
+        "ts-loader"
+      ]
+    },
+    "apps/observability-service": {
+      "entry": [
+        "src/main.ts!",
+        "src/**/*.spec.ts",
+        "test/**/*.e2e-spec.ts",
+        "eslint.config.mjs"
+      ],
+      "ignoreDependencies": ["source-map-support", "ts-loader"]
+    },
+    "apps/web-client": {
+      "entry": ["env.d.ts", "eslint.config.mjs"],
+      "ignore": ["src/components/ui/**"],
+      "ignoreDependencies": ["@tanstack/vue-table"]
+    },
+    "packages/eslint-config": {},
+    "packages/nestjs-auth": {
+      "entry": ["eslint.config.mjs"]
+    },
+    "packages/nestjs-logger": {
+      "entry": ["eslint.config.mjs"]
+    },
+    "packages/shared-types": {
+      "entry": ["eslint.config.mjs"]
+    }
+  }
+}

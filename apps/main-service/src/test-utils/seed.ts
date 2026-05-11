@@ -1,5 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient, Prisma } from "../generated/prisma/client";
+import {
+  EnrollmentStatus,
+  LessonStatus,
+  Role,
+  Transmission,
+  UserStatus,
+} from "../generated/prisma/enums";
 
 export interface SchoolHandle {
   id: string;
@@ -17,7 +24,7 @@ export interface SchoolHandle {
   ): Promise<StudentHandle>;
 }
 
-export interface InstructorHandle {
+interface InstructorHandle {
   userId: string;
   instructorProfileId: string;
   setAvailability(
@@ -27,7 +34,7 @@ export interface InstructorHandle {
   ): Promise<void>;
 }
 
-export interface StudentHandle {
+interface StudentHandle {
   userId: string;
   studentProfileId: string;
   enrollmentId: string;
@@ -65,7 +72,7 @@ export async function seedSchool(
       price: 100,
       hours: 30,
       categoryId: category.id,
-      transmission: "AUTOMATIC",
+      transmission: Transmission.AUTOMATIC,
     },
   });
 
@@ -98,7 +105,7 @@ async function createVehicle(
       make: "VW",
       model: "Golf",
       licensePlate: `PL-${randomUUID().slice(0, 6)}`,
-      transmission: "AUTOMATIC",
+      transmission: Transmission.AUTOMATIC,
       ...overrides,
     },
   });
@@ -118,8 +125,8 @@ async function createInstructor(
       passwordHash: "x",
       firstName: "Inst",
       lastName: "Ructor",
-      role: "INSTRUCTOR",
-      status: "ACTIVE",
+      role: Role.INSTRUCTOR,
+      status: UserStatus.ACTIVE,
       mustChangePassword: false,
       ...overrides,
       instructorProfile: {
@@ -159,8 +166,8 @@ async function createStudent(
       passwordHash: "x",
       firstName: "Stu",
       lastName: "Dent",
-      role: "STUDENT",
-      status: "ACTIVE",
+      role: Role.STUDENT,
+      status: UserStatus.ACTIVE,
       mustChangePassword: false,
       ...overrides,
       studentProfile: { create: {} },
@@ -176,7 +183,7 @@ async function createStudent(
       courseId,
       hoursPurchased: 30,
       hoursCompleted: 0,
-      status: "ACTIVE",
+      status: EnrollmentStatus.ACTIVE,
     },
   });
 
@@ -193,7 +200,7 @@ async function createStudent(
           vehicleId: args.vehicleId ?? null,
           startTime: args.startTime,
           endTime: args.endTime,
-          status: "SCHEDULED",
+          status: LessonStatus.SCHEDULED,
         },
       });
       return lesson.id;

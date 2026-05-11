@@ -1,6 +1,7 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import {
+  ANALYTICS_EVENTS,
   ROLES,
   type JwtPayload,
   type TokenResponseDto,
@@ -13,6 +14,7 @@ import {
   clearTokens as removeTokens,
 } from "@/api/token";
 import router from "@/router";
+import { logWarn, trackEvent } from "@/observability";
 
 function parseJwt(token: string): JwtPayload {
   const base64 = token.split(".")[1]!;
@@ -72,6 +74,9 @@ export const useAuthStore = defineStore("auth", () => {
       password,
     });
     setTokens(data.accessToken, data.refreshToken);
+    trackEvent(ANALYTICS_EVENTS.LOGIN, {
+      role: parseJwt(data.accessToken).role,
+    });
     return data;
   }
 
@@ -88,6 +93,7 @@ export const useAuthStore = defineStore("auth", () => {
 
       return true;
     } catch {
+      logWarn("Token refresh failed");
       return false;
     }
   }

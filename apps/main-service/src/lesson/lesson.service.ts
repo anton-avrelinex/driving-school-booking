@@ -9,13 +9,20 @@ import type {
   AvailableSlotDto,
   LessonDto,
 } from "@driving-school-booking/shared-types";
-import { LessonStatus, Role } from "../generated/prisma/enums";
+import {
+  EnrollmentStatus,
+  LessonStatus,
+  Role,
+  UserStatus,
+} from "../generated/prisma/enums";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { AssignVehicleDto } from "./dto/assign-vehicle.dto";
 import { LESSON_SELECT } from "./lesson.selects";
 import { toLessonDto } from "./lesson.mappers";
 import { slotsQuery } from "./lesson.queries";
+
+const DEFAULT_LESSON_DURATION_MIN = 120;
 
 @Injectable()
 export class LessonService {
@@ -47,7 +54,7 @@ export class LessonService {
 
     const instructors = await this.prisma.instructorProfile.findMany({
       where: {
-        user: { schoolId, status: "ACTIVE" },
+        user: { schoolId, status: UserStatus.ACTIVE },
         courses: { some: { id: enrollment.courseId } },
       },
       select: {
@@ -92,7 +99,8 @@ export class LessonService {
         studentProfileId,
         categoryId: enrollment.course.categoryId,
         transmission: enrollment.course.transmission,
-        durationMin: schoolConfig?.defaultLessonDurationMin ?? 120,
+        durationMin:
+          schoolConfig?.defaultLessonDurationMin ?? DEFAULT_LESSON_DURATION_MIN,
         schoolTz: schoolConfig?.timezone ?? "UTC",
       }),
     );
@@ -112,7 +120,7 @@ export class LessonService {
 
     const instructorProfile = await this.prisma.instructorProfile.findFirst({
       where: {
-        user: { id: dto.instructorId, schoolId, status: "ACTIVE" },
+        user: { id: dto.instructorId, schoolId, status: UserStatus.ACTIVE },
         courses: { some: { id: enrollment.courseId } },
       },
       select: { id: true },
@@ -128,7 +136,8 @@ export class LessonService {
       where: { schoolId },
       select: { defaultLessonDurationMin: true },
     });
-    const durationMin = schoolConfig?.defaultLessonDurationMin ?? 120;
+    const durationMin =
+      schoolConfig?.defaultLessonDurationMin ?? DEFAULT_LESSON_DURATION_MIN;
 
     const startTime = new Date(dto.startTime);
     const endTime = new Date(startTime.getTime() + durationMin * 60 * 1000);
@@ -285,7 +294,7 @@ export class LessonService {
         where: { id: lesson.enrollmentId },
         data: {
           hoursCompleted: { increment: lessonHours },
-          ...(enrollmentCompleted && { status: "COMPLETED" }),
+          ...(enrollmentCompleted && { status: EnrollmentStatus.COMPLETED }),
         },
       }),
     ]);
@@ -431,7 +440,7 @@ export class LessonService {
     if (enrollment.studentProfileId !== studentProfileId) {
       throw new ForbiddenException("Enrollment does not belong to student");
     }
-    if (opts.requireActive && enrollment.status !== "ACTIVE") {
+    if (opts.requireActive && enrollment.status !== EnrollmentStatus.ACTIVE) {
       throw new BadRequestException("Enrollment is not active");
     }
     return enrollment;

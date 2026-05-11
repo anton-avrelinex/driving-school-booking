@@ -1,6 +1,7 @@
 import { slotsQuery } from "./lesson.queries";
 import { createTestDb, type TestDb } from "../test-utils/pglite";
 import { seedSchool } from "../test-utils/seed";
+import { Transmission } from "../generated/prisma/enums";
 
 const FROM = new Date("2026-05-04T00:00:00.000Z"); // Monday
 const TO = new Date("2026-05-05T00:00:00.000Z"); // Tuesday (exclusive)
@@ -42,7 +43,7 @@ describe("lesson.queries", () => {
           instructorUserId: null,
           studentProfileId: student.studentProfileId,
           categoryId: school.categoryId,
-          transmission: "AUTOMATIC",
+          transmission: Transmission.AUTOMATIC,
           durationMin: 120,
           schoolTz: "UTC",
         }),
@@ -71,7 +72,7 @@ describe("lesson.queries", () => {
           instructorUserId: null,
           studentProfileId: student.studentProfileId,
           categoryId: school.categoryId,
-          transmission: "AUTOMATIC",
+          transmission: Transmission.AUTOMATIC,
           durationMin: 120,
           schoolTz: "Asia/Tokyo",
         }),
@@ -100,7 +101,7 @@ describe("lesson.queries", () => {
           instructorUserId: null,
           studentProfileId: student.studentProfileId,
           categoryId: school.categoryId,
-          transmission: "AUTOMATIC",
+          transmission: Transmission.AUTOMATIC,
           durationMin: 120,
           schoolTz: "Europe/Berlin",
         }),
@@ -120,7 +121,7 @@ describe("lesson.queries", () => {
           instructorUserId: null,
           studentProfileId: student.studentProfileId,
           categoryId: school.categoryId,
-          transmission: "AUTOMATIC",
+          transmission: Transmission.AUTOMATIC,
           durationMin: 120,
           schoolTz: "Europe/Berlin",
         }),
@@ -153,7 +154,7 @@ describe("lesson.queries", () => {
           instructorUserId: null,
           studentProfileId: student.studentProfileId,
           categoryId: school.categoryId,
-          transmission: "AUTOMATIC",
+          transmission: Transmission.AUTOMATIC,
           durationMin: 120,
           schoolTz: "UTC",
         }),
@@ -190,7 +191,7 @@ describe("lesson.queries", () => {
           instructorUserId: null,
           studentProfileId: student.studentProfileId,
           categoryId: school.categoryId,
-          transmission: "AUTOMATIC",
+          transmission: Transmission.AUTOMATIC,
           durationMin: 120,
           schoolTz: "UTC",
         }),
@@ -223,7 +224,7 @@ describe("lesson.queries", () => {
           instructorUserId: null,
           studentProfileId: student.studentProfileId,
           categoryId: school.categoryId,
-          transmission: "AUTOMATIC",
+          transmission: Transmission.AUTOMATIC,
           durationMin: 120,
           schoolTz: "UTC",
         }),

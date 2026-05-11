@@ -4,6 +4,8 @@ export const OBS_ANALYTICS_QUEUE = "obs-analytics" as const;
 export const ANALYTICS_EVENTS = {
   PAGE_VIEW: "page_view",
   PAGE_LOAD: "page_load",
+  LOGIN: "login",
+  LESSON_BOOKED: "lesson_booked",
 } as const;
 
 export type AnalyticsEventName =

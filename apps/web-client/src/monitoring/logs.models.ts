@@ -8,7 +8,7 @@ import type {
 } from "@driving-school-booking/shared-types";
 import { parseISOToZoned } from "@/lib/date-utils";
 
-export interface RequestLogModel {
+interface RequestLogModel {
   type: "request";
   service: Service;
   timestamp: ZonedDateTime;
@@ -20,7 +20,7 @@ export interface RequestLogModel {
   durationMs: number;
 }
 
-export interface AppLogModel {
+interface AppLogModel {
   type: "app";
   service: Service;
   timestamp: ZonedDateTime;
@@ -32,7 +32,7 @@ export interface AppLogModel {
   stack: string | null;
 }
 
-export type LogItemModel = RequestLogModel | AppLogModel;
+type LogItemModel = RequestLogModel | AppLogModel;
 
 export interface LogSearchResultModel {
   items: LogItemModel[];
@@ -41,7 +41,7 @@ export interface LogSearchResultModel {
   limit: number;
 }
 
-export function toLogItemModel(dto: RequestLogDto | AppLogDto): LogItemModel {
+function toLogItemModel(dto: RequestLogDto | AppLogDto): LogItemModel {
   if (dto.type === "request") {
     return {
       type: "request",

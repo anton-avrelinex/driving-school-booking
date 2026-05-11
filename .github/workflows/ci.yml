@@ -34,6 +34,8 @@ jobs:
 
       - run: pnpm lint
 
+      - run: pnpm knip:production
+
       - run: pnpm check-types
 
       - run: pnpm test

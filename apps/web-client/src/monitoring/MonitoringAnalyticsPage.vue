@@ -65,164 +65,23 @@
       </div>
 
       <div v-else class="space-y-6">
-        <!-- Event Trends -->
-        <LineChart
-          v-if="eventSeriesData.length > 0"
-          :title="t('analytics_title_event_trends')"
-          :description="''"
-          :data="eventSeriesData"
-          :chart-config="eventSeriesConfig"
-          :line-keys="eventSeriesKeys"
-        />
-
-        <!-- Event Counts -->
-        <PieChart
-          v-if="store.eventCounts.length > 0"
-          :title="t('analytics_title_events')"
-          :description="''"
-          :items="eventItems"
-          :chart-config="eventConfig"
-          :central-sub-label="'events'"
-        />
-        <Card v-else>
-          <CardContent>
-            <EmptyState :title="t('common_no_results')" />
-          </CardContent>
-        </Card>
-
-        <!-- Page Views Table -->
-        <Card>
-          <CardHeader>
-            <CardTitle>{{ t("analytics_title_page_views") }}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table v-if="store.pageViews.length > 0">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{{ t("analytics_col_route") }}</TableHead>
-                  <TableHead class="text-right">
-                    {{ t("analytics_col_count") }}
-                  </TableHead>
-                  <TableHead class="text-right">
-                    {{ t("analytics_col_duration") }}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow v-for="pv in store.pageViews" :key="pv.route">
-                  <TableCell class="text-sm font-mono">{{
-                    pv.route
-                  }}</TableCell>
-                  <TableCell class="text-sm text-right">{{
-                    pv.count
-                  }}</TableCell>
-                  <TableCell class="text-sm text-right">
-                    {{ Math.round(pv.avgDurationMs) }}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-            <EmptyState v-else :title="t('common_no_results')" />
-          </CardContent>
-        </Card>
-
-        <!-- Performance Table -->
-        <Card>
-          <CardHeader>
-            <CardTitle>{{ t("analytics_title_performance") }}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table v-if="store.performance.length > 0">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{{ t("analytics_col_route") }}</TableHead>
-                  <TableHead class="text-right">
-                    {{ t("analytics_col_avg") }}
-                  </TableHead>
-                  <TableHead class="text-right">
-                    {{ t("analytics_col_p50") }}
-                  </TableHead>
-                  <TableHead class="text-right">
-                    {{ t("analytics_col_p95") }}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow v-for="p in store.performance" :key="p.route">
-                  <TableCell class="text-sm font-mono">{{ p.route }}</TableCell>
-                  <TableCell class="text-sm text-right">
-                    {{ Math.round(p.avg) }}
-                  </TableCell>
-                  <TableCell class="text-sm text-right">
-                    {{ Math.round(p.p50) }}
-                  </TableCell>
-                  <TableCell class="text-sm text-right">
-                    {{ Math.round(p.p95) }}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-            <EmptyState v-else :title="t('common_no_results')" />
-          </CardContent>
-        </Card>
-
-        <!-- Route selector for per-route trends -->
-        <div v-if="allRoutes.length > 0" class="flex items-center gap-2">
-          <Label>{{ t("analytics_col_route") }}</Label>
-          <Select v-model="selectedRoute">
-            <SelectTrigger class="w-64">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{{ t("common_all") }}</SelectItem>
-              <SelectItem
-                v-for="route in allRoutes"
-                :key="route"
-                :value="route"
-              >
-                {{ route }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <!-- Page View Trends (selected route) -->
-        <LineChart
-          v-if="pageViewSeriesData.length > 0"
-          :title="t('analytics_title_page_view_trends')"
-          :description="
-            selectedRoute === 'all' ? t('common_all') : selectedRoute
-          "
-          :data="pageViewSeriesData"
-          :chart-config="pageViewSeriesConfig"
-          :line-keys="['count']"
-        />
-
-        <!-- Page Load Trends (selected route) -->
-        <LineChart
-          v-if="pageLoadSeriesData.length > 0"
-          :title="t('analytics_title_page_load_trends')"
-          :description="
-            selectedRoute === 'all' ? t('common_all') : selectedRoute
-          "
-          :data="pageLoadSeriesData"
-          :chart-config="pageLoadSeriesConfig"
-          :line-keys="['avgLoadTimeMs']"
-          unit="ms"
-        />
+        <EventTrendsCard />
+        <EventCountsCard />
+        <PageViewsTable />
+        <PerformanceTable />
+        <RouteTrendsCard />
       </div>
     </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { ChartConfig } from "@/components/ui/chart";
 import {
   GRANULARITIES,
   type Granularity,
   type TimeSeriesFilters,
 } from "@driving-school-booking/shared-types";
-import { computed, onMounted, ref, type Ref } from "vue";
+import { onMounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   type CalendarDate,
@@ -234,8 +93,6 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import EmptyState from "@/components/EmptyState.vue";
-import { dateEnd, dateStart } from "@/lib/date-utils";
 import {
   Select,
   SelectContent,
@@ -243,27 +100,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { dateEnd, dateStart } from "@/lib/date-utils";
 import { useAnalyticsStore } from "./analytics.store";
-import PieChart from "./PieChart.vue";
-import type { PieItem } from "./PieChart.vue";
-import LineChart from "@/components/LineChart.vue";
-
-const CHART_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-];
+import EventTrendsCard from "./components/EventTrendsCard.vue";
+import EventCountsCard from "./components/EventCountsCard.vue";
+import PageViewsTable from "./components/PageViewsTable.vue";
+import PerformanceTable from "./components/PerformanceTable.vue";
+import RouteTrendsCard from "./components/RouteTrendsCard.vue";
 
 const { t } = useI18n();
 const store = useAnalyticsStore();
@@ -294,149 +137,6 @@ function buildFilters(): TimeSeriesFilters {
 async function applyFilters() {
   await store.fetchAll(buildFilters());
 }
-
-const eventItems = computed<PieItem[]>(() =>
-  store.eventCounts.map((ec, i) => ({
-    label: ec.event,
-    value: ec.count,
-    fill: CHART_COLORS[i % CHART_COLORS.length]!,
-    [ec.event]: ec.count,
-  })),
-);
-
-const eventConfig = computed<ChartConfig>(() => {
-  const config: ChartConfig = {};
-  store.eventCounts.forEach((ec, i) => {
-    config[ec.event] = {
-      label: ec.event,
-      color: CHART_COLORS[i % CHART_COLORS.length],
-    };
-  });
-  return config;
-});
-
-// Event count time-series: pivot from [{bucket, event, count}] to [{bucket, event1: n, event2: n}]
-const eventSeriesKeys = computed(() => {
-  const keys = new Set<string>();
-  for (const d of store.eventCountSeries) {
-    keys.add(d.event);
-  }
-  return [...keys];
-});
-
-const eventSeriesData = computed<Record<string, unknown>[]>(() => {
-  const bucketMap = new Map<string, Record<string, unknown>>();
-  for (const d of store.eventCountSeries) {
-    const key = d.bucket.toAbsoluteString();
-    if (!bucketMap.has(key)) {
-      bucketMap.set(key, { bucket: d.bucket.toDate() });
-    }
-    bucketMap.get(key)![d.event] = d.count;
-  }
-  return [...bucketMap.values()];
-});
-
-const eventSeriesConfig = computed<ChartConfig>(() => {
-  const config: ChartConfig = {};
-  eventSeriesKeys.value.forEach((key, i) => {
-    config[key] = {
-      label: key,
-      color: CHART_COLORS[i % CHART_COLORS.length],
-    };
-  });
-  return config;
-});
-
-// Route selector for page view/load trends
-const allRoutes = computed(() => {
-  const routes = new Set<string>();
-  for (const d of store.pageViewSeries) {
-    routes.add(d.route);
-  }
-  for (const d of store.pageLoadSeries) {
-    routes.add(d.route);
-  }
-  return [...routes].sort();
-});
-
-const selectedRoute = ref("all");
-
-// Page view series filtered to selected route (or aggregated for "all")
-const pageViewSeriesData = computed<Record<string, unknown>[]>(() => {
-  const filtered =
-    selectedRoute.value === "all"
-      ? store.pageViewSeries
-      : store.pageViewSeries.filter((d) => d.route === selectedRoute.value);
-
-  if (selectedRoute.value !== "all") {
-    return filtered.map((d) => ({
-      bucket: d.bucket.toDate(),
-      count: d.count,
-    }));
-  }
-
-  // Aggregate all routes per bucket
-  const bucketMap = new Map<string, { bucket: Date; count: number }>();
-  for (const d of filtered) {
-    const key = d.bucket.toAbsoluteString();
-    const entry = bucketMap.get(key) ?? { bucket: d.bucket.toDate(), count: 0 };
-    entry.count += d.count;
-    bucketMap.set(key, entry);
-  }
-  return [...bucketMap.values()];
-});
-
-const pageViewSeriesConfig = computed<ChartConfig>(() => ({
-  count: {
-    label:
-      selectedRoute.value === "all" ? t("common_all") : selectedRoute.value,
-    color: CHART_COLORS[0],
-  },
-}));
-
-// Page load series filtered to selected route (or aggregated for "all")
-const pageLoadSeriesData = computed<Record<string, unknown>[]>(() => {
-  const filtered =
-    selectedRoute.value === "all"
-      ? store.pageLoadSeries
-      : store.pageLoadSeries.filter((d) => d.route === selectedRoute.value);
-
-  if (selectedRoute.value !== "all") {
-    return filtered.map((d) => ({
-      bucket: d.bucket.toDate(),
-      avgLoadTimeMs: d.avgLoadTimeMs,
-    }));
-  }
-
-  // Average across routes per bucket
-  const bucketMap = new Map<
-    string,
-    { bucket: Date; sum: number; count: number }
-  >();
-  for (const d of filtered) {
-    const key = d.bucket.toAbsoluteString();
-    const entry = bucketMap.get(key) ?? {
-      bucket: d.bucket.toDate(),
-      sum: 0,
-      count: 0,
-    };
-    entry.sum += d.avgLoadTimeMs;
-    entry.count++;
-    bucketMap.set(key, entry);
-  }
-  return [...bucketMap.values()].map(({ bucket, sum, count }) => ({
-    bucket,
-    avgLoadTimeMs: Math.round(sum / count),
-  }));
-});
-
-const pageLoadSeriesConfig = computed<ChartConfig>(() => ({
-  avgLoadTimeMs: {
-    label:
-      selectedRoute.value === "all" ? t("common_all") : selectedRoute.value,
-    color: CHART_COLORS[1],
-  },
-}));
 
 onMounted(async () => {
   await applyFilters();
