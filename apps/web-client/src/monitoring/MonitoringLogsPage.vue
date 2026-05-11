@@ -269,9 +269,15 @@ async function applyFilters(page: number) {
 }
 
 function statusCodeVariant(code: number): BadgeVariants["variant"] {
-  if (code < 300) return "success";
-  if (code < 400) return "info";
-  if (code < 500) return "warning";
+  if (code < 300) {
+    return "success";
+  }
+  if (code < 400) {
+    return "info";
+  }
+  if (code < 500) {
+    return "warning";
+  }
   return "destructive";
 }
 

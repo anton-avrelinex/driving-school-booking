@@ -56,7 +56,9 @@ defineProps<{
 }>();
 
 function percent(enrollment: Enrollment): number {
-  if (enrollment.hoursPurchased === 0) return 0;
+  if (enrollment.hoursPurchased === 0) {
+    return 0;
+  }
   const raw = (enrollment.hoursCompleted / enrollment.hoursPurchased) * 100;
   return Math.min(100, Math.max(0, Math.round(raw)));
 }

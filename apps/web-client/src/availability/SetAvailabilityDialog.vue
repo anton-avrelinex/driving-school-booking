@@ -67,7 +67,9 @@ watch(
 );
 
 async function handleSave() {
-  if (!props.user) return;
+  if (!props.user) {
+    return;
+  }
 
   try {
     await availabilityStore.setAvailability(props.user.id, formSlots.value);

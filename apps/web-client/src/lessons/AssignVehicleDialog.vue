@@ -94,7 +94,9 @@ watch(
 );
 
 async function handleAssign() {
-  if (!props.lesson || !selectedVehicleId.value) return;
+  if (!props.lesson || !selectedVehicleId.value) {
+    return;
+  }
 
   saving.value = true;
   try {

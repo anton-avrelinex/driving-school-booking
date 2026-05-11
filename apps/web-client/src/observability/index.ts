@@ -65,8 +65,12 @@ async function flush(): Promise<void> {
   const events = analyticsBuffer.splice(0);
 
   const promises: Promise<void>[] = [];
-  if (logs.length > 0) promises.push(sendLogs({ logs }));
-  if (events.length > 0) promises.push(sendAnalytics({ events }));
+  if (logs.length > 0) {
+    promises.push(sendLogs({ logs }));
+  }
+  if (events.length > 0) {
+    promises.push(sendAnalytics({ events }));
+  }
 
   await Promise.allSettled(promises);
 }
@@ -75,8 +79,12 @@ function flushSync(): void {
   const logs = logBuffer.splice(0);
   const events = analyticsBuffer.splice(0);
 
-  if (logs.length > 0) sendBeaconLogs({ logs });
-  if (events.length > 0) sendBeaconAnalytics({ events });
+  if (logs.length > 0) {
+    sendBeaconLogs({ logs });
+  }
+  if (events.length > 0) {
+    sendBeaconAnalytics({ events });
+  }
 }
 
 export function logError(

@@ -55,7 +55,9 @@ const todayLessons = computed(() => {
   const todayDate = today(getLocalTimeZone());
   return store.lessons
     .filter((l) => {
-      if (l.status === LESSON_STATUSES.CANCELLED) return false;
+      if (l.status === LESSON_STATUSES.CANCELLED) {
+        return false;
+      }
       return isSameDay(l.startTime, todayDate);
     })
     .slice()

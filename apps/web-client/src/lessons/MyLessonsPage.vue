@@ -252,7 +252,9 @@ function openAssignVehicle(lesson: LessonModel) {
 
 function openAssignVehicleById(lessonId: string, close: () => void) {
   const lesson = lessonStore.lessons.find((l) => l.id === lessonId);
-  if (!lesson) return;
+  if (!lesson) {
+    return;
+  }
   openAssignVehicle(lesson);
   close();
 }

@@ -70,7 +70,9 @@ const days = computed(() => {
     const iso = date.toString();
 
     const count = props.lessons.filter((l) => {
-      if (l.status === LESSON_STATUSES.CANCELLED) return false;
+      if (l.status === LESSON_STATUSES.CANCELLED) {
+        return false;
+      }
       return sameDay(l.startTime, date);
     }).length;
 

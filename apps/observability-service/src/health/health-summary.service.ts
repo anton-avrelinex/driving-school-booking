@@ -54,7 +54,9 @@ export class HealthSummaryService {
     const match: Record<string, unknown> = {
       timestamp: { $gte: new Date(filters.from), $lte: new Date(filters.to) },
     };
-    if (filters.component) match.component = filters.component;
+    if (filters.component) {
+      match.component = filters.component;
+    }
     return match;
   }
 
@@ -65,10 +67,14 @@ export class HealthSummaryService {
     for (const check of checks) {
       const date = isoDateUtc(check.timestamp);
 
-      if (!grouped.has(date)) grouped.set(date, new Map());
+      if (!grouped.has(date)) {
+        grouped.set(date, new Map());
+      }
       const dayMap = grouped.get(date)!;
 
-      if (!dayMap.has(check.component)) dayMap.set(check.component, []);
+      if (!dayMap.has(check.component)) {
+        dayMap.set(check.component, []);
+      }
       dayMap.get(check.component)!.push(check);
     }
     return grouped;
@@ -81,7 +87,9 @@ export class HealthSummaryService {
     const summaries: HealthSummaryDto[] = [];
     for (const component of components) {
       const dayChecks = dayMap.get(component);
-      if (!dayChecks || dayChecks.length === 0) continue;
+      if (!dayChecks || dayChecks.length === 0) {
+        continue;
+      }
       summaries.push(this.computeComponentSummary(component, dayChecks));
     }
     return summaries;
@@ -125,7 +133,9 @@ export class HealthSummaryService {
     const match: Record<string, unknown> = {
       timestamp: { $gte: fromDate, $lte: toDate },
     };
-    if (filters.component) match.component = filters.component;
+    if (filters.component) {
+      match.component = filters.component;
+    }
 
     const checks = await this.healthCheckModel
       .find(match)

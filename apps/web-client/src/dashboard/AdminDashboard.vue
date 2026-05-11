@@ -70,7 +70,9 @@ const store = useDashboardStore();
 const stats = computed(() => store.adminStats);
 
 const completionRateDisplay = computed(() => {
-  if (!stats.value) return "—";
+  if (!stats.value) {
+    return "—";
+  }
   return `${Math.round(stats.value.completionRate * 100)}%`;
 });
 

@@ -170,7 +170,9 @@ onMounted(() => store.fetchConfig());
 watch(
   () => store.config,
   (c) => {
-    if (c) Object.assign(form, c);
+    if (c) {
+      Object.assign(form, c);
+    }
   },
   { immediate: true },
 );

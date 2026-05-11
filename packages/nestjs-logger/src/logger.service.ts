@@ -48,7 +48,9 @@ export class ObsLoggerService {
     context?: Record<string, unknown>,
     stack?: string,
   ): void {
-    if (LOG_LEVEL_SEVERITY[level] < this.minSeverity) return;
+    if (LOG_LEVEL_SEVERITY[level] < this.minSeverity) {
+      return;
+    }
 
     const reqCtx = RequestContextStore.getStore();
 

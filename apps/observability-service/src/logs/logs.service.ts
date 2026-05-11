@@ -224,8 +224,12 @@ export class LogsService {
         $lte: new Date(filters.to),
       },
     };
-    if (filters.schoolId) match.schoolId = filters.schoolId;
-    if (filters.userId) match.userId = filters.userId;
+    if (filters.schoolId) {
+      match.schoolId = filters.schoolId;
+    }
+    if (filters.userId) {
+      match.userId = filters.userId;
+    }
     return match;
   }
 
@@ -236,12 +240,24 @@ export class LogsService {
         $lte: new Date(filters.to),
       },
     };
-    if (filters.type) match.type = filters.type;
-    if (filters.service) match.service = filters.service;
-    if (filters.level) match.level = filters.level;
-    if (filters.schoolId) match.schoolId = filters.schoolId;
-    if (filters.userId) match.userId = filters.userId;
-    if (filters.query) match.$text = { $search: filters.query };
+    if (filters.type) {
+      match.type = filters.type;
+    }
+    if (filters.service) {
+      match.service = filters.service;
+    }
+    if (filters.level) {
+      match.level = filters.level;
+    }
+    if (filters.schoolId) {
+      match.schoolId = filters.schoolId;
+    }
+    if (filters.userId) {
+      match.userId = filters.userId;
+    }
+    if (filters.query) {
+      match.$text = { $search: filters.query };
+    }
     return match;
   }
 }

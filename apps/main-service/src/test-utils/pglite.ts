@@ -26,9 +26,12 @@ export async function createTestDb(): Promise<TestDb> {
     try {
       await raw.exec(readFileSync(file, "utf8"));
     } catch (err) {
-      throw new Error(`Failed to apply migration ${dir}: ${(err as Error).message}`, {
-        cause: err,
-      });
+      throw new Error(
+        `Failed to apply migration ${dir}: ${(err as Error).message}`,
+        {
+          cause: err,
+        },
+      );
     }
   }
 

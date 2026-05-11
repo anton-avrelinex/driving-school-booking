@@ -60,9 +60,15 @@ const props = defineProps<{
 }>();
 
 function colorClassForUptime(uptime: number): string {
-  if (uptime >= 99) return "bg-green-500";
-  if (uptime >= 95) return "bg-yellow-500";
-  if (uptime >= 90) return "bg-orange-500";
+  if (uptime >= 99) {
+    return "bg-green-500";
+  }
+  if (uptime >= 95) {
+    return "bg-yellow-500";
+  }
+  if (uptime >= 90) {
+    return "bg-orange-500";
+  }
   return "bg-red-500";
 }
 
@@ -93,24 +99,38 @@ const bars = computed(() => {
 });
 
 const overallUptime = computed(() => {
-  if (props.days.length === 0) return 0;
+  if (props.days.length === 0) {
+    return 0;
+  }
   const sum = props.days.reduce((acc, d) => acc + d.uptimePercent, 0);
   return sum / props.days.length;
 });
 
 const statusLabel = computed(() => {
-  if (props.days.length === 0) return t("health_status_no_data");
+  if (props.days.length === 0) {
+    return t("health_status_no_data");
+  }
   const latest = props.days[props.days.length - 1]!;
-  if (latest.uptimePercent >= 99) return t("health_status_operational");
-  if (latest.uptimePercent >= 90) return t("health_status_degraded");
+  if (latest.uptimePercent >= 99) {
+    return t("health_status_operational");
+  }
+  if (latest.uptimePercent >= 90) {
+    return t("health_status_degraded");
+  }
   return t("health_status_down");
 });
 
 const statusVariant = computed<BadgeVariants["variant"]>(() => {
-  if (props.days.length === 0) return "secondary";
+  if (props.days.length === 0) {
+    return "secondary";
+  }
   const latest = props.days[props.days.length - 1]!;
-  if (latest.uptimePercent >= 99) return "success";
-  if (latest.uptimePercent >= 90) return "warning";
+  if (latest.uptimePercent >= 99) {
+    return "success";
+  }
+  if (latest.uptimePercent >= 90) {
+    return "warning";
+  }
   return "destructive";
 });
 </script>

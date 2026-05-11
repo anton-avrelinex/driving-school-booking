@@ -26,8 +26,16 @@ export function createBaseConfig(tsconfigRootDir) {
         ],
         "@typescript-eslint/no-floating-promises": "error",
         "@typescript-eslint/no-explicit-any": "warn",
+        eqeqeq: ["error", "always", { null: "ignore" }],
       },
     },
-    eslintConfigPrettier,
   );
 }
+
+// Apply LAST in every preset. Disables formatting rules that conflict with
+// prettier, then re-enables the structural rules prettier shouldn't own.
+export const prettierOverrides = defineConfig(eslintConfigPrettier, {
+  rules: {
+    curly: ["error", "all"],
+  },
+});

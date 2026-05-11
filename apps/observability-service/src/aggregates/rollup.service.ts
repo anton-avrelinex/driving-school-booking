@@ -228,7 +228,9 @@ export class RollupService {
         .sort({ timestamp: 1 })
         .lean();
 
-      if (checks.length === 0) continue;
+      if (checks.length === 0) {
+        continue;
+      }
 
       const healthyChecks = checks.filter(
         (c) => c.status === HEALTH_STATUSES.HEALTHY,

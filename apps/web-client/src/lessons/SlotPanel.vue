@@ -29,10 +29,7 @@
         />
       </div>
 
-      <div
-        v-else
-        class="flex flex-col gap-2 max-h-96 overflow-y-auto pr-1"
-      >
+      <div v-else class="flex flex-col gap-2 max-h-96 overflow-y-auto pr-1">
         <Button
           v-for="slot in slots"
           :key="slot.startTime.toAbsoluteString()"

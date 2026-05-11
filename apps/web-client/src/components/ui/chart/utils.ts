@@ -26,7 +26,9 @@ export function componentToString<P>(
   component: Constructor<P>,
   props?: P,
 ) {
-  if (!isClient) return;
+  if (!isClient) {
+    return;
+  }
 
   // This function will be called once during mount lifecycle
   const id = useId();
@@ -38,7 +40,9 @@ export function componentToString<P>(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const serializedKey = `${id}-${serializeKey(data)}`;
     const cachedContent = cache.get(serializedKey);
-    if (cachedContent) return cachedContent;
+    if (cachedContent) {
+      return cachedContent;
+    }
 
     const vnode = h<unknown>(component, { ...props, payload: data, config, x });
     const div = document.createElement("div");

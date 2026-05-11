@@ -2,6 +2,7 @@ import type { Linter } from "eslint";
 
 declare module "@driving-school-booking/eslint-config/base" {
   export function createBaseConfig(tsconfigRootDir: string): Linter.Config[];
+  export const prettierOverrides: Linter.Config[];
 }
 
 declare module "@driving-school-booking/eslint-config/nestjs" {

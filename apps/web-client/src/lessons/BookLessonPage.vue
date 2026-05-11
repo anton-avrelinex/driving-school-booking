@@ -335,7 +335,9 @@ const selectedInstructor = computed(() =>
 );
 
 const activeEnrollments = computed(() => {
-  if (!enrollments.value?.enrollments) return [];
+  if (!enrollments.value?.enrollments) {
+    return [];
+  }
   return enrollments.value.enrollments.filter(
     (e) => e.status === ENROLLMENT_STATUSES.ACTIVE,
   );
@@ -366,7 +368,9 @@ const availableDays = computed<Set<string>>(() => {
 });
 
 const slotsForSelectedDate = computed<SlotModel[]>(() => {
-  if (!selectedDate.value) return [];
+  if (!selectedDate.value) {
+    return [];
+  }
   const date = selectedDate.value;
   return lessonStore.slots.filter((s) => sameLocalDay(s.startTime, date));
 });
@@ -398,7 +402,9 @@ function onEnrollmentChange() {
   selectedInstructorId.value = null;
   selectedDate.value = null;
   selectedSlot.value = null;
-  if (!selectedEnrollmentId.value) return;
+  if (!selectedEnrollmentId.value) {
+    return;
+  }
   void lessonStore.fetchAvailableInstructors(selectedEnrollmentId.value);
   void refreshSlots();
 }
@@ -416,7 +422,9 @@ function onInstructorChange() {
 }
 
 function refreshSlots() {
-  if (!selectedEnrollmentId.value) return;
+  if (!selectedEnrollmentId.value) {
+    return;
+  }
   const timezone = getLocalTimeZone();
   const gridStart = startOfWeek(
     startOfMonth(calendarPlaceholder.value),
@@ -461,13 +469,17 @@ async function confirmInstructor(instructorId: string) {
 }
 
 async function confirmBookingFromInstructorFlow() {
-  if (!selectedInstructorId.value) return;
+  if (!selectedInstructorId.value) {
+    return;
+  }
   await handleBook(selectedInstructorId.value);
   confirmBookingOpen.value = false;
 }
 
 async function handleBook(instructorId: string) {
-  if (!selectedEnrollmentId.value || !selectedSlot.value) return;
+  if (!selectedEnrollmentId.value || !selectedSlot.value) {
+    return;
+  }
   try {
     await lessonStore.bookLesson({
       enrollmentId: selectedEnrollmentId.value,

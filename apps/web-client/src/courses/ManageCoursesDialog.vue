@@ -322,7 +322,9 @@ function cancelEdit() {
 }
 
 async function handleUpdate(id: string) {
-  if (!editForm.categoryId) return;
+  if (!editForm.categoryId) {
+    return;
+  }
   try {
     await courseStore.updateCourse(id, {
       name: editForm.name,
@@ -348,7 +350,9 @@ async function handleDelete(course: CourseDto) {
 }
 
 async function handleCreate() {
-  if (!newForm.categoryId) return;
+  if (!newForm.categoryId) {
+    return;
+  }
   try {
     await courseStore.createCourse({
       name: newForm.name,

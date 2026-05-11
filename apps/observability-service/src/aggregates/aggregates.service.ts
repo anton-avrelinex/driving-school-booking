@@ -21,7 +21,9 @@ export class AggregatesService {
         $lte: filters.to.slice(0, 10),
       },
     };
-    if (filters.service) match.service = filters.service;
+    if (filters.service) {
+      match.service = filters.service;
+    }
 
     return (await this.aggregateModel
       .find(match)

@@ -23,7 +23,9 @@ export function sendBeaconAnalytics(body: IngestAnalyticsBody): void {
 
 function sendWithKeepalive(url: string, body: unknown): void {
   const token = getAccessToken();
-  if (!token) return;
+  if (!token) {
+    return;
+  }
 
   void fetch(url, {
     method: "POST",

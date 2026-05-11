@@ -132,10 +132,18 @@ export class AnalyticsService {
         $lte: new Date(filters.to),
       },
     };
-    if (filters.event) match.event = filters.event;
-    if (filters.sessionId) match.sessionId = filters.sessionId;
-    if (filters.schoolId) match.schoolId = filters.schoolId;
-    if (filters.userId) match.userId = filters.userId;
+    if (filters.event) {
+      match.event = filters.event;
+    }
+    if (filters.sessionId) {
+      match.sessionId = filters.sessionId;
+    }
+    if (filters.schoolId) {
+      match.schoolId = filters.schoolId;
+    }
+    if (filters.userId) {
+      match.userId = filters.userId;
+    }
     return match;
   }
 
@@ -255,8 +263,12 @@ export class AnalyticsService {
         $lte: new Date(filters.to),
       },
     };
-    if (filters.schoolId) match.schoolId = filters.schoolId;
-    if (filters.userId) match.userId = filters.userId;
+    if (filters.schoolId) {
+      match.schoolId = filters.schoolId;
+    }
+    if (filters.userId) {
+      match.userId = filters.userId;
+    }
     return match;
   }
 }
