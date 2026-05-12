@@ -158,6 +158,7 @@
   "lesson_book_only_instructor": "Only {name} is available at this time.",
   "lesson_book_pick_date": "Pick a date to see available time slots.",
   "lesson_booked": "Lesson booked successfully",
+  "lesson_booked_view": "View",
   "lesson_cancel": "Cancel Lesson",
   "lesson_cancel_failed": "Failed to cancel lesson",
   "lesson_cancelled": "Lesson cancelled",

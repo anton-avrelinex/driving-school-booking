@@ -489,8 +489,17 @@ async function handleBook(instructorId: string) {
       startTime: selectedSlot.value.toAbsoluteString(),
     });
 
-    toast.success(t("lesson_booked"));
-    void router.push({ name: "my-lessons" });
+    toast.success(t("lesson_booked"), {
+      action: {
+        label: t("lesson_booked_view"),
+        onClick: () => {
+          void router.push({ name: "my-lessons" });
+        },
+      },
+    });
+
+    selectedSlot.value = null;
+    await refreshSlots();
   } catch {
     toast.error(t("lesson_book_failed"));
   }
