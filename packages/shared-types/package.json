@@ -17,6 +17,7 @@
     "lint": "eslint --cache ."
   },
   "devDependencies": {
-    "@driving-school-booking/eslint-config": "workspace:^"
+    "@driving-school-booking/eslint-config": "workspace:^",
+    "@driving-school-booking/tsconfig": "workspace:^"
   }
 }

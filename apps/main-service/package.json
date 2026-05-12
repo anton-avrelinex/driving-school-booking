@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@driving-school-booking/eslint-config": "workspace:^",
+    "@driving-school-booking/tsconfig": "workspace:^",
     "@electric-sql/pglite": "^0.4.5",
     "@electric-sql/pglite-socket": "^0.1.5",
     "@nestjs/cli": "^11.0.0",

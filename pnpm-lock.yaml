@@ -117,6 +117,9 @@ importers:
       '@driving-school-booking/eslint-config':
         specifier: workspace:^
         version: link:../../packages/eslint-config
+      '@driving-school-booking/tsconfig':
+        specifier: workspace:^
+        version: link:../../packages/tsconfig
       '@electric-sql/pglite':
         specifier: ^0.4.5
         version: 0.4.5
@@ -238,6 +241,9 @@ importers:
       '@driving-school-booking/eslint-config':
         specifier: workspace:^
         version: link:../../packages/eslint-config
+      '@driving-school-booking/tsconfig':
+        specifier: workspace:^
+        version: link:../../packages/tsconfig
       '@nestjs/cli':
         specifier: ^11.0.0
         version: 11.0.16(@types/node@22.19.15)
@@ -429,6 +435,9 @@ importers:
       '@driving-school-booking/eslint-config':
         specifier: workspace:^
         version: link:../eslint-config
+      '@driving-school-booking/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
@@ -457,6 +466,9 @@ importers:
       '@driving-school-booking/eslint-config':
         specifier: workspace:^
         version: link:../eslint-config
+      '@driving-school-booking/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
@@ -466,6 +478,11 @@ importers:
       '@driving-school-booking/eslint-config':
         specifier: workspace:^
         version: link:../eslint-config
+      '@driving-school-booking/tsconfig':
+        specifier: workspace:^
+        version: link:../tsconfig
+
+  packages/tsconfig: {}
 
 packages:
 

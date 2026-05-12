@@ -1,15 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "strict": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "./dist",
-    "esModuleInterop": true,
-    "skipLibCheck": true
-  },
+  "extends": "@driving-school-booking/tsconfig/lib.json",
   "include": ["src"]
 }
