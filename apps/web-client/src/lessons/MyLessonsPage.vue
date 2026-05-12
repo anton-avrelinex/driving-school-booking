@@ -204,6 +204,13 @@
       :lesson="selectedLesson"
       @assigned="lessonStore.fetchLessons()"
     />
+
+    <ConfirmLessonDialog
+      v-model:open="confirmDialogOpen"
+      :vehicles="confirmDialogVehicles"
+      :saving="confirmSaving"
+      @confirm="onConfirmWithVehicle"
+    />
   </div>
 </template>
 
@@ -233,7 +240,9 @@ import EmptyState from "@/components/EmptyState.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import TableSkeleton from "@/components/TableSkeleton.vue";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
+import ConfirmLessonDialog from "@/lessons/ConfirmLessonDialog.vue";
 import ScheduleView from "@/lessons/ScheduleView.vue";
+import type { VehicleDto } from "@driving-school-booking/shared-types";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -244,6 +253,12 @@ const view = ref<"list" | "calendar">("list");
 
 const vehicleDialogOpen = ref(false);
 const selectedLesson = ref(null) as Ref<LessonModel | null>;
+
+const confirmDialogOpen = ref(false);
+const confirmDialogVehicles = ref<VehicleDto[]>([]);
+const confirmTargetLessonId = ref<string | null>(null);
+const confirmSaving = ref(false);
+const confirmAfterDialog = ref<(() => void) | null>(null);
 
 onMounted(async () => {
   const tasks: Promise<unknown>[] = [lessonStore.fetchLessons()];
@@ -271,13 +286,56 @@ async function handleCancel(lessonId: string) {
   }
 }
 
-async function handleConfirm(lessonId: string) {
+async function confirmWithVehicle(
+  lessonId: string,
+  vehicleId: string,
+): Promise<void> {
+  await lessonStore.confirmLesson(lessonId);
+  await lessonStore.assignVehicle(lessonId, vehicleId);
+}
+
+async function startConfirm(lessonId: string, after?: () => void) {
   try {
-    await lessonStore.confirmLesson(lessonId);
-    toast.success(t("lesson_confirmed"));
+    const vehicles = await lessonStore.fetchAvailableVehicles(lessonId);
+    if (vehicles.length === 0) {
+      toast.error(t("lesson_confirm_no_vehicles"));
+      return;
+    }
+    if (vehicles.length === 1) {
+      await confirmWithVehicle(lessonId, vehicles[0]!.id);
+      toast.success(t("lesson_confirmed"));
+      after?.();
+      return;
+    }
+    confirmTargetLessonId.value = lessonId;
+    confirmDialogVehicles.value = vehicles;
+    confirmAfterDialog.value = after ?? null;
+    confirmDialogOpen.value = true;
   } catch {
     toast.error(t("lesson_confirm_failed"));
   }
+}
+
+async function onConfirmWithVehicle(vehicleId: string) {
+  if (!confirmTargetLessonId.value) {
+    return;
+  }
+  confirmSaving.value = true;
+  try {
+    await confirmWithVehicle(confirmTargetLessonId.value, vehicleId);
+    toast.success(t("lesson_confirmed"));
+    confirmDialogOpen.value = false;
+    confirmAfterDialog.value?.();
+    confirmAfterDialog.value = null;
+  } catch {
+    toast.error(t("lesson_confirm_failed"));
+  } finally {
+    confirmSaving.value = false;
+  }
+}
+
+function handleConfirm(lessonId: string) {
+  return startConfirm(lessonId);
 }
 
 async function handleReject(lessonId: string) {
@@ -300,8 +358,7 @@ async function cancelAndClose(lessonId: string, close: () => void) {
 }
 
 async function confirmAndClose(lessonId: string, close: () => void) {
-  await handleConfirm(lessonId);
-  close();
+  await startConfirm(lessonId, close);
 }
 
 async function rejectAndClose(lessonId: string, close: () => void) {

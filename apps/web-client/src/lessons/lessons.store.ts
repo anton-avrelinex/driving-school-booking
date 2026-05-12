@@ -7,6 +7,7 @@ import {
   type AvailableSlotDto,
   type CreateLessonDto,
   type LessonDto,
+  type VehicleDto,
 } from "@driving-school-booking/shared-types";
 import api from "@/api/api";
 import { trackEvent } from "@/observability";
@@ -110,6 +111,15 @@ export const useLessonStore = defineStore("lessons", () => {
     return toLessonModel(data);
   }
 
+  async function fetchAvailableVehicles(
+    lessonId: string,
+  ): Promise<VehicleDto[]> {
+    const { data } = await api.get<VehicleDto[]>(
+      `/lessons/${lessonId}/available-vehicles`,
+    );
+    return data;
+  }
+
   async function confirmLesson(lessonId: string): Promise<LessonModel> {
     const { data } = await api.patch<LessonDto>(`/lessons/${lessonId}/confirm`);
     await fetchLessons();
@@ -150,5 +160,6 @@ export const useLessonStore = defineStore("lessons", () => {
     confirmLesson,
     rejectLesson,
     assignVehicle,
+    fetchAvailableVehicles,
   };
 });
