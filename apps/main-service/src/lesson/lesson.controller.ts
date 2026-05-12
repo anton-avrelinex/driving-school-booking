@@ -96,6 +96,28 @@ export class LessonController {
     return this.lessonService.complete(req.user.schoolId, id);
   }
 
+  @Patch(":id/confirm")
+  @Roles(Role.INSTRUCTOR, Role.ADMIN)
+  confirm(@Param("id") id: string, @Request() req: AuthenticatedRequest) {
+    return this.lessonService.confirm(
+      req.user.schoolId,
+      id,
+      req.user.sub,
+      req.user.role,
+    );
+  }
+
+  @Patch(":id/reject")
+  @Roles(Role.INSTRUCTOR, Role.ADMIN)
+  reject(@Param("id") id: string, @Request() req: AuthenticatedRequest) {
+    return this.lessonService.reject(
+      req.user.schoolId,
+      id,
+      req.user.sub,
+      req.user.role,
+    );
+  }
+
   @Patch(":id/cancel")
   cancel(@Param("id") id: string, @Request() req: AuthenticatedRequest) {
     return this.lessonService.cancel(req.user.schoolId, id, req.user.sub);

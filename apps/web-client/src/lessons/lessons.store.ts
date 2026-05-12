@@ -110,6 +110,18 @@ export const useLessonStore = defineStore("lessons", () => {
     return toLessonModel(data);
   }
 
+  async function confirmLesson(lessonId: string): Promise<LessonModel> {
+    const { data } = await api.patch<LessonDto>(`/lessons/${lessonId}/confirm`);
+    await fetchLessons();
+    return toLessonModel(data);
+  }
+
+  async function rejectLesson(lessonId: string): Promise<LessonModel> {
+    const { data } = await api.patch<LessonDto>(`/lessons/${lessonId}/reject`);
+    await fetchLessons();
+    return toLessonModel(data);
+  }
+
   async function assignVehicle(
     lessonId: string,
     vehicleId: string,
@@ -135,6 +147,8 @@ export const useLessonStore = defineStore("lessons", () => {
     bookLesson,
     completeLesson,
     cancelLesson,
+    confirmLesson,
+    rejectLesson,
     assignVehicle,
   };
 });

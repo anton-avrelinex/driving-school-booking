@@ -30,9 +30,11 @@ enum EnrollmentStatus {
 }
 
 enum LessonStatus {
+  PENDING
   SCHEDULED
   COMPLETED
   CANCELLED
+  REJECTED
 }
 
 model School {
@@ -94,9 +96,10 @@ model User {
 }
 
 model InstructorProfile {
-  id     String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String  @id @default(uuid())
+  userId           String  @unique
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instructorNumber String? @unique
 
   courses      Course[]
   vehicles     Vehicle[]
@@ -168,10 +171,13 @@ model Lesson {
   vehicle      Vehicle?          @relation(fields: [vehicleId], references: [id])
   startTime    DateTime
   endTime      DateTime
-  status       LessonStatus      @default(SCHEDULED)
+  status       LessonStatus      @default(PENDING)
   cancelledAt  DateTime?
   cancelledBy  String?
   completedAt  DateTime?
+  confirmedAt  DateTime?
+  rejectedAt   DateTime?
+  rejectedBy   String?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 

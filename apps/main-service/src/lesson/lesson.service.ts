@@ -25,6 +25,13 @@ import { slotsQuery } from "./lesson.queries";
 
 const DEFAULT_LESSON_DURATION_MIN = 120;
 
+// Statuses that consume a slot for conflict checks (instructor, student, vehicle).
+// Rejected/Cancelled/Completed do not block new bookings at the same time.
+const ACTIVE_LESSON_STATUSES: LessonStatus[] = [
+  LessonStatus.PENDING,
+  LessonStatus.SCHEDULED,
+];
+
 @Injectable()
 export class LessonService {
   constructor(private readonly prisma: PrismaService) {}
@@ -59,14 +66,16 @@ export class LessonService {
         courses: { some: { id: enrollment.courseId } },
       },
       select: {
+        instructorNumber: true,
         user: { select: { id: true, firstName: true, lastName: true } },
       },
     });
 
-    return instructors.map(({ user }) => ({
+    return instructors.map(({ user, instructorNumber }) => ({
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
+      instructorNumber,
     }));
   }
 
@@ -147,7 +156,7 @@ export class LessonService {
       const instructorConflict = await tx.lesson.findFirst({
         where: {
           instructorId: instructorProfile.id,
-          status: LessonStatus.SCHEDULED,
+          status: { in: ACTIVE_LESSON_STATUSES },
           startTime: { lt: endTime },
           endTime: { gt: startTime },
         },
@@ -161,7 +170,7 @@ export class LessonService {
       const studentConflict = await tx.lesson.findFirst({
         where: {
           enrollment: { studentProfileId },
-          status: LessonStatus.SCHEDULED,
+          status: { in: ACTIVE_LESSON_STATUSES },
           startTime: { lt: endTime },
           endTime: { gt: startTime },
         },
@@ -182,7 +191,7 @@ export class LessonService {
       const bookedVehicles = await tx.lesson.count({
         where: {
           schoolId,
-          status: LessonStatus.SCHEDULED,
+          status: { in: ACTIVE_LESSON_STATUSES },
           vehicleId: { not: null },
           startTime: { lt: endTime },
           endTime: { gt: startTime },
@@ -199,7 +208,7 @@ export class LessonService {
           instructorId: instructorProfile.id,
           startTime,
           endTime,
-          status: LessonStatus.SCHEDULED,
+          status: LessonStatus.PENDING,
         },
         select: LESSON_SELECT,
       });
@@ -319,16 +328,99 @@ export class LessonService {
       throw new NotFoundException("Lesson not found");
     }
 
-    if (lesson.status !== LessonStatus.SCHEDULED) {
-      throw new BadRequestException("Only scheduled lessons can be cancelled");
+    if (!ACTIVE_LESSON_STATUSES.includes(lesson.status)) {
+      throw new BadRequestException(
+        "Only pending or scheduled lessons can be cancelled",
+      );
     }
 
     const updated = await this.prisma.lesson.update({
-      where: { id: lessonId, status: LessonStatus.SCHEDULED },
+      where: { id: lessonId, status: { in: ACTIVE_LESSON_STATUSES } },
       data: {
         status: LessonStatus.CANCELLED,
         cancelledAt: new Date(),
         cancelledBy: cancelledByUserId,
+      },
+      select: LESSON_SELECT,
+    });
+
+    return toLessonDto(updated);
+  }
+
+  async confirm(
+    schoolId: string,
+    lessonId: string,
+    callerUserId: string,
+    callerRole: Role,
+  ): Promise<LessonDto> {
+    const lesson = await this.prisma.lesson.findUnique({
+      where: { id: lessonId, schoolId },
+      select: {
+        id: true,
+        status: true,
+        instructor: { select: { userId: true } },
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException("Lesson not found");
+    }
+    if (lesson.status !== LessonStatus.PENDING) {
+      throw new BadRequestException("Only pending lessons can be confirmed");
+    }
+    if (
+      callerRole === Role.INSTRUCTOR &&
+      lesson.instructor.userId !== callerUserId
+    ) {
+      throw new ForbiddenException("Not your lesson");
+    }
+
+    const updated = await this.prisma.lesson.update({
+      where: { id: lessonId, status: LessonStatus.PENDING },
+      data: {
+        status: LessonStatus.SCHEDULED,
+        confirmedAt: new Date(),
+      },
+      select: LESSON_SELECT,
+    });
+
+    return toLessonDto(updated);
+  }
+
+  async reject(
+    schoolId: string,
+    lessonId: string,
+    callerUserId: string,
+    callerRole: Role,
+  ): Promise<LessonDto> {
+    const lesson = await this.prisma.lesson.findUnique({
+      where: { id: lessonId, schoolId },
+      select: {
+        id: true,
+        status: true,
+        instructor: { select: { userId: true } },
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException("Lesson not found");
+    }
+    if (lesson.status !== LessonStatus.PENDING) {
+      throw new BadRequestException("Only pending lessons can be rejected");
+    }
+    if (
+      callerRole === Role.INSTRUCTOR &&
+      lesson.instructor.userId !== callerUserId
+    ) {
+      throw new ForbiddenException("Not your lesson");
+    }
+
+    const updated = await this.prisma.lesson.update({
+      where: { id: lessonId, status: LessonStatus.PENDING },
+      data: {
+        status: LessonStatus.REJECTED,
+        rejectedAt: new Date(),
+        rejectedBy: callerUserId,
       },
       select: LESSON_SELECT,
     });
@@ -402,7 +494,7 @@ export class LessonService {
       const conflicting = await tx.lesson.findFirst({
         where: {
           vehicleId: dto.vehicleId,
-          status: LessonStatus.SCHEDULED,
+          status: { in: ACTIVE_LESSON_STATUSES },
           id: { not: lessonId },
           startTime: { lt: lesson.endTime },
           endTime: { gt: lesson.startTime },

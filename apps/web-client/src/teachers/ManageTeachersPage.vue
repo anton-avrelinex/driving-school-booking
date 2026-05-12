@@ -36,6 +36,7 @@
             <TableHead>{{ $t("common_first_name") }}</TableHead>
             <TableHead>{{ $t("common_last_name") }}</TableHead>
             <TableHead>{{ $t("common_email") }}</TableHead>
+            <TableHead>{{ $t("teacher_instructor_number") }}</TableHead>
             <TableHead>{{ $t("teacher_courses") }}</TableHead>
             <TableHead>{{ $t("teacher_vehicles") }}</TableHead>
             <TableHead>{{ $t("common_status") }}</TableHead>
@@ -47,6 +48,9 @@
             <TableCell>{{ user.firstName }}</TableCell>
             <TableCell>{{ user.lastName }}</TableCell>
             <TableCell>{{ user.email }}</TableCell>
+            <TableCell class="text-muted-foreground">
+              {{ user.instructorProfile?.instructorNumber ?? "—" }}
+            </TableCell>
             <TableCell class="space-x-1">
               <Badge
                 v-for="course in user.instructorProfile?.courses"

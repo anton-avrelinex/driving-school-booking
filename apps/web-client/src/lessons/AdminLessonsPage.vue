@@ -12,6 +12,9 @@
         </SelectTrigger>
         <SelectContent>
           <SelectItem :value="null">{{ $t("common_all") }}</SelectItem>
+          <SelectItem :value="LESSON_STATUSES.PENDING">
+            {{ $t("lesson_status_pending") }}
+          </SelectItem>
           <SelectItem :value="LESSON_STATUSES.SCHEDULED">
             {{ $t("lesson_status_scheduled") }}
           </SelectItem>
@@ -20,6 +23,9 @@
           </SelectItem>
           <SelectItem :value="LESSON_STATUSES.CANCELLED">
             {{ $t("lesson_status_cancelled") }}
+          </SelectItem>
+          <SelectItem :value="LESSON_STATUSES.REJECTED">
+            {{ $t("lesson_status_rejected") }}
           </SelectItem>
         </SelectContent>
       </Select>
@@ -71,7 +77,19 @@
               </Badge>
             </TableCell>
             <TableCell class="text-right space-x-2">
-              <template v-if="lesson.status === LESSON_STATUSES.SCHEDULED">
+              <template v-if="lesson.status === LESSON_STATUSES.PENDING">
+                <Button size="sm" @click="handleConfirm(lesson.id)">
+                  {{ $t("lesson_confirm") }}
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  @click="handleReject(lesson.id)"
+                >
+                  {{ $t("lesson_reject") }}
+                </Button>
+              </template>
+              <template v-else-if="lesson.status === LESSON_STATUSES.SCHEDULED">
                 <Button
                   variant="outline"
                   size="sm"
@@ -183,6 +201,26 @@ async function handleCancel(lessonId: string) {
     applyFilters();
   } catch {
     toast.error(t("lesson_cancel_failed"));
+  }
+}
+
+async function handleConfirm(lessonId: string) {
+  try {
+    await lessonStore.confirmLesson(lessonId);
+    toast.success(t("lesson_confirmed"));
+    applyFilters();
+  } catch {
+    toast.error(t("lesson_confirm_failed"));
+  }
+}
+
+async function handleReject(lessonId: string) {
+  try {
+    await lessonStore.rejectLesson(lessonId);
+    toast.success(t("lesson_rejected"));
+    applyFilters();
+  } catch {
+    toast.error(t("lesson_reject_failed"));
   }
 }
 

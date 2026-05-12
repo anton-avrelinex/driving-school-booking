@@ -21,6 +21,12 @@
           <Input id="edit-last-name" v-model="form.lastName" required />
         </div>
         <div class="flex flex-col gap-2">
+          <Label for="edit-instructor-number">
+            {{ $t("teacher_instructor_number") }}
+          </Label>
+          <Input id="edit-instructor-number" v-model="form.instructorNumber" />
+        </div>
+        <div class="flex flex-col gap-2">
           <Label>{{ $t("teacher_courses") }}</Label>
           <div class="flex flex-col gap-1">
             <div
@@ -113,6 +119,7 @@ const form = ref<UpdateInstructorDto>({
   email: "",
   firstName: "",
   lastName: "",
+  instructorNumber: "",
 });
 
 watch(
@@ -123,6 +130,7 @@ watch(
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        instructorNumber: user.instructorProfile?.instructorNumber ?? "",
       };
       selectedCourseIds.value =
         user.instructorProfile?.courses.map((c) => c.id) ?? [];
@@ -141,6 +149,9 @@ async function handleEdit() {
   try {
     await teacherStore.updateTeacher(props.user.id, {
       ...form.value,
+      ...(form.value.instructorNumber
+        ? { instructorNumber: form.value.instructorNumber }
+        : {}),
       courseIds: selectedCourseIds.value,
       vehicleIds: selectedVehicleIds.value,
     });

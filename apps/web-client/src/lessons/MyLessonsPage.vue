@@ -52,7 +52,29 @@
           "
         >
           <template #lesson-actions="{ lesson, close }">
-            <template v-if="lesson.status === LESSON_STATUSES.SCHEDULED">
+            <template v-if="lesson.status === LESSON_STATUSES.PENDING">
+              <template v-if="authStore.isInstructor">
+                <Button size="sm" @click="confirmAndClose(lesson.id, close)">
+                  {{ $t("lesson_confirm") }}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  @click="rejectAndClose(lesson.id, close)"
+                >
+                  {{ $t("lesson_reject") }}
+                </Button>
+              </template>
+              <Button
+                v-else
+                size="sm"
+                variant="destructive"
+                @click="cancelAndClose(lesson.id, close)"
+              >
+                {{ $t("lesson_cancel") }}
+              </Button>
+            </template>
+            <template v-else-if="lesson.status === LESSON_STATUSES.SCHEDULED">
               <template v-if="authStore.isInstructor">
                 <Button size="sm" @click="completeAndClose(lesson.id, close)">
                   {{ $t("lesson_mark_complete") }}
@@ -109,6 +131,12 @@
               <TableCell>{{ lesson.courseName }}</TableCell>
               <TableCell v-if="!authStore.isInstructor">
                 {{ lesson.instructorName }}
+                <span
+                  v-if="lesson.instructorNumber"
+                  class="text-muted-foreground"
+                >
+                  · #{{ lesson.instructorNumber }}
+                </span>
               </TableCell>
               <TableCell v-if="authStore.isInstructor">
                 {{ lesson.studentName }}
@@ -122,7 +150,31 @@
                 </Badge>
               </TableCell>
               <TableCell class="space-x-2">
-                <template v-if="lesson.status === LESSON_STATUSES.SCHEDULED">
+                <template v-if="lesson.status === LESSON_STATUSES.PENDING">
+                  <template v-if="authStore.isInstructor">
+                    <Button size="sm" @click="handleConfirm(lesson.id)">
+                      {{ $t("lesson_confirm") }}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      @click="handleReject(lesson.id)"
+                    >
+                      {{ $t("lesson_reject") }}
+                    </Button>
+                  </template>
+                  <Button
+                    v-else
+                    size="sm"
+                    variant="destructive"
+                    @click="handleCancel(lesson.id)"
+                  >
+                    {{ $t("lesson_cancel") }}
+                  </Button>
+                </template>
+                <template
+                  v-else-if="lesson.status === LESSON_STATUSES.SCHEDULED"
+                >
                   <template v-if="authStore.isInstructor">
                     <Button size="sm" @click="handleComplete(lesson.id)">
                       {{ $t("lesson_mark_complete") }}
@@ -162,10 +214,7 @@
 <script setup lang="ts">
 import { ref, onMounted, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
-import {
-  LESSON_STATUSES,
-  type LessonStatus,
-} from "@driving-school-booking/shared-types";
+import { LESSON_STATUSES } from "@driving-school-booking/shared-types";
 import type { LessonModel } from "@/lessons/lessons.models";
 import { toast } from "vue-sonner";
 import { CalendarIcon, ListIcon } from "lucide-vue-next";
@@ -173,7 +222,8 @@ import { useAuthStore } from "@/auth/auth.store";
 import { useAvailabilityStore } from "@/availability/availability.store";
 import { useLessonStore } from "@/lessons/lessons.store";
 import { Button } from "@/components/ui/button";
-import { Badge, type BadgeVariants } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
+import { lessonStatusVariant } from "@/lessons/lesson-status";
 import {
   Table,
   TableBody,
@@ -187,17 +237,6 @@ import PageHeader from "@/components/PageHeader.vue";
 import TableSkeleton from "@/components/TableSkeleton.vue";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
 import ScheduleView from "@/lessons/ScheduleView.vue";
-
-function lessonStatusVariant(status: LessonStatus): BadgeVariants["variant"] {
-  switch (status) {
-    case LESSON_STATUSES.SCHEDULED:
-      return "info";
-    case LESSON_STATUSES.COMPLETED:
-      return "success";
-    case LESSON_STATUSES.CANCELLED:
-      return "destructive";
-  }
-}
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -235,6 +274,24 @@ async function handleCancel(lessonId: string) {
   }
 }
 
+async function handleConfirm(lessonId: string) {
+  try {
+    await lessonStore.confirmLesson(lessonId);
+    toast.success(t("lesson_confirmed"));
+  } catch {
+    toast.error(t("lesson_confirm_failed"));
+  }
+}
+
+async function handleReject(lessonId: string) {
+  try {
+    await lessonStore.rejectLesson(lessonId);
+    toast.success(t("lesson_rejected"));
+  } catch {
+    toast.error(t("lesson_reject_failed"));
+  }
+}
+
 async function completeAndClose(lessonId: string, close: () => void) {
   await handleComplete(lessonId);
   close();
@@ -242,6 +299,16 @@ async function completeAndClose(lessonId: string, close: () => void) {
 
 async function cancelAndClose(lessonId: string, close: () => void) {
   await handleCancel(lessonId);
+  close();
+}
+
+async function confirmAndClose(lessonId: string, close: () => void) {
+  await handleConfirm(lessonId);
+  close();
+}
+
+async function rejectAndClose(lessonId: string, close: () => void) {
+  await handleReject(lessonId);
   close();
 }
 

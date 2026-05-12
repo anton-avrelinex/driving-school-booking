@@ -24,6 +24,11 @@ export class CreateInstructorDto {
   lastName!: string;
 
   @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  instructorNumber?: string;
+
+  @IsOptional()
   @IsUUID("4", { each: true })
   courseIds?: string[];
 

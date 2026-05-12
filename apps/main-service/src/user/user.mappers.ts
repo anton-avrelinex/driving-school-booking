@@ -34,6 +34,7 @@ export function toUserDto(user: {
   createdAt: Date;
   instructorProfile?: {
     id: string;
+    instructorNumber: string | null;
     courses: {
       id: string;
       name: string;
@@ -81,6 +82,7 @@ export function toUserDto(user: {
   if (user.instructorProfile) {
     dto.instructorProfile = {
       id: user.instructorProfile.id,
+      instructorNumber: user.instructorProfile.instructorNumber,
       courses: user.instructorProfile.courses.map(toCourseDto),
       vehicles: user.instructorProfile.vehicles,
       availability: user.instructorProfile.availability ?? [],

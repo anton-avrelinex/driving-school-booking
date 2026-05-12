@@ -29,6 +29,7 @@ export const USER_SELECT = {
   instructorProfile: {
     select: {
       id: true,
+      instructorNumber: true,
       courses: { select: COURSE_SELECT_IN_PROFILE },
       vehicles: { select: VEHICLE_SELECT_IN_PROFILE },
       availability: {
