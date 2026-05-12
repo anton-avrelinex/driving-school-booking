@@ -16,6 +16,7 @@ import {
   UserStatus,
 } from "../generated/prisma/enums";
 import { PrismaService } from "../prisma/prisma.service";
+import { withSerializableRetry } from "../common/transactions";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { AssignVehicleDto } from "./dto/assign-vehicle.dto";
 import { LESSON_SELECT } from "./lesson.selects";
@@ -142,64 +143,66 @@ export class LessonService {
     const startTime = new Date(dto.startTime);
     const endTime = new Date(startTime.getTime() + durationMin * 60 * 1000);
 
-    const instructorConflict = await this.prisma.lesson.findFirst({
-      where: {
-        instructorId: instructorProfile.id,
-        status: LessonStatus.SCHEDULED,
-        startTime: { lt: endTime },
-        endTime: { gt: startTime },
-      },
-    });
-    if (instructorConflict) {
-      throw new BadRequestException(
-        "Instructor has a conflicting lesson at this time",
-      );
-    }
+    const lesson = await withSerializableRetry(this.prisma, async (tx) => {
+      const instructorConflict = await tx.lesson.findFirst({
+        where: {
+          instructorId: instructorProfile.id,
+          status: LessonStatus.SCHEDULED,
+          startTime: { lt: endTime },
+          endTime: { gt: startTime },
+        },
+      });
+      if (instructorConflict) {
+        throw new BadRequestException(
+          "Instructor has a conflicting lesson at this time",
+        );
+      }
 
-    const studentConflict = await this.prisma.lesson.findFirst({
-      where: {
-        enrollment: { studentProfileId },
-        status: LessonStatus.SCHEDULED,
-        startTime: { lt: endTime },
-        endTime: { gt: startTime },
-      },
-    });
-    if (studentConflict) {
-      throw new BadRequestException(
-        "You already have a lesson scheduled at this time",
-      );
-    }
+      const studentConflict = await tx.lesson.findFirst({
+        where: {
+          enrollment: { studentProfileId },
+          status: LessonStatus.SCHEDULED,
+          startTime: { lt: endTime },
+          endTime: { gt: startTime },
+        },
+      });
+      if (studentConflict) {
+        throw new BadRequestException(
+          "You already have a lesson scheduled at this time",
+        );
+      }
 
-    const totalVehicles = await this.prisma.vehicle.count({
-      where: {
-        schoolId,
-        categoryId: enrollment.course.categoryId,
-        transmission: enrollment.course.transmission,
-      },
-    });
-    const bookedVehicles = await this.prisma.lesson.count({
-      where: {
-        schoolId,
-        status: LessonStatus.SCHEDULED,
-        vehicleId: { not: null },
-        startTime: { lt: endTime },
-        endTime: { gt: startTime },
-      },
-    });
-    if (totalVehicles - bookedVehicles <= 0) {
-      throw new BadRequestException("No vehicles available at this time");
-    }
+      const totalVehicles = await tx.vehicle.count({
+        where: {
+          schoolId,
+          categoryId: enrollment.course.categoryId,
+          transmission: enrollment.course.transmission,
+        },
+      });
+      const bookedVehicles = await tx.lesson.count({
+        where: {
+          schoolId,
+          status: LessonStatus.SCHEDULED,
+          vehicleId: { not: null },
+          startTime: { lt: endTime },
+          endTime: { gt: startTime },
+        },
+      });
+      if (totalVehicles - bookedVehicles <= 0) {
+        throw new BadRequestException("No vehicles available at this time");
+      }
 
-    const lesson = await this.prisma.lesson.create({
-      data: {
-        schoolId,
-        enrollmentId: dto.enrollmentId,
-        instructorId: instructorProfile.id,
-        startTime,
-        endTime,
-        status: LessonStatus.SCHEDULED,
-      },
-      select: LESSON_SELECT,
+      return tx.lesson.create({
+        data: {
+          schoolId,
+          enrollmentId: dto.enrollmentId,
+          instructorId: instructorProfile.id,
+          startTime,
+          endTime,
+          status: LessonStatus.SCHEDULED,
+        },
+        select: LESSON_SELECT,
+      });
     });
 
     return toLessonDto(lesson);
@@ -283,7 +286,7 @@ export class LessonService {
 
     const [updatedLesson] = await this.prisma.$transaction([
       this.prisma.lesson.update({
-        where: { id: lessonId },
+        where: { id: lessonId, status: LessonStatus.SCHEDULED },
         data: {
           status: LessonStatus.COMPLETED,
           completedAt: new Date(),
@@ -321,7 +324,7 @@ export class LessonService {
     }
 
     const updated = await this.prisma.lesson.update({
-      where: { id: lessonId },
+      where: { id: lessonId, status: LessonStatus.SCHEDULED },
       data: {
         status: LessonStatus.CANCELLED,
         cancelledAt: new Date(),
@@ -395,24 +398,26 @@ export class LessonService {
       );
     }
 
-    const conflicting = await this.prisma.lesson.findFirst({
-      where: {
-        vehicleId: dto.vehicleId,
-        status: LessonStatus.SCHEDULED,
-        id: { not: lessonId },
-        startTime: { lt: lesson.endTime },
-        endTime: { gt: lesson.startTime },
-      },
-    });
+    const updated = await withSerializableRetry(this.prisma, async (tx) => {
+      const conflicting = await tx.lesson.findFirst({
+        where: {
+          vehicleId: dto.vehicleId,
+          status: LessonStatus.SCHEDULED,
+          id: { not: lessonId },
+          startTime: { lt: lesson.endTime },
+          endTime: { gt: lesson.startTime },
+        },
+      });
 
-    if (conflicting) {
-      throw new BadRequestException("Vehicle is already booked at this time");
-    }
+      if (conflicting) {
+        throw new BadRequestException("Vehicle is already booked at this time");
+      }
 
-    const updated = await this.prisma.lesson.update({
-      where: { id: lessonId },
-      data: { vehicleId: dto.vehicleId },
-      select: LESSON_SELECT,
+      return tx.lesson.update({
+        where: { id: lessonId, status: LessonStatus.SCHEDULED },
+        data: { vehicleId: dto.vehicleId },
+        select: LESSON_SELECT,
+      });
     });
 
     return toLessonDto(updated);
