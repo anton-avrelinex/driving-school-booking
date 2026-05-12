@@ -152,6 +152,7 @@
   "lesson_book_choose_setup": "Choose a course and instructor to see availability.",
   "lesson_book_confirm_title": "Confirm booking",
   "lesson_book_confirm_description": "Book a lesson with {name} on {date} at {time}?",
+  "lesson_book_description": "Find a slot that fits your schedule and confirm your next lesson.",
   "lesson_book_failed": "Failed to book lesson",
   "lesson_book_instructors_available": "{count} instructor available | {count} instructors available",
   "lesson_book_only_instructor": "Only {name} is available at this time.",
