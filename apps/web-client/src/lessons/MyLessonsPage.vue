@@ -109,7 +109,9 @@
                 {{ $t("lesson_vehicle") }}
               </TableHead>
               <TableHead>{{ $t("lesson_status") }}</TableHead>
-              <TableHead>{{ $t("common_actions") }}</TableHead>
+              <TableHead class="text-right">
+                {{ $t("common_actions") }}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -143,7 +145,7 @@
                   {{ $t(`lesson_status_${lesson.status.toLowerCase()}`) }}
                 </Badge>
               </TableCell>
-              <TableCell class="space-x-2">
+              <TableCell class="text-right space-x-2">
                 <template v-if="lesson.status === LESSON_STATUSES.PENDING">
                   <template v-if="authStore.isInstructor">
                     <Button size="sm" @click="handleConfirm(lesson.id)">

@@ -16,7 +16,9 @@
             <TableHead>{{ $t("vehicle_license_plate") }}</TableHead>
             <TableHead>{{ $t("vehicle_transmission") }}</TableHead>
             <TableHead>{{ $t("vehicle_category") }}</TableHead>
-            <TableHead>{{ $t("common_actions") }}</TableHead>
+            <TableHead class="text-right">
+              {{ $t("common_actions") }}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -62,7 +64,7 @@
                   </SelectContent>
                 </Select>
               </TableCell>
-              <TableCell class="flex gap-2">
+              <TableCell class="flex gap-2 justify-end">
                 <Button size="sm" @click="handleUpdate(vehicle.id)">
                   {{ $t("common_save") }}
                 </Button>
@@ -83,7 +85,7 @@
                 }}
               </TableCell>
               <TableCell>{{ getCategoryName(vehicle.categoryId) }}</TableCell>
-              <TableCell class="flex gap-2">
+              <TableCell class="flex gap-2 justify-end">
                 <Button size="sm" variant="outline" @click="startEdit(vehicle)">
                   {{ $t("common_edit") }}
                 </Button>
