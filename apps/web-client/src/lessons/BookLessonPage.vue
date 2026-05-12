@@ -1,8 +1,9 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">{{ $t("lesson_book") }}</h1>
-    </div>
+    <PageHeader
+      :title="$t('lesson_book')"
+      :description="$t('lesson_book_description')"
+    />
 
     <Transition name="fade" mode="out-in">
       <div v-if="loadingEnrollments" class="flex flex-col gap-4 max-w-2xl">
@@ -287,6 +288,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmptyState from "@/components/EmptyState.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import {
   type CalendarDate,
   type DateValue,
@@ -487,8 +489,17 @@ async function handleBook(instructorId: string) {
       startTime: selectedSlot.value.toAbsoluteString(),
     });
 
-    toast.success(t("lesson_booked"));
-    void router.push({ name: "my-lessons" });
+    toast.success(t("lesson_booked"), {
+      action: {
+        label: t("lesson_booked_view"),
+        onClick: () => {
+          void router.push({ name: "my-lessons" });
+        },
+      },
+    });
+
+    selectedSlot.value = null;
+    await refreshSlots();
   } catch {
     toast.error(t("lesson_book_failed"));
   }
