@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@driving-school-booking/eslint-config": "workspace:^",
+    "@driving-school-booking/tsconfig": "workspace:^",
     "@types/express": "^5.0.0"
   }
 }
