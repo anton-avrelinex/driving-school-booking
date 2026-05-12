@@ -1,4 +1,7 @@
 {
   "extends": "@driving-school-booking/tsconfig/lib.json",
+  "compilerOptions": {
+    "outDir": "./dist"
+  },
   "include": ["src"]
 }
