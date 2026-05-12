@@ -1,6 +1,7 @@
 {
   "extends": "@driving-school-booking/tsconfig/nest-app.json",
   "compilerOptions": {
+    "outDir": "./dist",
     "types": ["node", "jest"]
   }
 }
