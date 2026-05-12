@@ -5,24 +5,18 @@
       :description="$t('lesson_list_description')"
     >
       <template #actions>
-        <div class="flex items-center gap-0.5 rounded-md border p-0.5">
-          <Button
-            :variant="view === 'list' ? 'default' : 'ghost'"
-            size="sm"
-            @click="view = 'list'"
-          >
-            <ListIcon class="size-4" />
-            {{ $t("schedule_view_list") }}
-          </Button>
-          <Button
-            :variant="view === 'calendar' ? 'default' : 'ghost'"
-            size="sm"
-            @click="view = 'calendar'"
-          >
-            <CalendarIcon class="size-4" />
-            {{ $t("schedule_view_calendar") }}
-          </Button>
-        </div>
+        <Tabs v-model="view">
+          <TabsList>
+            <TabsTrigger value="list">
+              <ListIcon class="size-4" />
+              {{ $t("schedule_view_list") }}
+            </TabsTrigger>
+            <TabsTrigger value="calendar">
+              <CalendarIcon class="size-4" />
+              {{ $t("schedule_view_calendar") }}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </template>
     </PageHeader>
 
@@ -222,6 +216,7 @@ import { useAuthStore } from "@/auth/auth.store";
 import { useAvailabilityStore } from "@/availability/availability.store";
 import { useLessonStore } from "@/lessons/lessons.store";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { lessonStatusVariant } from "@/lessons/lesson-status";
 import {

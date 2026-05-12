@@ -34,22 +34,14 @@
         <span class="ml-2 text-sm font-medium">{{ rangeLabel }}</span>
       </div>
 
-      <div class="flex items-center gap-0.5 rounded-md border p-0.5">
-        <Button
-          :variant="mode === 'week' ? 'default' : 'ghost'"
-          size="sm"
-          @click="mode = 'week'"
-        >
-          {{ $t("schedule_view_week") }}
-        </Button>
-        <Button
-          :variant="mode === 'month' ? 'default' : 'ghost'"
-          size="sm"
-          @click="mode = 'month'"
-        >
-          {{ $t("schedule_view_month") }}
-        </Button>
-      </div>
+      <Tabs v-model="mode">
+        <TabsList>
+          <TabsTrigger value="week">{{ $t("schedule_view_week") }}</TabsTrigger>
+          <TabsTrigger value="month">{{
+            $t("schedule_view_month")
+          }}</TabsTrigger>
+        </TabsList>
+      </Tabs>
     </div>
 
     <Card class="overflow-hidden flex-1 min-h-0 flex flex-col py-0">
@@ -179,6 +171,7 @@ import {
 import type { LessonModel } from "@/lessons/lessons.models";
 import type { AvailabilityBlockModel } from "@/availability/availability.models";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
