@@ -21,6 +21,15 @@
           <Input id="create-last-name" v-model="form.lastName" required />
         </div>
         <div class="flex flex-col gap-2">
+          <Label for="create-instructor-number">
+            {{ $t("teacher_instructor_number") }}
+          </Label>
+          <Input
+            id="create-instructor-number"
+            v-model="form.instructorNumber"
+          />
+        </div>
+        <div class="flex flex-col gap-2">
           <Label>{{ $t("teacher_courses") }}</Label>
           <div class="flex flex-col gap-1">
             <label
@@ -105,6 +114,7 @@ const form = ref<Omit<CreateInstructorDto, "courseIds" | "vehicleIds">>({
   email: "",
   firstName: "",
   lastName: "",
+  instructorNumber: "",
 });
 
 async function handleCreate() {
@@ -112,6 +122,9 @@ async function handleCreate() {
   try {
     const payload: CreateInstructorDto = {
       ...form.value,
+      ...(form.value.instructorNumber
+        ? { instructorNumber: form.value.instructorNumber }
+        : { instructorNumber: undefined }),
       courseIds: selectedCourseIds.value,
       vehicleIds: selectedVehicleIds.value,
     };
@@ -122,6 +135,7 @@ async function handleCreate() {
       email: "",
       firstName: "",
       lastName: "",
+      instructorNumber: "",
     };
     selectedCourseIds.value = [];
     selectedVehicleIds.value = [];

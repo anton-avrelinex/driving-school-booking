@@ -14,16 +14,23 @@
         }}</span>
         <span class="ml-1">{{ chipLabel(lesson) }}</span>
       </button>
-      <span
+      <button
         v-if="lessonsForDate(day.date).length > MAX_VISIBLE"
-        class="text-[10px] text-muted-foreground px-1.5"
+        type="button"
+        class="text-[10px] text-muted-foreground px-1.5 text-left hover:text-foreground hover:underline"
+        @click="
+          $emit('day-click', {
+            date: day.date,
+            lessons: lessonsForDate(day.date),
+          })
+        "
       >
         {{
           $t("schedule_more_lessons", {
             count: lessonsForDate(day.date).length - MAX_VISIBLE,
           })
         }}
-      </span>
+      </button>
     </template>
   </MonthCalendarGrid>
 </template>
@@ -42,7 +49,10 @@ const props = defineProps<{
   lessons: LessonModel[];
 }>();
 
-defineEmits<{ "lesson-click": [LessonModel] }>();
+defineEmits<{
+  "lesson-click": [LessonModel];
+  "day-click": [{ date: CalendarDate; lessons: LessonModel[] }];
+}>();
 
 const auth = useAuthStore();
 
@@ -60,11 +70,14 @@ function lessonsForDate(date: CalendarDate): LessonModel[] {
 
 function lessonChipClass(status: LessonModel["status"]): string {
   switch (status) {
+    case LESSON_STATUSES.PENDING:
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200";
     case LESSON_STATUSES.SCHEDULED:
       return "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200";
     case LESSON_STATUSES.COMPLETED:
       return "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200";
     case LESSON_STATUSES.CANCELLED:
+    case LESSON_STATUSES.REJECTED:
       return "bg-muted text-muted-foreground line-through";
   }
 }

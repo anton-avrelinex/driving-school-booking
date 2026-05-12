@@ -92,11 +92,14 @@ function chipsForDate(
 
 function lessonChipClass(status: LessonModel["status"]): string {
   switch (status) {
+    case LESSON_STATUSES.PENDING:
+      return "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/50 dark:text-yellow-100 border-yellow-300 dark:border-yellow-800";
     case LESSON_STATUSES.SCHEDULED:
       return "bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-100 border-blue-300 dark:border-blue-800";
     case LESSON_STATUSES.COMPLETED:
       return "bg-green-100 text-green-900 dark:bg-green-900/50 dark:text-green-100 border-green-300 dark:border-green-800";
     case LESSON_STATUSES.CANCELLED:
+    case LESSON_STATUSES.REJECTED:
       return "bg-muted text-muted-foreground line-through";
   }
 }

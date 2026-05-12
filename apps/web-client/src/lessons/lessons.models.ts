@@ -11,6 +11,7 @@ export interface LessonModel {
   enrollmentId: string;
   courseName: string;
   instructorName: string;
+  instructorNumber: string | null;
   studentName: string;
   vehicleId: string | null;
   vehicleName: string | null;
@@ -19,6 +20,8 @@ export interface LessonModel {
   status: LessonStatus;
   cancelledAt: ZonedDateTime | null;
   completedAt: ZonedDateTime | null;
+  confirmedAt: ZonedDateTime | null;
+  rejectedAt: ZonedDateTime | null;
   createdAt: ZonedDateTime;
 }
 
@@ -34,6 +37,7 @@ export function toLessonModel(dto: LessonDto): LessonModel {
     enrollmentId: dto.enrollmentId,
     courseName: dto.courseName,
     instructorName: dto.instructorName,
+    instructorNumber: dto.instructorNumber,
     studentName: dto.studentName,
     vehicleId: dto.vehicleId,
     vehicleName: dto.vehicleName,
@@ -42,6 +46,8 @@ export function toLessonModel(dto: LessonDto): LessonModel {
     endTime: parseISOToZoned(dto.endTime),
     cancelledAt: dto.cancelledAt ? parseISOToZoned(dto.cancelledAt) : null,
     completedAt: dto.completedAt ? parseISOToZoned(dto.completedAt) : null,
+    confirmedAt: dto.confirmedAt ? parseISOToZoned(dto.confirmedAt) : null,
+    rejectedAt: dto.rejectedAt ? parseISOToZoned(dto.rejectedAt) : null,
     createdAt: parseISOToZoned(dto.createdAt),
   };
 }

@@ -5,6 +5,7 @@ export interface LessonDto {
   enrollmentId: string;
   courseName: string;
   instructorName: string;
+  instructorNumber: string | null;
   studentName: string;
   vehicleId: string | null;
   vehicleName: string | null;
@@ -13,6 +14,8 @@ export interface LessonDto {
   status: LessonStatus;
   cancelledAt: string | null;
   completedAt: string | null;
+  confirmedAt: string | null;
+  rejectedAt: string | null;
   createdAt: string;
 }
 
@@ -32,6 +35,7 @@ export interface AvailableInstructorDto {
   id: string;
   firstName: string;
   lastName: string;
+  instructorNumber: string | null;
 }
 
 export interface AvailabilityRangeQueryDto {

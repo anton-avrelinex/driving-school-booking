@@ -29,9 +29,11 @@ export type EnrollmentStatus =
   (typeof ENROLLMENT_STATUSES)[keyof typeof ENROLLMENT_STATUSES];
 
 export const LESSON_STATUSES = {
+  PENDING: "PENDING",
   SCHEDULED: "SCHEDULED",
   COMPLETED: "COMPLETED",
   CANCELLED: "CANCELLED",
+  REJECTED: "REJECTED",
 } as const;
 
 export type LessonStatus =
@@ -41,6 +43,8 @@ export const RECENT_ACTIVITY_TYPES = {
   BOOKED: "BOOKED",
   COMPLETED: "COMPLETED",
   CANCELLED: "CANCELLED",
+  CONFIRMED: "CONFIRMED",
+  REJECTED: "REJECTED",
 } as const;
 
 export type RecentActivityType =

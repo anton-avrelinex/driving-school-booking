@@ -106,7 +106,7 @@ export function slotsQuery(p: SlotsParams): Prisma.Sql {
       -- Drop slots overlapping a lesson the same instructor is already on.
       AND NOT EXISTS (
         SELECT 1 FROM lessons l
-        WHERE l.status = ${LessonStatus.SCHEDULED}::"LessonStatus"
+        WHERE l.status IN (${LessonStatus.PENDING}::"LessonStatus", ${LessonStatus.SCHEDULED}::"LessonStatus")
           AND l."instructorId" = cs."instructorId"
           AND l."startTime" < cs.slot_end
           AND l."endTime" > cs.slot_start
@@ -115,7 +115,7 @@ export function slotsQuery(p: SlotsParams): Prisma.Sql {
       AND NOT EXISTS (
         SELECT 1 FROM lessons sl
         JOIN enrollments e ON e.id = sl."enrollmentId"
-        WHERE sl.status = ${LessonStatus.SCHEDULED}::"LessonStatus"
+        WHERE sl.status IN (${LessonStatus.PENDING}::"LessonStatus", ${LessonStatus.SCHEDULED}::"LessonStatus")
           AND e."studentProfileId" = ${p.studentProfileId}
           AND sl."startTime" < cs.slot_end
           AND sl."endTime" > cs.slot_start
@@ -123,7 +123,7 @@ export function slotsQuery(p: SlotsParams): Prisma.Sql {
       -- Require at least one matching vehicle free at this time.
       AND (SELECT n FROM total_vehicles) - (
         SELECT COUNT(*) FROM lessons vl
-        WHERE vl.status = ${LessonStatus.SCHEDULED}::"LessonStatus"
+        WHERE vl.status IN (${LessonStatus.PENDING}::"LessonStatus", ${LessonStatus.SCHEDULED}::"LessonStatus")
           AND vl."schoolId" = ${p.schoolId}
           AND vl."vehicleId" IS NOT NULL
           AND vl."startTime" < cs.slot_end

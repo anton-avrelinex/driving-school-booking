@@ -69,9 +69,11 @@ function iconFor(type: RecentActivityType): LucideIcon {
   switch (type) {
     case RECENT_ACTIVITY_TYPES.BOOKED:
       return PlusIcon;
+    case RECENT_ACTIVITY_TYPES.CONFIRMED:
     case RECENT_ACTIVITY_TYPES.COMPLETED:
       return CheckIcon;
     case RECENT_ACTIVITY_TYPES.CANCELLED:
+    case RECENT_ACTIVITY_TYPES.REJECTED:
       return XIcon;
   }
 }
@@ -80,9 +82,11 @@ function badgeClass(type: RecentActivityType): string {
   switch (type) {
     case RECENT_ACTIVITY_TYPES.BOOKED:
       return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+    case RECENT_ACTIVITY_TYPES.CONFIRMED:
     case RECENT_ACTIVITY_TYPES.COMPLETED:
       return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
     case RECENT_ACTIVITY_TYPES.CANCELLED:
+    case RECENT_ACTIVITY_TYPES.REJECTED:
       return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
   }
 }

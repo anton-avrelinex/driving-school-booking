@@ -86,6 +86,7 @@ export interface EnrollmentDto {
 
 export interface InstructorProfileDto {
   id: string;
+  instructorNumber: string | null;
   courses: CourseDto[];
   vehicles: VehicleDto[];
   availability: InstructorAvailabilityDto[];
@@ -124,6 +125,7 @@ export interface CreateInstructorDto {
   email: string;
   firstName: string;
   lastName: string;
+  instructorNumber?: string;
   courseIds?: string[];
   vehicleIds?: string[];
 }
@@ -144,6 +146,7 @@ export interface UpdateInstructorDto {
   email?: string;
   firstName?: string;
   lastName?: string;
+  instructorNumber?: string;
   courseIds?: string[];
   vehicleIds?: string[];
 }

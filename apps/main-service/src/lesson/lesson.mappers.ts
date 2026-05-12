@@ -10,6 +10,7 @@ export function toLessonDto(lesson: {
     };
   };
   instructor: {
+    instructorNumber: string | null;
     user: { firstName: string; lastName: string };
   };
   vehicleId: string | null;
@@ -23,6 +24,8 @@ export function toLessonDto(lesson: {
   status: string;
   cancelledAt: Date | null;
   completedAt: Date | null;
+  confirmedAt: Date | null;
+  rejectedAt: Date | null;
   createdAt: Date;
 }): LessonDto {
   const student = lesson.enrollment.studentProfile.user;
@@ -33,6 +36,7 @@ export function toLessonDto(lesson: {
     enrollmentId: lesson.enrollmentId,
     courseName: lesson.enrollment.course.name,
     instructorName: `${instructor.firstName} ${instructor.lastName}`,
+    instructorNumber: lesson.instructor.instructorNumber,
     studentName: `${student.firstName} ${student.lastName}`,
     vehicleId: lesson.vehicleId,
     vehicleName: lesson.vehicle
@@ -43,6 +47,8 @@ export function toLessonDto(lesson: {
     status: lesson.status as LessonDto["status"],
     cancelledAt: lesson.cancelledAt?.toISOString() ?? null,
     completedAt: lesson.completedAt?.toISOString() ?? null,
+    confirmedAt: lesson.confirmedAt?.toISOString() ?? null,
+    rejectedAt: lesson.rejectedAt?.toISOString() ?? null,
     createdAt: lesson.createdAt.toISOString(),
   };
 }

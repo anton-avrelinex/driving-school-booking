@@ -8,7 +8,7 @@
     <div
       v-for="(label, i) in weekdayLabels"
       :key="i"
-      class="border-r border-b bg-muted/40 px-2 py-1.5 text-xs font-medium text-muted-foreground sticky top-0 z-10"
+      class="border-r border-b bg-muted px-2 py-1.5 text-xs font-medium text-muted-foreground sticky top-0 z-10"
     >
       {{ label }}
     </div>
@@ -58,7 +58,7 @@ const props = withDefaults(
     monthAnchor: CalendarDate;
     minRowPx?: number;
   }>(),
-  { minRowPx: 96 },
+  { minRowPx: 124 },
 );
 
 defineSlots<{

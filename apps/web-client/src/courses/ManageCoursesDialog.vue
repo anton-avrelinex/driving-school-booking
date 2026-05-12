@@ -16,7 +16,9 @@
             <TableHead>{{ $t("course_hours") }}</TableHead>
             <TableHead>{{ $t("course_category") }}</TableHead>
             <TableHead>{{ $t("course_transmission") }}</TableHead>
-            <TableHead>{{ $t("common_actions") }}</TableHead>
+            <TableHead class="text-right">
+              {{ $t("common_actions") }}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -73,7 +75,7 @@
                   </SelectContent>
                 </Select>
               </TableCell>
-              <TableCell class="flex gap-2">
+              <TableCell class="flex gap-2 justify-end">
                 <Button size="sm" @click="handleUpdate(course.id)">
                   {{ $t("common_save") }}
                 </Button>
@@ -94,7 +96,7 @@
                     : $t("vehicle_transmission_manual")
                 }}
               </TableCell>
-              <TableCell class="flex gap-2">
+              <TableCell class="flex gap-2 justify-end">
                 <Button size="sm" variant="outline" @click="startEdit(course)">
                   {{ $t("common_edit") }}
                 </Button>

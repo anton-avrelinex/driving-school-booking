@@ -39,6 +39,9 @@ export class InstructorService {
       {
         instructorProfile: {
           create: {
+            ...(dto.instructorNumber !== undefined && {
+              instructorNumber: dto.instructorNumber,
+            }),
             ...(dto.courseIds && {
               courses: { connect: dto.courseIds.map((id) => ({ id })) },
             }),
@@ -60,13 +63,14 @@ export class InstructorService {
   ): Promise<UserDto> {
     await this.userService.findOne(schoolId, userId);
 
-    const { courseIds, vehicleIds, ...rest } = dto;
+    const { courseIds, vehicleIds, instructorNumber, ...rest } = dto;
 
     const updateData: Record<string, unknown> = { ...rest };
 
-    if (courseIds || vehicleIds) {
+    if (courseIds || vehicleIds || instructorNumber !== undefined) {
       updateData.instructorProfile = {
         update: {
+          ...(instructorNumber !== undefined && { instructorNumber }),
           ...(courseIds && {
             courses: { set: courseIds.map((id) => ({ id })) },
           }),

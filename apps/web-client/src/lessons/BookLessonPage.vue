@@ -93,6 +93,12 @@
                       :value="instructor.id"
                     >
                       {{ instructor.firstName }} {{ instructor.lastName }}
+                      <span
+                        v-if="instructor.instructorNumber"
+                        class="text-muted-foreground"
+                      >
+                        · #{{ instructor.instructorNumber }}
+                      </span>
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -237,6 +243,12 @@
             @click="confirmInstructor(instructor.id)"
           >
             {{ instructor.firstName }} {{ instructor.lastName }}
+            <span
+              v-if="instructor.instructorNumber"
+              class="text-muted-foreground"
+            >
+              · #{{ instructor.instructorNumber }}
+            </span>
           </Button>
         </div>
         <DialogFooter v-if="pickerInstructors.length === 1">
@@ -258,6 +270,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
   ENROLLMENT_STATUSES,
+  type AvailableInstructorDto,
   type UserDto,
 } from "@driving-school-booking/shared-types";
 import { toast } from "vue-sonner";
@@ -355,10 +368,7 @@ const calendarPlaceholder = ref(today(getLocalTimeZone())) as Ref<CalendarDate>;
 const pickerInstructors = computed(() =>
   pickerInstructorIds.value
     .map((id) => lessonStore.availableInstructors.find((i) => i.id === id))
-    .filter(
-      (i): i is { id: string; firstName: string; lastName: string } =>
-        i !== undefined,
-    ),
+    .filter((i): i is AvailableInstructorDto => i !== undefined),
 );
 
 const availableDays = computed<Set<string>>(() => {

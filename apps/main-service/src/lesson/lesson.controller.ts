@@ -16,14 +16,18 @@ import {
   type AuthenticatedRequest,
 } from "@driving-school-booking/nestjs-auth";
 import { Role } from "../generated/prisma/enums";
-import { LessonService } from "./lesson.service";
+import { LessonAvailabilityService } from "./lesson-availability.service";
+import { LessonLifecycleService } from "./lesson-lifecycle.service";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
 import { AssignVehicleDto } from "./dto/assign-vehicle.dto";
 
 @Controller("lessons")
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class LessonController {
-  constructor(private readonly lessonService: LessonService) {}
+  constructor(
+    private readonly availability: LessonAvailabilityService,
+    private readonly lifecycle: LessonLifecycleService,
+  ) {}
 
   @Get("available-instructors")
   @Roles(Role.STUDENT)
@@ -31,10 +35,10 @@ export class LessonController {
     @Query("enrollmentId") enrollmentId: string,
     @Request() req: AuthenticatedRequest,
   ) {
-    const studentProfileId = await this.lessonService.getStudentProfileId(
+    const studentProfileId = await this.availability.getStudentProfileId(
       req.user.sub,
     );
-    return this.lessonService.getAvailableInstructors(
+    return this.availability.getAvailableInstructors(
       req.user.schoolId,
       enrollmentId,
       studentProfileId,
@@ -50,10 +54,10 @@ export class LessonController {
     @Query("instructorId") instructorId: string | undefined,
     @Request() req: AuthenticatedRequest,
   ) {
-    const studentProfileId = await this.lessonService.getStudentProfileId(
+    const studentProfileId = await this.availability.getStudentProfileId(
       req.user.sub,
     );
-    return this.lessonService.getSlots(
+    return this.availability.getSlots(
       req.user.schoolId,
       enrollmentId,
       studentProfileId,
@@ -69,10 +73,10 @@ export class LessonController {
     @Body() dto: CreateLessonDto,
     @Request() req: AuthenticatedRequest,
   ) {
-    const studentProfileId = await this.lessonService.getStudentProfileId(
+    const studentProfileId = await this.availability.getStudentProfileId(
       req.user.sub,
     );
-    return this.lessonService.create(req.user.schoolId, studentProfileId, dto);
+    return this.lifecycle.create(req.user.schoolId, studentProfileId, dto);
   }
 
   @Get()
@@ -82,7 +86,7 @@ export class LessonController {
     @Query("to") to: string | undefined,
     @Request() req: AuthenticatedRequest,
   ) {
-    return this.lessonService.findAll(
+    return this.lifecycle.findAll(
       req.user.schoolId,
       req.user.role,
       req.user.sub,
@@ -93,12 +97,34 @@ export class LessonController {
   @Patch(":id/complete")
   @Roles(Role.INSTRUCTOR, Role.ADMIN)
   complete(@Param("id") id: string, @Request() req: AuthenticatedRequest) {
-    return this.lessonService.complete(req.user.schoolId, id);
+    return this.lifecycle.complete(req.user.schoolId, id);
+  }
+
+  @Patch(":id/confirm")
+  @Roles(Role.INSTRUCTOR, Role.ADMIN)
+  confirm(@Param("id") id: string, @Request() req: AuthenticatedRequest) {
+    return this.lifecycle.confirm(
+      req.user.schoolId,
+      id,
+      req.user.sub,
+      req.user.role,
+    );
+  }
+
+  @Patch(":id/reject")
+  @Roles(Role.INSTRUCTOR, Role.ADMIN)
+  reject(@Param("id") id: string, @Request() req: AuthenticatedRequest) {
+    return this.lifecycle.reject(
+      req.user.schoolId,
+      id,
+      req.user.sub,
+      req.user.role,
+    );
   }
 
   @Patch(":id/cancel")
   cancel(@Param("id") id: string, @Request() req: AuthenticatedRequest) {
-    return this.lessonService.cancel(req.user.schoolId, id, req.user.sub);
+    return this.lifecycle.cancel(req.user.schoolId, id, req.user.sub);
   }
 
   @Patch(":id/vehicle")
@@ -108,6 +134,6 @@ export class LessonController {
     @Body() dto: AssignVehicleDto,
     @Request() req: AuthenticatedRequest,
   ) {
-    return this.lessonService.assignVehicle(req.user.schoolId, id, dto);
+    return this.lifecycle.assignVehicle(req.user.schoolId, id, dto);
   }
 }

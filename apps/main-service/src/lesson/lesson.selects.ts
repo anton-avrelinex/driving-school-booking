@@ -15,6 +15,7 @@ export const LESSON_SELECT = {
   },
   instructor: {
     select: {
+      instructorNumber: true,
       user: { select: { firstName: true, lastName: true } },
     },
   },
@@ -31,5 +32,7 @@ export const LESSON_SELECT = {
   status: true,
   cancelledAt: true,
   completedAt: true,
+  confirmedAt: true,
+  rejectedAt: true,
   createdAt: true,
 } satisfies Prisma.LessonSelect;
