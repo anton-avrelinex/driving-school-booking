@@ -37,7 +37,7 @@
     "@tailwindcss/vite": "^4.2.1",
     "@tsconfig/node24": "^24.0.4",
     "@types/jsdom": "^28.0.0",
-    "@types/node": "^24.11.0",
+    "@types/node": "^22.19.19",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/tsconfig": "^0.8.1",
     "jsdom": "^28.1.0",
