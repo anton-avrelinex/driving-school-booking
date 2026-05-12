@@ -42,6 +42,8 @@ const datetimeFormats = {
 } as const;
 
 const i18n = createI18n({
+  locale: "en",
+  fallbackLocale: "en",
   messages: {
     en: await import("./locales/en.json"),
   },
