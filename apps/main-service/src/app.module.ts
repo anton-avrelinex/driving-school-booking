@@ -1,6 +1,8 @@
 import { Module } from "@nestjs/common";
+import { APP_GUARD } from "@nestjs/core";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { BullModule } from "@nestjs/bullmq";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { Queue } from "bullmq";
 import {
   OBS_LOGS_QUEUE,
@@ -47,6 +49,7 @@ function getLogQueue(): Queue {
       }),
     }),
     BullModule.registerQueue({ name: OBS_LOGS_QUEUE }),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     ObsLoggerModule.forRoot({
       serviceName: SERVICES.MAIN,
       logLevel: process.env.LOG_LEVEL ?? "info",
@@ -67,6 +70,9 @@ function getLogQueue(): Queue {
     SchoolConfigModule,
     StatsModule,
   ],
-  providers: [RequestLogInterceptor],
+  providers: [
+    RequestLogInterceptor,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule {}

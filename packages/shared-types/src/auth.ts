@@ -10,13 +10,8 @@ export interface ChangePasswordDto {
   newPassword: string;
 }
 
-export interface RefreshDto {
-  refreshToken: string;
-}
-
 export interface TokenResponseDto {
   accessToken: string;
-  refreshToken: string;
 }
 
 export interface JwtPayload {

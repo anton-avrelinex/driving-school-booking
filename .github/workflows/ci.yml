@@ -34,6 +34,8 @@ jobs:
 
       - run: pnpm lint
 
+      - run: pnpm audit --prod --audit-level=critical
+
       - run: pnpm knip:production
 
       - run: pnpm check-types

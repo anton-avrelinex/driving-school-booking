@@ -1,11 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import type { TokenResponseDto } from "@driving-school-booking/shared-types";
-import {
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
-  clearTokens,
-} from "@/api/token";
+import { clearAccessToken, getAccessToken, setAccessToken } from "@/api/token";
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -15,6 +10,7 @@ const PUBLIC_ROUTES = ["/auth/login", "/auth/refresh"];
 
 const api = axios.create({
   baseURL: "/api",
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
@@ -41,23 +37,21 @@ api.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
-      const refreshToken = getRefreshToken();
-      if (refreshToken) {
-        try {
-          const { data } = await axios.post<TokenResponseDto>(
-            "/api/auth/refresh",
-            { refreshToken },
-          );
-          setTokens(data.accessToken, data.refreshToken);
+      try {
+        const { data } = await axios.post<TokenResponseDto>(
+          "/api/auth/refresh",
+          null,
+          { withCredentials: true },
+        );
+        setAccessToken(data.accessToken);
 
-          originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-          return api(originalRequest);
-        } catch {
-          // refresh failed, fall through to clear
-        }
+        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        return api(originalRequest);
+      } catch {
+        // refresh failed, fall through to clear
       }
 
-      clearTokens();
+      clearAccessToken();
       globalThis.location.href = "/login";
     }
 
