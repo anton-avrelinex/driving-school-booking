@@ -7,12 +7,7 @@ import {
   type TokenResponseDto,
 } from "@driving-school-booking/shared-types";
 import api from "@/api/api";
-import {
-  getAccessToken,
-  getRefreshToken,
-  setTokens as persistTokens,
-  clearTokens as removeTokens,
-} from "@/api/token";
+import { clearAccessToken, getAccessToken, setAccessToken } from "@/api/token";
 import router from "@/router";
 import { logWarn, trackEvent } from "@/observability";
 
@@ -23,7 +18,6 @@ function parseJwt(token: string): JwtPayload {
 
 export const useAuthStore = defineStore("auth", () => {
   const accessToken = ref<string | null>(getAccessToken());
-  const refreshToken = ref<string | null>(getRefreshToken());
 
   const user = computed(() => {
     if (!accessToken.value) {
@@ -54,18 +48,14 @@ export const useAuthStore = defineStore("auth", () => {
     return user.value?.mustChangePassword ?? false;
   });
 
-  function setTokens(access: string, refresh: string) {
+  function setToken(access: string) {
     accessToken.value = access;
-    refreshToken.value = refresh;
-
-    persistTokens(access, refresh);
+    setAccessToken(access);
   }
 
-  function clearTokens() {
+  function clearToken() {
     accessToken.value = null;
-    refreshToken.value = null;
-
-    removeTokens();
+    clearAccessToken();
   }
 
   async function login(email: string, password: string) {
@@ -73,7 +63,7 @@ export const useAuthStore = defineStore("auth", () => {
       email,
       password,
     });
-    setTokens(data.accessToken, data.refreshToken);
+    setToken(data.accessToken);
     trackEvent(ANALYTICS_EVENTS.LOGIN, {
       role: parseJwt(data.accessToken).role,
     });
@@ -81,16 +71,9 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function refresh(): Promise<boolean> {
-    if (!refreshToken.value) {
-      return false;
-    }
-
     try {
-      const { data } = await api.post<TokenResponseDto>("/auth/refresh", {
-        refreshToken: refreshToken.value,
-      });
-      setTokens(data.accessToken, data.refreshToken);
-
+      const { data } = await api.post<TokenResponseDto>("/auth/refresh", null);
+      setToken(data.accessToken);
       return true;
     } catch {
       logWarn("Token refresh failed");
@@ -103,17 +86,21 @@ export const useAuthStore = defineStore("auth", () => {
       currentPassword,
       newPassword,
     });
-    setTokens(data.accessToken, data.refreshToken);
+    setToken(data.accessToken);
   }
 
-  function logout() {
-    clearTokens();
+  async function logout() {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // best-effort; clear local state regardless
+    }
+    clearToken();
     void router.push("/login");
   }
 
   return {
     accessToken,
-    refreshToken,
     user,
     isAuthenticated,
     isAdmin,
@@ -124,6 +111,6 @@ export const useAuthStore = defineStore("auth", () => {
     refresh,
     changePassword,
     logout,
-    setTokens,
+    setToken,
   };
 });

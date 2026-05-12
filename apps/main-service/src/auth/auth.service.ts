@@ -6,11 +6,12 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
-import type {
-  JwtPayload,
-  TokenResponseDto,
-  UserDto,
-} from "@driving-school-booking/shared-types";
+import type { JwtPayload, UserDto } from "@driving-school-booking/shared-types";
+
+interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+}
 import { PrismaService } from "../prisma/prisma.service";
 import { USER_SELECT } from "../user/user.selects";
 import { toUserDto } from "../user/user.mappers";
@@ -26,7 +27,7 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async login(email: string, password: string): Promise<TokenResponseDto> {
+  async login(email: string, password: string): Promise<TokenPair> {
     const user = await this.prisma.user.findFirst({
       where: { email, status: UserStatus.ACTIVE },
     });
@@ -38,7 +39,7 @@ export class AuthService {
     return this.generateTokens(user);
   }
 
-  async refresh(refreshToken: string): Promise<TokenResponseDto> {
+  async refresh(refreshToken: string): Promise<TokenPair> {
     try {
       const payload: JwtPayload = this.jwt.verify(refreshToken, {
         secret: this.config.getOrThrow<string>("JWT_REFRESH_SECRET"),
@@ -114,7 +115,7 @@ export class AuthService {
     return toUserDto(user);
   }
 
-  private generateTokens(user: UserModel): TokenResponseDto {
+  private generateTokens(user: UserModel): TokenPair {
     const payload = {
       sub: user.id,
       schoolId: user.schoolId,
