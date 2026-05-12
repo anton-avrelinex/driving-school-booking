@@ -124,6 +124,13 @@
       :lesson="assignVehicleLesson"
       @assigned="applyFilters"
     />
+
+    <ConfirmLessonDialog
+      v-model:open="confirmDialogOpen"
+      :vehicles="confirmDialogVehicles"
+      :saving="confirmSaving"
+      @confirm="onConfirmWithVehicle"
+    />
   </div>
 </template>
 
@@ -134,6 +141,7 @@ import { toast } from "vue-sonner";
 import {
   LESSON_STATUSES,
   type LessonStatus,
+  type VehicleDto,
 } from "@driving-school-booking/shared-types";
 import type { LessonModel } from "@/lessons/lessons.models";
 import { CalendarIcon } from "lucide-vue-next";
@@ -159,6 +167,7 @@ import {
 } from "@/components/ui/select";
 import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
+import ConfirmLessonDialog from "@/lessons/ConfirmLessonDialog.vue";
 
 function lessonStatusVariant(status: LessonStatus): BadgeVariants["variant"] {
   switch (status) {
@@ -177,6 +186,11 @@ const lessonStore = useLessonStore();
 const statusFilter = ref<LessonStatus | null>(null);
 const showAssignVehicleDialog = ref(false);
 const assignVehicleLesson = ref(null) as Ref<LessonModel | null>;
+
+const confirmDialogOpen = ref(false);
+const confirmDialogVehicles = ref<VehicleDto[]>([]);
+const confirmTargetLessonId = ref<string | null>(null);
+const confirmSaving = ref(false);
 
 function applyFilters() {
   void lessonStore.fetchLessons(
@@ -204,13 +218,49 @@ async function handleCancel(lessonId: string) {
   }
 }
 
+async function confirmWithVehicle(
+  lessonId: string,
+  vehicleId: string,
+): Promise<void> {
+  await lessonStore.confirmLesson(lessonId);
+  await lessonStore.assignVehicle(lessonId, vehicleId);
+}
+
 async function handleConfirm(lessonId: string) {
   try {
-    await lessonStore.confirmLesson(lessonId);
+    const vehicles = await lessonStore.fetchAvailableVehicles(lessonId);
+    if (vehicles.length === 0) {
+      toast.error(t("lesson_confirm_no_vehicles"));
+      return;
+    }
+    if (vehicles.length === 1) {
+      await confirmWithVehicle(lessonId, vehicles[0]!.id);
+      toast.success(t("lesson_confirmed"));
+      applyFilters();
+      return;
+    }
+    confirmTargetLessonId.value = lessonId;
+    confirmDialogVehicles.value = vehicles;
+    confirmDialogOpen.value = true;
+  } catch {
+    toast.error(t("lesson_confirm_failed"));
+  }
+}
+
+async function onConfirmWithVehicle(vehicleId: string) {
+  if (!confirmTargetLessonId.value) {
+    return;
+  }
+  confirmSaving.value = true;
+  try {
+    await confirmWithVehicle(confirmTargetLessonId.value, vehicleId);
     toast.success(t("lesson_confirmed"));
+    confirmDialogOpen.value = false;
     applyFilters();
   } catch {
     toast.error(t("lesson_confirm_failed"));
+  } finally {
+    confirmSaving.value = false;
   }
 }
 

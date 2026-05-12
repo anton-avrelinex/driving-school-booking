@@ -100,6 +100,20 @@ export class LessonController {
     return this.lifecycle.complete(req.user.schoolId, id);
   }
 
+  @Get(":id/available-vehicles")
+  @Roles(Role.INSTRUCTOR, Role.ADMIN)
+  getAvailableVehicles(
+    @Param("id") id: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.lifecycle.getAvailableVehicles(
+      req.user.schoolId,
+      id,
+      req.user.sub,
+      req.user.role,
+    );
+  }
+
   @Patch(":id/confirm")
   @Roles(Role.INSTRUCTOR, Role.ADMIN)
   confirm(@Param("id") id: string, @Request() req: AuthenticatedRequest) {

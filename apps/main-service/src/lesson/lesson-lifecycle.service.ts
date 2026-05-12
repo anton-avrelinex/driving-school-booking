@@ -265,6 +265,65 @@ export class LessonLifecycleService {
     return toLessonDto(updated);
   }
 
+  async getAvailableVehicles(
+    schoolId: string,
+    lessonId: string,
+    callerUserId: string,
+    callerRole: Role,
+  ) {
+    const lesson = await this.prisma.lesson.findUnique({
+      where: { id: lessonId, schoolId },
+      select: {
+        id: true,
+        status: true,
+        startTime: true,
+        endTime: true,
+        instructor: { select: { userId: true } },
+        enrollment: {
+          select: {
+            course: { select: { categoryId: true, transmission: true } },
+          },
+        },
+      },
+    });
+    if (!lesson) {
+      throw new NotFoundException("Lesson not found");
+    }
+    if (
+      callerRole === Role.INSTRUCTOR &&
+      lesson.instructor.userId !== callerUserId
+    ) {
+      throw new ForbiddenException("Not your lesson");
+    }
+
+    const { categoryId, transmission } = lesson.enrollment.course;
+
+    return this.prisma.vehicle.findMany({
+      where: {
+        schoolId,
+        categoryId,
+        transmission,
+        lessons: {
+          none: {
+            status: { in: ACTIVE_LESSON_STATUSES },
+            id: { not: lessonId },
+            startTime: { lt: lesson.endTime },
+            endTime: { gt: lesson.startTime },
+          },
+        },
+      },
+      select: {
+        id: true,
+        make: true,
+        model: true,
+        licensePlate: true,
+        transmission: true,
+        categoryId: true,
+      },
+      orderBy: [{ make: "asc" }, { model: "asc" }],
+    });
+  }
+
   async confirm(
     schoolId: string,
     lessonId: string,
