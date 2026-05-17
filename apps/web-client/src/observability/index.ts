@@ -97,13 +97,6 @@ export function logError(
   bufferLog(LOG_LEVELS.ERROR, message, context, stack);
 }
 
-export function logWarn(
-  message: string,
-  context?: Record<string, unknown>,
-): void {
-  bufferLog(LOG_LEVELS.WARN, message, context);
-}
-
 export function logInfo(
   message: string,
   context?: Record<string, unknown>,
