@@ -46,11 +46,12 @@ model School {
   config SchoolConfig?
   users  User[]
 
-  categories  Category[]
-  courses     Course[]
-  vehicles    Vehicle[]
-  enrollments Enrollment[]
-  lessons     Lesson[]
+  categories    Category[]
+  courses       Course[]
+  vehicles      Vehicle[]
+  enrollments   Enrollment[]
+  lessons       Lesson[]
+  conversations Conversation[]
 
   @@map("schools")
 }
@@ -87,6 +88,8 @@ model User {
   instructorProfile  InstructorProfile?
   studentProfile     StudentProfile?
   adminProfile       AdminProfile?
+  conversationMemberships ConversationParticipant[]
+  sentMessages            Message[]
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -242,4 +245,44 @@ model Vehicle {
   @@index([schoolId])
   @@index([categoryId])
   @@map("vehicles")
+}
+
+model Conversation {
+  id            String                    @id @default(uuid())
+  schoolId      String
+  school        School                    @relation(fields: [schoolId], references: [id])
+  lastMessageAt DateTime                  @default(now())
+  createdAt     DateTime                  @default(now())
+  participants  ConversationParticipant[]
+  messages      Message[]
+
+  @@index([schoolId, lastMessageAt])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt         DateTime?
+  joinedAt       DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  body           String
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
 }

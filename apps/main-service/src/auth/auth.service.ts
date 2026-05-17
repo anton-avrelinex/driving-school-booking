@@ -6,18 +6,25 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
-import type { JwtPayload, UserDto } from "@driving-school-booking/shared-types";
-
-interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
-}
+import type {
+  AuthSessionDto,
+  JwtPayload,
+  UserDto,
+} from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
 import { USER_SELECT } from "../user/user.selects";
 import { toUserDto } from "../user/user.mappers";
 import type { UserModel } from "../generated/prisma/models/User";
 import { UserStatus } from "../generated/prisma/enums";
 import { BCRYPT_ROUNDS } from "../common/auth-constants";
+
+export interface AuthResult {
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+  };
+  session: AuthSessionDto;
+}
 
 @Injectable()
 export class AuthService {
@@ -27,7 +34,7 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async login(email: string, password: string): Promise<TokenPair> {
+  async login(email: string, password: string): Promise<AuthResult> {
     const user = await this.prisma.user.findFirst({
       where: { email, status: UserStatus.ACTIVE },
     });
@@ -36,10 +43,10 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password");
     }
 
-    return this.generateTokens(user);
+    return this.buildAuthResult(user);
   }
 
-  async refresh(refreshToken: string): Promise<TokenPair> {
+  async refresh(refreshToken: string): Promise<AuthResult> {
     try {
       const payload: JwtPayload = this.jwt.verify(refreshToken, {
         secret: this.config.getOrThrow<string>("JWT_REFRESH_SECRET"),
@@ -53,7 +60,7 @@ export class AuthService {
         throw new UnauthorizedException();
       }
 
-      return this.generateTokens(user);
+      return this.buildAuthResult(user);
     } catch {
       throw new UnauthorizedException("Invalid refresh token");
     }
@@ -63,7 +70,7 @@ export class AuthService {
     userId: string,
     currentPassword: string,
     newPassword: string,
-  ) {
+  ): Promise<AuthResult> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -79,7 +86,7 @@ export class AuthService {
       data: { passwordHash, mustChangePassword: false },
     });
 
-    return this.generateTokens(updatedUser);
+    return this.buildAuthResult(updatedUser);
   }
 
   async getProfile(userId: string): Promise<UserDto> {
@@ -115,7 +122,7 @@ export class AuthService {
     return toUserDto(user);
   }
 
-  private generateTokens(user: UserModel): TokenPair {
+  private buildAuthResult(user: UserModel): AuthResult {
     const payload = {
       sub: user.id,
       schoolId: user.schoolId,
@@ -134,6 +141,14 @@ export class AuthService {
       ) as any,
     });
 
-    return { accessToken, refreshToken };
+    return {
+      tokens: { accessToken, refreshToken },
+      session: {
+        id: user.id,
+        schoolId: user.schoolId,
+        role: user.role,
+        mustChangePassword: user.mustChangePassword,
+      },
+    };
   }
 }

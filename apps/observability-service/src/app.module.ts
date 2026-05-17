@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { APP_GUARD } from "@nestjs/core";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { HealthModule } from "./health/health.module";
@@ -7,7 +8,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { BullModule } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
 import { ScheduleModule } from "@nestjs/schedule";
-import { JwtAuthModule } from "@driving-school-booking/nestjs-auth";
+import { CsrfGuard, JwtAuthModule } from "@driving-school-booking/nestjs-auth";
 import { ObsLoggerModule } from "@driving-school-booking/nestjs-logger";
 import {
   SERVICES,
@@ -66,6 +67,6 @@ function getLogQueue(): Queue {
     AggregatesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: CsrfGuard }],
 })
 export class AppModule {}

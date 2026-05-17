@@ -1,13 +1,10 @@
-const ACCESS_TOKEN_KEY = "accessToken";
+const CSRF_COOKIE_NAME = "csrfToken";
 
-export function getAccessToken(): string | null {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
-}
-
-export function setAccessToken(token: string) {
-  localStorage.setItem(ACCESS_TOKEN_KEY, token);
-}
-
-export function clearAccessToken() {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
+export function getCsrfToken(): string | null {
+  const match = document.cookie
+    .split("; ")
+    .find((c) => c.startsWith(`${CSRF_COOKIE_NAME}=`));
+  return match
+    ? decodeURIComponent(match.slice(CSRF_COOKIE_NAME.length + 1))
+    : null;
 }

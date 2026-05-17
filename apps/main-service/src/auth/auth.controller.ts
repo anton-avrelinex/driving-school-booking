@@ -11,29 +11,23 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
+import { randomBytes } from "crypto";
 import type { Request as ExpressRequest, Response } from "express";
-import type { TokenResponseDto } from "@driving-school-booking/shared-types";
+import type { AuthSessionDto } from "@driving-school-booking/shared-types";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
 import {
+  ACCESS_TOKEN_COOKIE,
+  CSRF_TOKEN_COOKIE,
   JwtAuthGuard,
   type AuthenticatedRequest,
 } from "@driving-school-booking/nestjs-auth";
 
 const REFRESH_COOKIE_NAME = "refreshToken";
+const ACCESS_COOKIE_MAX_AGE_MS = 15 * 60 * 1000;
 const REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
-
-function refreshCookieOptions() {
-  return {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict" as const,
-    path: "/api/auth",
-    maxAge: REFRESH_COOKIE_MAX_AGE_MS,
-  };
-}
 
 @Controller("auth")
 export class AuthController {
@@ -44,14 +38,10 @@ export class AuthController {
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<TokenResponseDto> {
-    const { accessToken, refreshToken } = await this.auth.login(
-      dto.email,
-      dto.password,
-    );
-
-    res.cookie(REFRESH_COOKIE_NAME, refreshToken, refreshCookieOptions());
-    return { accessToken };
+  ): Promise<AuthSessionDto> {
+    const { tokens, session } = await this.auth.login(dto.email, dto.password);
+    issueAuthCookies(res, tokens);
+    return session;
   }
 
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
@@ -59,22 +49,23 @@ export class AuthController {
   async refresh(
     @Req() req: ExpressRequest,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<TokenResponseDto> {
+  ): Promise<AuthSessionDto> {
     const cookies = req.cookies as Record<string, string | undefined>;
     const incoming = cookies[REFRESH_COOKIE_NAME];
     if (!incoming) {
       throw new UnauthorizedException("Missing refresh token");
     }
 
-    const { accessToken, refreshToken } = await this.auth.refresh(incoming);
-
-    res.cookie(REFRESH_COOKIE_NAME, refreshToken, refreshCookieOptions());
-    return { accessToken };
+    const { tokens, session } = await this.auth.refresh(incoming);
+    issueAuthCookies(res, tokens);
+    return session;
   }
 
   @Post("logout")
   logout(@Res({ passthrough: true }) res: Response): { ok: true } {
+    res.clearCookie(ACCESS_TOKEN_COOKIE, { path: "/api" });
     res.clearCookie(REFRESH_COOKIE_NAME, { path: "/api/auth" });
+    res.clearCookie(CSRF_TOKEN_COOKIE, { path: "/" });
     return { ok: true };
   }
 
@@ -99,13 +90,58 @@ export class AuthController {
     @Body() dto: ChangePasswordDto,
     @Request() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<TokenResponseDto> {
-    const { accessToken, refreshToken } = await this.auth.changePassword(
+  ): Promise<AuthSessionDto> {
+    const { tokens, session } = await this.auth.changePassword(
       req.user.sub,
       dto.currentPassword,
       dto.newPassword,
     );
-    res.cookie(REFRESH_COOKIE_NAME, refreshToken, refreshCookieOptions());
-    return { accessToken };
+    issueAuthCookies(res, tokens);
+    return session;
   }
+}
+
+const isProd = () => process.env.NODE_ENV === "production";
+
+function accessCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: isProd(),
+    sameSite: "strict" as const,
+    path: "/api",
+    maxAge: ACCESS_COOKIE_MAX_AGE_MS,
+  };
+}
+
+function refreshCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: isProd(),
+    sameSite: "strict" as const,
+    path: "/api/auth",
+    maxAge: REFRESH_COOKIE_MAX_AGE_MS,
+  };
+}
+
+function csrfCookieOptions() {
+  return {
+    httpOnly: false,
+    secure: isProd(),
+    sameSite: "strict" as const,
+    path: "/",
+    maxAge: ACCESS_COOKIE_MAX_AGE_MS,
+  };
+}
+
+function issueAuthCookies(
+  res: Response,
+  tokens: { accessToken: string; refreshToken: string },
+): void {
+  res.cookie(ACCESS_TOKEN_COOKIE, tokens.accessToken, accessCookieOptions());
+  res.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, refreshCookieOptions());
+  res.cookie(
+    CSRF_TOKEN_COOKIE,
+    randomBytes(32).toString("hex"),
+    csrfCookieOptions(),
+  );
 }

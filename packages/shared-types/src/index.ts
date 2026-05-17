@@ -6,3 +6,4 @@ export * from "./lesson";
 export * from "./school-config";
 export * from "./observability";
 export * from "./stats";
+export * from "./messaging";

@@ -10,6 +10,7 @@ import {
   SERVICES,
   type AppLogDto,
 } from "@driving-school-booking/shared-types";
+import { CsrfGuard } from "@driving-school-booking/nestjs-auth";
 import { ObsLoggerModule } from "@driving-school-booking/nestjs-logger";
 import { RequestLogInterceptor } from "./request-log/request-log.interceptor";
 import { PrismaModule } from "./prisma/prisma.module";
@@ -26,6 +27,7 @@ import { CourseModule } from "./course/course.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { SchoolConfigModule } from "./school-config/school-config.module";
 import { StatsModule } from "./stats/stats.module";
+import { MessagingModule } from "./messaging/messaging.module";
 
 let logQueue: Queue | null = null;
 function getLogQueue(): Queue {
@@ -69,10 +71,12 @@ function getLogQueue(): Queue {
     LessonModule,
     SchoolConfigModule,
     StatsModule,
+    MessagingModule,
   ],
   providers: [
     RequestLogInterceptor,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: CsrfGuard },
   ],
 })
 export class AppModule {}

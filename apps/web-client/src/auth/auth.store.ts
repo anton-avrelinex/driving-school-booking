@@ -3,104 +3,61 @@ import { defineStore } from "pinia";
 import {
   ANALYTICS_EVENTS,
   ROLES,
-  type JwtPayload,
-  type TokenResponseDto,
+  type AuthSessionDto,
 } from "@driving-school-booking/shared-types";
 import api from "@/api/api";
-import { clearAccessToken, getAccessToken, setAccessToken } from "@/api/token";
 import router from "@/router";
-import { logWarn, trackEvent } from "@/observability";
-
-function parseJwt(token: string): JwtPayload {
-  const base64 = token.split(".")[1]!;
-  return JSON.parse(atob(base64)) as JwtPayload;
-}
+import { trackEvent } from "@/observability";
 
 export const useAuthStore = defineStore("auth", () => {
-  const accessToken = ref<string | null>(getAccessToken());
+  const user = ref<AuthSessionDto | null>(null);
 
-  const user = computed(() => {
-    if (!accessToken.value) {
-      return null;
-    }
-
-    try {
-      const payload = parseJwt(accessToken.value);
-
-      return {
-        id: payload.sub,
-        schoolId: payload.schoolId,
-        role: payload.role,
-        mustChangePassword: payload.mustChangePassword,
-      };
-    } catch {
-      return null;
-    }
-  });
-
-  const isAuthenticated = computed(() => !!accessToken.value);
-
+  const isAuthenticated = computed(() => user.value !== null);
   const isAdmin = computed(() => user.value?.role === ROLES.ADMIN);
   const isInstructor = computed(() => user.value?.role === ROLES.INSTRUCTOR);
   const isStudent = computed(() => user.value?.role === ROLES.STUDENT);
-
-  const mustChangePassword = computed(() => {
-    return user.value?.mustChangePassword ?? false;
-  });
-
-  function setToken(access: string) {
-    accessToken.value = access;
-    setAccessToken(access);
-  }
-
-  function clearToken() {
-    accessToken.value = null;
-    clearAccessToken();
-  }
+  const mustChangePassword = computed(
+    () => user.value?.mustChangePassword ?? false,
+  );
 
   async function login(email: string, password: string) {
-    const { data } = await api.post<TokenResponseDto>("/auth/login", {
+    const { data } = await api.post<AuthSessionDto>("/auth/login", {
       email,
       password,
     });
-    setToken(data.accessToken);
-    trackEvent(ANALYTICS_EVENTS.LOGIN, {
-      role: parseJwt(data.accessToken).role,
-    });
+    user.value = data;
+    trackEvent(ANALYTICS_EVENTS.LOGIN, { role: data.role });
     return data;
   }
 
-  async function refresh(): Promise<boolean> {
+  async function refresh(): Promise<void> {
     try {
-      const { data } = await api.post<TokenResponseDto>("/auth/refresh", null);
-      setToken(data.accessToken);
-      return true;
-    } catch {
-      logWarn("Token refresh failed");
-      return false;
+      const { data } = await api.post<AuthSessionDto>("/auth/refresh");
+      user.value = data;
+    } catch (e) {
+      user.value = null;
+      throw e;
     }
   }
 
   async function changePassword(currentPassword: string, newPassword: string) {
-    const { data } = await api.post<TokenResponseDto>("/auth/change-password", {
+    const { data } = await api.post<AuthSessionDto>("/auth/change-password", {
       currentPassword,
       newPassword,
     });
-    setToken(data.accessToken);
+    user.value = data;
   }
 
   async function logout() {
     try {
       await api.post("/auth/logout");
-    } catch {
-      // best-effort; clear local state regardless
+    } finally {
+      user.value = null;
+      void router.push("/login");
     }
-    clearToken();
-    void router.push("/login");
   }
 
   return {
-    accessToken,
     user,
     isAuthenticated,
     isAdmin,
@@ -111,6 +68,5 @@ export const useAuthStore = defineStore("auth", () => {
     refresh,
     changePassword,
     logout,
-    setToken,
   };
 });

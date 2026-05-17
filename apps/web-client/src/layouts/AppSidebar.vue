@@ -25,7 +25,14 @@
         exact-active-class="bg-accent text-foreground"
       >
         <component :is="item.icon" class="size-4" />
-        {{ item.label }}
+        <span class="flex-1">{{ item.label }}</span>
+        <Badge
+          v-if="item.badge !== undefined && item.badge > 0"
+          variant="default"
+          class="ml-auto"
+        >
+          {{ item.badge }}
+        </Badge>
       </RouterLink>
     </template>
 
@@ -82,6 +89,7 @@ import {
   GraduationCapIcon,
   LayoutDashboardIcon,
   LogOutIcon,
+  MessageSquareIcon,
   MoonIcon,
   PlusCircleIcon,
   SchoolIcon,
@@ -93,7 +101,9 @@ import { useI18n } from "vue-i18n";
 import { ROLES, type Role } from "@driving-school-booking/shared-types";
 import { useAuthStore } from "@/auth/auth.store";
 import { useSettingsStore } from "@/settings/settings.store";
+import { useMessagesStore } from "@/messages/messages.store";
 import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -104,6 +114,7 @@ import {
 const { t } = useI18n();
 const auth = useAuthStore();
 const settings = useSettingsStore();
+const messages = useMessagesStore();
 const mode = useColorMode();
 
 function toggleTheme() {
@@ -126,7 +137,12 @@ const displayName = computed(() => {
 });
 
 type IconComponent = FunctionalComponent;
-type NavItem = { to: string; label: string; icon: IconComponent };
+type NavItem = {
+  to: string;
+  label: string;
+  icon: IconComponent;
+  badge?: number;
+};
 type NavSection = {
   key: string;
   label: string;
@@ -218,6 +234,12 @@ const sections = computed<NavSection[]>(() => {
       key: "account",
       label: t("nav_section_account"),
       items: [
+        {
+          to: "/messages",
+          label: t("nav_messages"),
+          icon: markRaw(MessageSquareIcon),
+          badge: messages.totalUnread,
+        },
         {
           to: "/settings",
           label: t("nav_settings"),

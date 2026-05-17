@@ -8,5 +8,18 @@
 </template>
 
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted } from "vue";
 import AppSidebar from "@/layouts/AppSidebar.vue";
+import { useMessagesStore } from "@/messages/messages.store";
+
+const messages = useMessagesStore();
+
+onMounted(() => {
+  void messages.fetchConversations();
+  messages.startSse();
+});
+
+onBeforeUnmount(() => {
+  messages.stopSse();
+});
 </script>

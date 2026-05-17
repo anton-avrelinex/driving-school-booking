@@ -6,6 +6,8 @@ import { createPinia } from "pinia";
 
 import App from "./App.vue";
 import router from "./router";
+import { installInterceptors } from "./api/interceptors";
+import { useAuthStore } from "./auth/auth.store";
 import { initObservability, logInfo } from "./observability";
 
 const datetimeFormats = {
@@ -58,6 +60,13 @@ const app = createApp(App);
 
 app.use(i18n);
 app.use(createPinia());
+
+installInterceptors();
+
+await useAuthStore()
+  .refresh()
+  .catch(() => {});
+
 app.use(router);
 
 initObservability(router);
