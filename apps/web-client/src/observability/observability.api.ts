@@ -1,5 +1,5 @@
 import api from "@/api/api";
-import { getAccessToken } from "@/api/token";
+import { getCsrfToken } from "@/api/token";
 import type {
   IngestLogsBody,
   IngestAnalyticsBody,
@@ -22,16 +22,17 @@ export function sendBeaconAnalytics(body: IngestAnalyticsBody): void {
 }
 
 function sendWithKeepalive(url: string, body: unknown): void {
-  const token = getAccessToken();
-  if (!token) {
+  const csrf = getCsrfToken();
+  if (!csrf) {
     return;
   }
 
   void fetch(url, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      "X-CSRF-Token": csrf,
     },
     body: JSON.stringify(body),
     keepalive: true,

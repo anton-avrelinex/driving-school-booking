@@ -104,6 +104,11 @@ const router = createRouter({
           ],
         },
         {
+          path: "messages",
+          name: "messages",
+          component: () => import("@/messages/MessagesPage.vue"),
+        },
+        {
           path: "settings",
           name: "settings",
           component: () => import("@/settings/SettingsPage.vue"),

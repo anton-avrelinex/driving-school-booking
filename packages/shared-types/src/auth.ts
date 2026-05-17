@@ -10,8 +10,11 @@ export interface ChangePasswordDto {
   newPassword: string;
 }
 
-export interface TokenResponseDto {
-  accessToken: string;
+export interface AuthSessionDto {
+  id: string;
+  schoolId: string;
+  role: Role;
+  mustChangePassword: boolean;
 }
 
 export interface JwtPayload {
