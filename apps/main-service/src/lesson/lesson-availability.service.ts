@@ -75,14 +75,22 @@ export class LessonAvailabilityService {
 
     const schoolConfig = await this.prisma.schoolConfig.findUnique({
       where: { schoolId },
-      select: { defaultLessonDurationMin: true, timezone: true },
+      select: {
+        defaultLessonDurationMin: true,
+        minBookingLeadHours: true,
+        timezone: true,
+      },
     });
+
+    const leadHours = schoolConfig?.minBookingLeadHours ?? 0;
+    const earliestStart = new Date(Date.now() + leadHours * 60 * 60 * 1000);
+    const effectiveFrom = from > earliestStart ? from : earliestStart;
 
     return this.prisma.$queryRaw<AvailableSlotDto[]>(
       slotsQuery({
         schoolId,
         courseId: enrollment.courseId,
-        from,
+        from: effectiveFrom,
         to,
         instructorUserId: instructorUserId ?? null,
         studentProfileId,

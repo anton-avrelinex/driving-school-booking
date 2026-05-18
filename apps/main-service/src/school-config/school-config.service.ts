@@ -35,8 +35,7 @@ function toDto(c: {
   cancelDeadlineTime: string;
   lateCancelPenaltyPerHour: Decimal | number;
   defaultLessonDurationMin: number;
-  inviteExpiryHours: number;
-  defaultReminderHours: number;
+  minBookingLeadHours: number;
   timezone: string;
   currency: string;
 }): SchoolConfigDto {
@@ -45,8 +44,7 @@ function toDto(c: {
     cancelDeadlineTime: c.cancelDeadlineTime,
     lateCancelPenaltyPerHour: Number(c.lateCancelPenaltyPerHour),
     defaultLessonDurationMin: c.defaultLessonDurationMin,
-    inviteExpiryHours: c.inviteExpiryHours,
-    defaultReminderHours: c.defaultReminderHours,
+    minBookingLeadHours: c.minBookingLeadHours,
     timezone: c.timezone,
     currency: c.currency,
   };

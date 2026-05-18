@@ -3,8 +3,7 @@ export interface SchoolConfigDto {
   cancelDeadlineTime: string;
   lateCancelPenaltyPerHour: number;
   defaultLessonDurationMin: number;
-  inviteExpiryHours: number;
-  defaultReminderHours: number;
+  minBookingLeadHours: number;
   timezone: string;
   currency: string;
 }
@@ -14,8 +13,7 @@ export interface UpdateSchoolConfigDto {
   cancelDeadlineTime?: string;
   lateCancelPenaltyPerHour?: number;
   defaultLessonDurationMin?: number;
-  inviteExpiryHours?: number;
-  defaultReminderHours?: number;
+  minBookingLeadHours?: number;
   timezone?: string;
   currency?: string;
 }

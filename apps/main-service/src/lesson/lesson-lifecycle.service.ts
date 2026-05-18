@@ -111,12 +111,19 @@ export class LessonLifecycleService {
 
     const schoolConfig = await this.prisma.schoolConfig.findUnique({
       where: { schoolId },
-      select: { defaultLessonDurationMin: true },
+      select: { defaultLessonDurationMin: true, minBookingLeadHours: true },
     });
     const durationMin =
       schoolConfig?.defaultLessonDurationMin ?? DEFAULT_LESSON_DURATION_MIN;
+    const leadHours = schoolConfig?.minBookingLeadHours ?? 0;
 
     const startTime = new Date(dto.startTime);
+    const earliestStart = new Date(Date.now() + leadHours * 60 * 60 * 1000);
+    if (startTime < earliestStart) {
+      throw new BadRequestException(
+        `Lessons must be booked at least ${leadHours} hours in advance`,
+      );
+    }
     const endTime = new Date(startTime.getTime() + durationMin * 60 * 1000);
 
     const lesson = await withSerializableRetry(this.prisma, async (tx) => {

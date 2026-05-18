@@ -60,15 +60,15 @@
             />
           </div>
           <div class="flex flex-col gap-2">
-            <Label for="reminder">
-              {{ $t("school_config_reminder_hours") }}
+            <Label for="leadHours">
+              {{ $t("school_config_min_booking_lead_hours") }}
             </Label>
             <Input
-              id="reminder"
-              v-model.number="form.defaultReminderHours"
+              id="leadHours"
+              v-model.number="form.minBookingLeadHours"
               type="number"
               min="0"
-              max="720"
+              max="168"
             />
           </div>
           <div class="flex flex-col gap-2">
@@ -118,18 +118,6 @@
               </SelectContent>
             </Select>
           </div>
-          <div class="flex flex-col gap-2">
-            <Label for="invite">
-              {{ $t("school_config_invite_expiry") }}
-            </Label>
-            <Input
-              id="invite"
-              v-model.number="form.inviteExpiryHours"
-              type="number"
-              min="1"
-              max="720"
-            />
-          </div>
         </CardContent>
       </Card>
 
@@ -178,8 +166,7 @@ const form = reactive<SchoolConfigDto>({
   cancelDeadlineTime: "15:00",
   lateCancelPenaltyPerHour: 0,
   defaultLessonDurationMin: 120,
-  inviteExpiryHours: 24,
-  defaultReminderHours: 24,
+  minBookingLeadHours: 2,
   timezone: "UTC",
   currency: "EUR",
 });

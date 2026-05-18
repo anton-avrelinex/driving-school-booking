@@ -31,9 +31,9 @@ CREATE TABLE "school_configs" (
     "cancelDeadlineTime" TEXT NOT NULL DEFAULT '15:00',
     "lateCancelPenaltyPerHour" DECIMAL(65,30) NOT NULL DEFAULT 0,
     "defaultLessonDurationMin" INTEGER NOT NULL DEFAULT 120,
-    "inviteExpiryHours" INTEGER NOT NULL DEFAULT 24,
-    "defaultReminderHours" INTEGER NOT NULL DEFAULT 24,
+    "minBookingLeadHours" INTEGER NOT NULL DEFAULT 2,
     "timezone" TEXT NOT NULL DEFAULT 'Europe/Amsterdam',
+    "currency" TEXT NOT NULL DEFAULT 'EUR',
 
     CONSTRAINT "school_configs_pkey" PRIMARY KEY ("id")
 );
@@ -49,7 +49,6 @@ CREATE TABLE "users" (
     "role" "Role" NOT NULL,
     "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
     "mustChangePassword" BOOLEAN NOT NULL DEFAULT true,
-    "reminderHours" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -80,6 +79,7 @@ CREATE TABLE "instructor_availabilities" (
 CREATE TABLE "student_profiles" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
+    "outstandingBalance" DECIMAL(65,30) NOT NULL DEFAULT 0,
 
     CONSTRAINT "student_profiles_pkey" PRIMARY KEY ("id")
 );
@@ -167,6 +167,38 @@ CREATE TABLE "vehicles" (
 );
 
 -- CreateTable
+CREATE TABLE "conversations" (
+    "id" TEXT NOT NULL,
+    "schoolId" TEXT NOT NULL,
+    "lastMessageAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "conversations_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "conversation_participants" (
+    "id" TEXT NOT NULL,
+    "conversationId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "readAt" TIMESTAMP(3),
+    "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "conversation_participants_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "messages" (
+    "id" TEXT NOT NULL,
+    "conversationId" TEXT NOT NULL,
+    "senderId" TEXT NOT NULL,
+    "body" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "messages_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_InstructorProfileToVehicle" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
@@ -251,6 +283,18 @@ CREATE INDEX "vehicles_categoryId_idx" ON "vehicles"("categoryId");
 CREATE UNIQUE INDEX "vehicles_schoolId_licensePlate_key" ON "vehicles"("schoolId", "licensePlate");
 
 -- CreateIndex
+CREATE INDEX "conversations_schoolId_lastMessageAt_idx" ON "conversations"("schoolId", "lastMessageAt");
+
+-- CreateIndex
+CREATE INDEX "conversation_participants_userId_idx" ON "conversation_participants"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "conversation_participants_conversationId_userId_key" ON "conversation_participants"("conversationId", "userId");
+
+-- CreateIndex
+CREATE INDEX "messages_conversationId_createdAt_idx" ON "messages"("conversationId", "createdAt");
+
+-- CreateIndex
 CREATE INDEX "_InstructorProfileToVehicle_B_index" ON "_InstructorProfileToVehicle"("B");
 
 -- CreateIndex
@@ -309,6 +353,21 @@ ALTER TABLE "vehicles" ADD CONSTRAINT "vehicles_schoolId_fkey" FOREIGN KEY ("sch
 
 -- AddForeignKey
 ALTER TABLE "vehicles" ADD CONSTRAINT "vehicles_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "conversations" ADD CONSTRAINT "conversations_schoolId_fkey" FOREIGN KEY ("schoolId") REFERENCES "schools"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "conversation_participants" ADD CONSTRAINT "conversation_participants_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "conversation_participants" ADD CONSTRAINT "conversation_participants_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "messages" ADD CONSTRAINT "messages_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "messages" ADD CONSTRAINT "messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_InstructorProfileToVehicle" ADD CONSTRAINT "_InstructorProfileToVehicle_A_fkey" FOREIGN KEY ("A") REFERENCES "instructor_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;

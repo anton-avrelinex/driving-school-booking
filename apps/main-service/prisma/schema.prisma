@@ -65,8 +65,7 @@ model SchoolConfig {
   cancelDeadlineTime       String  @default("15:00")
   lateCancelPenaltyPerHour Decimal @default(0)
   defaultLessonDurationMin Int     @default(120)
-  inviteExpiryHours        Int     @default(24)
-  defaultReminderHours     Int     @default(24)
+  minBookingLeadHours      Int     @default(2)
   timezone                 String  @default("Europe/Amsterdam")
   currency                 String  @default("EUR")
 
@@ -85,7 +84,6 @@ model User {
   role                    Role
   status                  UserStatus                @default(ACTIVE)
   mustChangePassword      Boolean                   @default(true)
-  reminderHours           Int?
   instructorProfile       InstructorProfile?
   studentProfile          StudentProfile?
   adminProfile            AdminProfile?
