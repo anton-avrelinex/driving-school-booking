@@ -72,4 +72,23 @@ export class StudentService {
 
     return toUserDto(user);
   }
+
+  async setBalance(
+    schoolId: string,
+    userId: string,
+    outstandingBalance: number,
+  ): Promise<UserDto> {
+    await this.userService.findOne(schoolId, userId);
+
+    await this.prisma.studentProfile.update({
+      where: { userId },
+      data: { outstandingBalance },
+    });
+
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: USER_SELECT,
+    });
+    return toUserDto(user);
+  }
 }

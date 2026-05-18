@@ -5,6 +5,7 @@ import {
   ANALYTICS_EVENTS,
   type AvailableInstructorDto,
   type AvailableSlotDto,
+  type CancellationInfoDto,
   type CreateLessonDto,
   type LessonDto,
   type VehicleDto,
@@ -21,23 +22,25 @@ import {
 export const useLessonStore = defineStore("lessons", () => {
   const { t } = useI18n();
 
+  type LessonFilters = { status?: string; from?: string; to?: string };
+
   const lessons = ref<LessonModel[]>([]) as Ref<LessonModel[]>;
   const availableInstructors = ref<AvailableInstructorDto[]>([]);
   const slots = ref([]) as Ref<SlotModel[]>;
   const loading = ref(true);
   const saving = ref(false);
   const error = ref<string | null>(null);
+  const currentFilters = ref<LessonFilters>({});
 
-  async function fetchLessons(filters?: {
-    status?: string;
-    from?: string;
-    to?: string;
-  }) {
+  async function fetchLessons(filters?: LessonFilters) {
+    if (filters !== undefined) {
+      currentFilters.value = filters;
+    }
     loading.value = true;
     error.value = null;
     try {
       const { data } = await api.get<LessonDto[]>("/lessons", {
-        params: filters,
+        params: currentFilters.value,
       });
       lessons.value = data.map(toLessonModel);
     } catch {
@@ -111,6 +114,15 @@ export const useLessonStore = defineStore("lessons", () => {
     return toLessonModel(data);
   }
 
+  async function fetchCancellationInfo(
+    lessonId: string,
+  ): Promise<CancellationInfoDto> {
+    const { data } = await api.get<CancellationInfoDto>(
+      `/lessons/${lessonId}/cancellation-info`,
+    );
+    return data;
+  }
+
   async function fetchAvailableVehicles(
     lessonId: string,
   ): Promise<VehicleDto[]> {
@@ -157,6 +169,7 @@ export const useLessonStore = defineStore("lessons", () => {
     bookLesson,
     completeLesson,
     cancelLesson,
+    fetchCancellationInfo,
     confirmLesson,
     rejectLesson,
     assignVehicle,

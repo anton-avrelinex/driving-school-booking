@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import type { Decimal } from "@prisma/client/runtime/client";
 import type { CourseDto } from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateCourseDto } from "./dto/create-course.dto";
@@ -21,7 +22,7 @@ const COURSE_SELECT = {
 function toCourseDto(course: {
   id: string;
   name: string;
-  price: unknown;
+  price: Decimal;
   hours: number;
   categoryId: string;
   transmission: string;

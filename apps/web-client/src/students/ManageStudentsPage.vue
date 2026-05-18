@@ -14,7 +14,7 @@
     <Transition name="fade" mode="out-in">
       <TableSkeleton
         v-if="studentStore.loading && studentStore.users.length === 0"
-        :columns="6"
+        :columns="7"
       />
       <p v-else-if="studentStore.error" class="text-destructive">
         {{ studentStore.error }}
@@ -37,6 +37,7 @@
             <TableHead>{{ $t("common_last_name") }}</TableHead>
             <TableHead>{{ $t("common_email") }}</TableHead>
             <TableHead>{{ $t("student_enrollments") }}</TableHead>
+            <TableHead>{{ $t("student_balance_label") }}</TableHead>
             <TableHead>{{ $t("common_status") }}</TableHead>
             <TableHead class="text-right">{{ $t("common_actions") }}</TableHead>
           </TableRow>
@@ -62,6 +63,9 @@
               </Badge>
             </TableCell>
             <TableCell>
+              {{ formatBalance(user.studentProfile?.outstandingBalance ?? 0) }}
+            </TableCell>
+            <TableCell>
               <Badge
                 :variant="
                   user.status === USER_STATUSES.ACTIVE ? 'success' : 'secondary'
@@ -71,6 +75,13 @@
               </Badge>
             </TableCell>
             <TableCell class="text-right space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                @click="openBalanceDialog(user)"
+              >
+                {{ $t("student_balance_edit") }}
+              </Button>
               <Button variant="outline" size="sm" @click="openEditDialog(user)">
                 {{ $t("common_edit") }}
               </Button>
@@ -105,6 +116,12 @@
       v-model:open="showDeactivateDialog"
       :user="deactivatingUser"
     />
+
+    <EditStudentBalanceDialog
+      v-model:open="showBalanceDialog"
+      :student-id="balanceTargetId"
+      :initial-balance="balanceInitial"
+    />
   </div>
 </template>
 
@@ -135,8 +152,14 @@ import CreateStudentDialog from "@/students/CreateStudentDialog.vue";
 import TempPasswordDialog from "@/students/TempPasswordDialog.vue";
 import EditStudentDialog from "@/students/EditStudentDialog.vue";
 import DeactivateStudentDialog from "@/students/DeactivateStudentDialog.vue";
+import EditStudentBalanceDialog from "@/students/EditStudentBalanceDialog.vue";
+import { useI18n } from "vue-i18n";
+import { formatCurrency } from "@/lib/currency";
+import { useSchoolConfigStore } from "@/school-config/school-config.store";
 
 const studentStore = useStudentStore();
+const schoolConfigStore = useSchoolConfigStore();
+const { locale } = useI18n();
 
 const showCreateDialog = ref(false);
 const showTempPasswordDialog = ref(false);
@@ -148,6 +171,24 @@ const editingUser = ref<UserDto | null>(null);
 
 const showDeactivateDialog = ref(false);
 const deactivatingUser = ref<UserDto | null>(null);
+
+const showBalanceDialog = ref(false);
+const balanceTargetId = ref<string | null>(null);
+const balanceInitial = ref(0);
+
+function formatBalance(amount: number): string {
+  return formatCurrency(
+    amount,
+    schoolConfigStore.config?.currency ?? "EUR",
+    locale.value,
+  );
+}
+
+function openBalanceDialog(user: UserDto) {
+  balanceTargetId.value = user.id;
+  balanceInitial.value = user.studentProfile?.outstandingBalance ?? 0;
+  showBalanceDialog.value = true;
+}
 
 onMounted(async () => {
   await studentStore.fetchUsers(ROLES.STUDENT);

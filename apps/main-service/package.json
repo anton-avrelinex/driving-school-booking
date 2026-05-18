@@ -19,6 +19,7 @@
     "@driving-school-booking/nestjs-auth": "workspace:^",
     "@driving-school-booking/nestjs-logger": "workspace:^",
     "@driving-school-booking/shared-types": "workspace:^",
+    "@js-temporal/polyfill": "^0.5.1",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",

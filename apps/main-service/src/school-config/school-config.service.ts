@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import type { SchoolConfigDto } from "@driving-school-booking/shared-types";
 import { PrismaService } from "../prisma/prisma.service";
 import { UpdateSchoolConfigDto } from "./dto/update-school-config.dto";
+import { type Decimal } from "@prisma/client/runtime/client";
 
 @Injectable()
 export class SchoolConfigService {
@@ -20,10 +21,6 @@ export class SchoolConfigService {
     schoolId: string,
     dto: UpdateSchoolConfigDto,
   ): Promise<SchoolConfigDto> {
-    if (dto.timezone !== undefined) {
-      await assertTimezoneValid(this.prisma, dto.timezone);
-    }
-
     const config = await this.prisma.schoolConfig.upsert({
       where: { schoolId },
       update: dto,
@@ -36,11 +33,12 @@ export class SchoolConfigService {
 function toDto(c: {
   cancelDeadlineDaysBefore: number;
   cancelDeadlineTime: string;
-  lateCancelPenaltyPerHour: { toString(): string } | number;
+  lateCancelPenaltyPerHour: Decimal | number;
   defaultLessonDurationMin: number;
   inviteExpiryHours: number;
   defaultReminderHours: number;
   timezone: string;
+  currency: string;
 }): SchoolConfigDto {
   return {
     cancelDeadlineDaysBefore: c.cancelDeadlineDaysBefore,
@@ -50,17 +48,6 @@ function toDto(c: {
     inviteExpiryHours: c.inviteExpiryHours,
     defaultReminderHours: c.defaultReminderHours,
     timezone: c.timezone,
+    currency: c.currency,
   };
-}
-
-async function assertTimezoneValid(
-  prisma: PrismaService,
-  timezone: string,
-): Promise<void> {
-  // Defer IANA validity to Postgres — same source of truth as the slot SQL.
-  try {
-    await prisma.$queryRaw`SELECT (now() AT TIME ZONE ${timezone})`;
-  } catch {
-    throw new BadRequestException(`Unknown timezone: ${timezone}`);
-  }
 }

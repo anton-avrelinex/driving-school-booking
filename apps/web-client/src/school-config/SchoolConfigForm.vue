@@ -102,6 +102,23 @@
             />
           </div>
           <div class="flex flex-col gap-2">
+            <Label for="currency">{{ $t("school_config_currency") }}</Label>
+            <Select v-model="form.currency">
+              <SelectTrigger id="currency" class="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="code in CURRENCY_CODES"
+                  :key="code"
+                  :value="code"
+                >
+                  {{ code }} — {{ currencyDisplayName(code, locale) }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="flex flex-col gap-2">
             <Label for="invite">
               {{ $t("school_config_invite_expiry") }}
             </Label>
@@ -149,8 +166,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CURRENCY_CODES, currencyDisplayName } from "@/lib/currency";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const store = useSchoolConfigStore();
 
 const TIMEZONES = Intl.supportedValuesOf("timeZone");
@@ -163,6 +181,7 @@ const form = reactive<SchoolConfigDto>({
   inviteExpiryHours: 24,
   defaultReminderHours: 24,
   timezone: "UTC",
+  currency: "EUR",
 });
 
 onMounted(() => store.fetchConfig());

@@ -95,6 +95,11 @@ export interface InstructorProfileDto {
 export interface StudentProfileDto {
   id: string;
   enrollments: EnrollmentDto[];
+  outstandingBalance: number;
+}
+
+export interface UpdateStudentBalanceDto {
+  outstandingBalance: number;
 }
 
 export interface AdminProfileDto {

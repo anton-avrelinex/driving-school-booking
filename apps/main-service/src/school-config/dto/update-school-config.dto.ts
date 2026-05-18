@@ -1,4 +1,5 @@
 import {
+  IsISO4217CurrencyCode,
   IsInt,
   IsMilitaryTime,
   IsNumber,
@@ -50,6 +51,10 @@ export class UpdateSchoolConfigDto {
   @IsOptional()
   @IsTimeZone()
   timezone?: string;
+
+  @IsOptional()
+  @IsISO4217CurrencyCode()
+  currency?: string;
 }
 
 type _assert = AssertTrue<

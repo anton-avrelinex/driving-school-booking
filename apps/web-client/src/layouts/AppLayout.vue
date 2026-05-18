@@ -11,11 +11,14 @@
 import { onBeforeUnmount, onMounted } from "vue";
 import AppSidebar from "@/layouts/AppSidebar.vue";
 import { useMessagesStore } from "@/messages/messages.store";
+import { useSchoolConfigStore } from "@/school-config/school-config.store";
 
 const messages = useMessagesStore();
+const schoolConfig = useSchoolConfigStore();
 
 onMounted(() => {
   void messages.fetchConversations();
+  void schoolConfig.fetchConfig();
   messages.startSse();
 });
 

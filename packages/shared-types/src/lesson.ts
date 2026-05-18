@@ -19,6 +19,11 @@ export interface LessonDto {
   createdAt: string;
 }
 
+export interface CancellationInfoDto {
+  deadlineAt: string | null;
+  fee: number;
+}
+
 export interface CreateLessonDto {
   enrollmentId: string;
   instructorId: string;

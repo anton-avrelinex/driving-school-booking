@@ -1,3 +1,4 @@
+import type { Decimal } from "@prisma/client/runtime/client";
 import type {
   CourseDto,
   UserDto,
@@ -9,7 +10,7 @@ import type {
 function toCourseDto(c: {
   id: string;
   name: string;
-  price: unknown;
+  price: Decimal;
   hours: number;
   categoryId: string;
   transmission: string;
@@ -38,7 +39,7 @@ export function toUserDto(user: {
     courses: {
       id: string;
       name: string;
-      price: unknown;
+      price: Decimal;
       hours: number;
       categoryId: string;
       transmission: string;
@@ -48,19 +49,20 @@ export function toUserDto(user: {
   } | null;
   studentProfile?: {
     id: string;
+    outstandingBalance: Decimal;
     enrollments: {
       id: string;
       courseId: string;
       course: {
         id: string;
         name: string;
-        price: unknown;
+        price: Decimal;
         hours: number;
         categoryId: string;
         transmission: string;
       };
-      hoursPurchased: unknown;
-      hoursCompleted: unknown;
+      hoursPurchased: Decimal;
+      hoursCompleted: Decimal;
       status: string;
       createdAt: Date;
     }[];
@@ -92,6 +94,7 @@ export function toUserDto(user: {
   if (user.studentProfile) {
     dto.studentProfile = {
       id: user.studentProfile.id,
+      outstandingBalance: Number(user.studentProfile.outstandingBalance),
       enrollments: user.studentProfile.enrollments.map(
         (e): EnrollmentDto => ({
           id: e.id,

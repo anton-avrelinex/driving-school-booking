@@ -4,7 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import type { LessonDto } from "@driving-school-booking/shared-types";
+import type { Decimal } from "@prisma/client/runtime/client";
+import type {
+  CancellationInfoDto,
+  LessonDto,
+} from "@driving-school-booking/shared-types";
 import {
   EnrollmentStatus,
   LessonStatus,
@@ -20,6 +24,7 @@ import {
   ACTIVE_LESSON_STATUSES,
   DEFAULT_LESSON_DURATION_MIN,
 } from "./lesson.constants";
+import { computeCancelDeadlineUtc } from "./lesson.deadline";
 import { LESSON_SELECT } from "./lesson.selects";
 import { toLessonDto } from "./lesson.mappers";
 
@@ -236,10 +241,18 @@ export class LessonLifecycleService {
     schoolId: string,
     lessonId: string,
     cancelledByUserId: string,
+    callerRole: Role,
   ): Promise<LessonDto> {
     const lesson = await this.prisma.lesson.findUnique({
       where: { id: lessonId, schoolId },
-      select: { id: true, status: true },
+      select: {
+        id: true,
+        status: true,
+        startTime: true,
+        endTime: true,
+        enrollment: { select: { studentProfileId: true } },
+        school: { select: { config: true } },
+      },
     });
 
     if (!lesson) {
@@ -252,17 +265,71 @@ export class LessonLifecycleService {
       );
     }
 
-    const updated = await this.prisma.lesson.update({
-      where: { id: lessonId, status: { in: ACTIVE_LESSON_STATUSES } },
-      data: {
-        status: LessonStatus.CANCELLED,
-        cancelledAt: new Date(),
-        cancelledBy: cancelledByUserId,
-      },
-      select: LESSON_SELECT,
-    });
+    const fee = resolveCancellationFee(
+      callerRole,
+      lesson,
+      lesson.school.config,
+    );
+
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.lesson.update({
+        where: { id: lessonId, status: { in: ACTIVE_LESSON_STATUSES } },
+        data: {
+          status: LessonStatus.CANCELLED,
+          cancelledAt: new Date(),
+          cancelledBy: cancelledByUserId,
+        },
+        select: LESSON_SELECT,
+      }),
+      this.prisma.studentProfile.update({
+        where: { id: lesson.enrollment.studentProfileId },
+        data: { outstandingBalance: { increment: fee } },
+      }),
+    ]);
 
     return toLessonDto(updated);
+  }
+
+  async getCancellationInfo(
+    schoolId: string,
+    lessonId: string,
+    callerRole: Role,
+  ): Promise<CancellationInfoDto> {
+    const lesson = await this.prisma.lesson.findUnique({
+      where: { id: lessonId, schoolId },
+      select: {
+        status: true,
+        startTime: true,
+        endTime: true,
+        school: { select: { config: true } },
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException("Lesson not found");
+    }
+    if (!ACTIVE_LESSON_STATUSES.includes(lesson.status)) {
+      throw new BadRequestException("Lesson is not cancellable");
+    }
+    if (!lesson.school.config) {
+      throw new BadRequestException("School config missing");
+    }
+
+    const subjectToFeePolicy =
+      callerRole === Role.STUDENT && lesson.status === LessonStatus.SCHEDULED;
+    const deadlineAt = subjectToFeePolicy
+      ? computeCancelDeadlineUtc(
+          lesson.startTime,
+          lesson.school.config,
+        ).toISOString()
+      : null;
+    const fee = resolveCancellationFee(
+      callerRole,
+      lesson,
+      lesson.school.config,
+    );
+
+    return { deadlineAt, fee };
   }
 
   async getAvailableVehicles(
@@ -491,4 +558,32 @@ export class LessonLifecycleService {
 
     return toLessonDto(updated);
   }
+}
+
+function resolveCancellationFee(
+  callerRole: Role,
+  lesson: { status: LessonStatus; startTime: Date; endTime: Date },
+  config: {
+    cancelDeadlineDaysBefore: number;
+    cancelDeadlineTime: string;
+    timezone: string;
+    lateCancelPenaltyPerHour: Decimal | number;
+  } | null,
+): number {
+  if (
+    callerRole !== Role.STUDENT ||
+    lesson.status !== LessonStatus.SCHEDULED ||
+    !config
+  ) {
+    return 0;
+  }
+
+  const deadline = computeCancelDeadlineUtc(lesson.startTime, config);
+  if (new Date() <= deadline) {
+    return 0;
+  }
+
+  const hours =
+    (lesson.endTime.getTime() - lesson.startTime.getTime()) / (1000 * 60 * 60);
+  return Number(config.lateCancelPenaltyPerHour) * hours;
 }

@@ -22,6 +22,27 @@
       </p>
 
       <div v-else class="flex flex-col gap-6">
+        <Card
+          v-if="outstandingBalance > 0"
+          class="border-destructive/40 bg-destructive/5"
+        >
+          <CardHeader
+            class="flex flex-row items-center justify-between gap-4 space-y-0"
+          >
+            <div>
+              <CardTitle class="text-destructive">
+                {{ $t("dashboard_balance_due_title") }}
+              </CardTitle>
+              <CardDescription>
+                {{ $t("dashboard_balance_due_description") }}
+              </CardDescription>
+            </div>
+            <span class="text-2xl font-semibold text-destructive">
+              {{ formattedBalance }}
+            </span>
+          </CardHeader>
+        </Card>
+
         <NextLessonCard :lesson="nextLesson" />
 
         <div class="grid gap-6 md:grid-cols-2">
@@ -124,13 +145,28 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import NextLessonCard from "@/dashboard/components/NextLessonCard.vue";
 import EnrollmentProgressCard from "@/dashboard/components/EnrollmentProgressCard.vue";
+import { formatCurrency } from "@/lib/currency";
+import { useSchoolConfigStore } from "@/school-config/school-config.store";
 
 const UPCOMING_COUNT = 3;
 const RECENT_COUNT = 3;
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const auth = useAuthStore();
 const store = useDashboardStore();
+const schoolConfigStore = useSchoolConfigStore();
+
+const outstandingBalance = computed(
+  () => store.studentProfile?.studentProfile?.outstandingBalance ?? 0,
+);
+
+const formattedBalance = computed(() =>
+  formatCurrency(
+    outstandingBalance.value,
+    schoolConfigStore.config?.currency ?? "EUR",
+    locale.value,
+  ),
+);
 
 const title = computed(() => {
   const name = store.studentProfile?.firstName;
