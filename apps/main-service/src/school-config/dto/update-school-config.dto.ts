@@ -38,15 +38,9 @@ export class UpdateSchoolConfigDto {
 
   @IsOptional()
   @IsInt()
-  @Min(1)
-  @Max(720)
-  inviteExpiryHours?: number;
-
-  @IsOptional()
-  @IsInt()
   @Min(0)
-  @Max(720)
-  defaultReminderHours?: number;
+  @Max(168)
+  minBookingLeadHours?: number;
 
   @IsOptional()
   @IsTimeZone()
