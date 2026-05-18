@@ -59,6 +59,14 @@ export const useStudentStore = defineStore("students", () => {
     return data;
   }
 
+  async function setBalance(id: string, outstandingBalance: number) {
+    const { data } = await api.patch<UserDto>(`/users/students/${id}/balance`, {
+      outstandingBalance,
+    });
+    await fetchUsers(ROLES.STUDENT);
+    return data;
+  }
+
   return {
     users,
     loading,
@@ -67,5 +75,6 @@ export const useStudentStore = defineStore("students", () => {
     createStudent,
     updateStudent,
     deactivateUser,
+    setBalance,
   };
 });

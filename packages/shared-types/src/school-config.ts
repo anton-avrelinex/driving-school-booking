@@ -6,6 +6,7 @@ export interface SchoolConfigDto {
   inviteExpiryHours: number;
   defaultReminderHours: number;
   timezone: string;
+  currency: string;
 }
 
 export interface UpdateSchoolConfigDto {
@@ -16,4 +17,5 @@ export interface UpdateSchoolConfigDto {
   inviteExpiryHours?: number;
   defaultReminderHours?: number;
   timezone?: string;
+  currency?: string;
 }

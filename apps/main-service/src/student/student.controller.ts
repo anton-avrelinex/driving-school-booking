@@ -17,6 +17,7 @@ import { Role } from "../generated/prisma/enums";
 import { StudentService } from "./student.service";
 import { CreateStudentDto } from "./dto/create-student.dto";
 import { UpdateStudentDto } from "./dto/update-student.dto";
+import { UpdateStudentBalanceDto } from "./dto/update-student-balance.dto";
 
 @Controller("users/students")
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -36,5 +37,18 @@ export class StudentController {
     @Request() req: AuthenticatedRequest,
   ) {
     return this.studentService.update(req.user.schoolId, id, dto);
+  }
+
+  @Patch(":id/balance")
+  setBalance(
+    @Param("id") id: string,
+    @Body() dto: UpdateStudentBalanceDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.studentService.setBalance(
+      req.user.schoolId,
+      id,
+      dto.outstandingBalance,
+    );
   }
 }

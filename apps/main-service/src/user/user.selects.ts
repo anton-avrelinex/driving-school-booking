@@ -45,6 +45,7 @@ export const USER_SELECT = {
   studentProfile: {
     select: {
       id: true,
+      outstandingBalance: true,
       enrollments: {
         select: {
           id: true,

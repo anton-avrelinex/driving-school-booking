@@ -136,9 +136,26 @@ export class LessonController {
     );
   }
 
+  @Get(":id/cancellation-info")
+  cancellationInfo(
+    @Param("id") id: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.lifecycle.getCancellationInfo(
+      req.user.schoolId,
+      id,
+      req.user.role,
+    );
+  }
+
   @Patch(":id/cancel")
   cancel(@Param("id") id: string, @Request() req: AuthenticatedRequest) {
-    return this.lifecycle.cancel(req.user.schoolId, id, req.user.sub);
+    return this.lifecycle.cancel(
+      req.user.schoolId,
+      id,
+      req.user.sub,
+      req.user.role,
+    );
   }
 
   @Patch(":id/vehicle")

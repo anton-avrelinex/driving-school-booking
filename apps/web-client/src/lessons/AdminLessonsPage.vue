@@ -131,6 +131,12 @@
       :saving="confirmSaving"
       @confirm="onConfirmWithVehicle"
     />
+
+    <CancelLessonDialog
+      v-model:open="cancelDialogOpen"
+      :lesson-id="cancelTargetLessonId"
+      @cancelled="applyFilters"
+    />
   </div>
 </template>
 
@@ -167,6 +173,7 @@ import {
 } from "@/components/ui/select";
 import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
+import CancelLessonDialog from "@/lessons/CancelLessonDialog.vue";
 import ConfirmLessonDialog from "@/lessons/ConfirmLessonDialog.vue";
 
 function lessonStatusVariant(status: LessonStatus): BadgeVariants["variant"] {
@@ -192,6 +199,9 @@ const confirmDialogVehicles = ref<VehicleDto[]>([]);
 const confirmTargetLessonId = ref<string | null>(null);
 const confirmSaving = ref(false);
 
+const cancelDialogOpen = ref(false);
+const cancelTargetLessonId = ref<string | null>(null);
+
 function applyFilters() {
   void lessonStore.fetchLessons(
     statusFilter.value ? { status: statusFilter.value } : {},
@@ -208,14 +218,9 @@ async function handleComplete(lessonId: string) {
   }
 }
 
-async function handleCancel(lessonId: string) {
-  try {
-    await lessonStore.cancelLesson(lessonId);
-    toast.success(t("lesson_cancelled"));
-    applyFilters();
-  } catch {
-    toast.error(t("lesson_cancel_failed"));
-  }
+function handleCancel(lessonId: string) {
+  cancelTargetLessonId.value = lessonId;
+  cancelDialogOpen.value = true;
 }
 
 async function confirmWithVehicle(

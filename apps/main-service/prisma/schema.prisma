@@ -68,30 +68,31 @@ model SchoolConfig {
   inviteExpiryHours        Int     @default(24)
   defaultReminderHours     Int     @default(24)
   timezone                 String  @default("Europe/Amsterdam")
+  currency                 String  @default("EUR")
 
   @@map("school_configs")
 }
 
 model User {
-  id                 String   @id @default(uuid())
-  schoolId           String
-  school             School   @relation(fields: [schoolId], references: [id])
+  id       String @id @default(uuid())
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
-  email              String
-  passwordHash       String
-  firstName          String
-  lastName           String
-  role               Role
-  status             UserStatus @default(ACTIVE)
-  mustChangePassword Boolean  @default(true)
-  reminderHours      Int?
-  instructorProfile  InstructorProfile?
-  studentProfile     StudentProfile?
-  adminProfile       AdminProfile?
+  email                   String
+  passwordHash            String
+  firstName               String
+  lastName                String
+  role                    Role
+  status                  UserStatus                @default(ACTIVE)
+  mustChangePassword      Boolean                   @default(true)
+  reminderHours           Int?
+  instructorProfile       InstructorProfile?
+  studentProfile          StudentProfile?
+  adminProfile            AdminProfile?
   conversationMemberships ConversationParticipant[]
   sentMessages            Message[]
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
 
   @@unique([schoolId, email])
   @@index([schoolId, role])
@@ -125,9 +126,10 @@ model InstructorAvailability {
 }
 
 model StudentProfile {
-  id     String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String  @id @default(uuid())
+  userId             String  @unique
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outstandingBalance Decimal @default(0)
 
   enrollments Enrollment[]
 
@@ -148,14 +150,14 @@ model Enrollment {
   school           School           @relation(fields: [schoolId], references: [id])
   studentProfileId String
   studentProfile   StudentProfile   @relation(fields: [studentProfileId], references: [id])
-  courseId          String
+  courseId         String
   course           Course           @relation(fields: [courseId], references: [id])
   hoursPurchased   Decimal
   hoursCompleted   Decimal          @default(0)
   status           EnrollmentStatus @default(ACTIVE)
   createdAt        DateTime         @default(now())
 
-  lessons          Lesson[]
+  lessons Lesson[]
 
   @@unique([studentProfileId, courseId])
   @@index([schoolId])
@@ -202,9 +204,9 @@ model Category {
 }
 
 model Course {
-  id           String       @id @default(uuid())
-  schoolId     String
-  school       School       @relation(fields: [schoolId], references: [id])
+  id       String @id @default(uuid())
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
   name         String
   price        Decimal
@@ -215,8 +217,8 @@ model Course {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  instructors  InstructorProfile[]
-  enrollments  Enrollment[]
+  instructors InstructorProfile[]
+  enrollments Enrollment[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -225,9 +227,9 @@ model Course {
 }
 
 model Vehicle {
-  id           String       @id @default(uuid())
-  schoolId     String
-  school       School       @relation(fields: [schoolId], references: [id])
+  id       String @id @default(uuid())
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
 
   make         String
   model        String
@@ -238,8 +240,8 @@ model Vehicle {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  instructors  InstructorProfile[]
-  lessons      Lesson[]
+  instructors InstructorProfile[]
+  lessons     Lesson[]
 
   @@unique([schoolId, licensePlate])
   @@index([schoolId])

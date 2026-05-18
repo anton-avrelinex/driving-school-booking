@@ -5,6 +5,29 @@
       :description="$t('lesson_list_description')"
     >
       <template #actions>
+        <Select v-model="statusFilter" @update:model-value="applyFilters">
+          <SelectTrigger class="w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem :value="null">{{ $t("common_all") }}</SelectItem>
+            <SelectItem :value="LESSON_STATUSES.PENDING">
+              {{ $t("lesson_status_pending") }}
+            </SelectItem>
+            <SelectItem :value="LESSON_STATUSES.SCHEDULED">
+              {{ $t("lesson_status_scheduled") }}
+            </SelectItem>
+            <SelectItem :value="LESSON_STATUSES.COMPLETED">
+              {{ $t("lesson_status_completed") }}
+            </SelectItem>
+            <SelectItem :value="LESSON_STATUSES.CANCELLED">
+              {{ $t("lesson_status_cancelled") }}
+            </SelectItem>
+            <SelectItem :value="LESSON_STATUSES.REJECTED">
+              {{ $t("lesson_status_rejected") }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
         <Tabs v-model="view">
           <TabsList>
             <TabsTrigger value="list">
@@ -211,13 +234,22 @@
       :saving="confirmSaving"
       @confirm="onConfirmWithVehicle"
     />
+
+    <CancelLessonDialog
+      v-model:open="cancelDialogOpen"
+      :lesson-id="cancelTargetLessonId"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { LESSON_STATUSES } from "@driving-school-booking/shared-types";
+import {
+  LESSON_STATUSES,
+  type LessonStatus,
+  type VehicleDto,
+} from "@driving-school-booking/shared-types";
 import type { LessonModel } from "@/lessons/lessons.models";
 import { toast } from "vue-sonner";
 import { CalendarIcon, ListIcon } from "lucide-vue-next";
@@ -226,6 +258,13 @@ import { useAvailabilityStore } from "@/availability/availability.store";
 import { useLessonStore } from "@/lessons/lessons.store";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { lessonStatusVariant } from "@/lessons/lesson-status";
 import {
@@ -240,9 +279,9 @@ import EmptyState from "@/components/EmptyState.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import TableSkeleton from "@/components/TableSkeleton.vue";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
+import CancelLessonDialog from "@/lessons/CancelLessonDialog.vue";
 import ConfirmLessonDialog from "@/lessons/ConfirmLessonDialog.vue";
 import ScheduleView from "@/lessons/ScheduleView.vue";
-import type { VehicleDto } from "@driving-school-booking/shared-types";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -250,6 +289,7 @@ const lessonStore = useLessonStore();
 const availabilityStore = useAvailabilityStore();
 
 const view = ref<"list" | "calendar">("list");
+const statusFilter = ref<LessonStatus | null>(null);
 
 const vehicleDialogOpen = ref(false);
 const selectedLesson = ref(null) as Ref<LessonModel | null>;
@@ -259,6 +299,15 @@ const confirmDialogVehicles = ref<VehicleDto[]>([]);
 const confirmTargetLessonId = ref<string | null>(null);
 const confirmSaving = ref(false);
 const confirmAfterDialog = ref<(() => void) | null>(null);
+
+const cancelDialogOpen = ref(false);
+const cancelTargetLessonId = ref<string | null>(null);
+
+function applyFilters() {
+  void lessonStore.fetchLessons(
+    statusFilter.value ? { status: statusFilter.value } : {},
+  );
+}
 
 onMounted(async () => {
   const tasks: Promise<unknown>[] = [lessonStore.fetchLessons()];
@@ -277,13 +326,9 @@ async function handleComplete(lessonId: string) {
   }
 }
 
-async function handleCancel(lessonId: string) {
-  try {
-    await lessonStore.cancelLesson(lessonId);
-    toast.success(t("lesson_cancelled_success"));
-  } catch {
-    toast.error(t("lesson_cancelled_failed"));
-  }
+function handleCancel(lessonId: string) {
+  cancelTargetLessonId.value = lessonId;
+  cancelDialogOpen.value = true;
 }
 
 async function confirmWithVehicle(
@@ -352,9 +397,9 @@ async function completeAndClose(lessonId: string, close: () => void) {
   close();
 }
 
-async function cancelAndClose(lessonId: string, close: () => void) {
-  await handleCancel(lessonId);
+function cancelAndClose(lessonId: string, close: () => void) {
   close();
+  handleCancel(lessonId);
 }
 
 async function confirmAndClose(lessonId: string, close: () => void) {
