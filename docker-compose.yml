@@ -50,6 +50,20 @@ services:
       timeout: 5s
       retries: 5
 
+  bootstrap:
+    build:
+      context: .
+      target: bootstrap
+    container_name: driving-school-bootstrap
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+      DEMO_USERS_PASSWORD: ${DEMO_USERS_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   main-service:
     build:
       context: .
@@ -60,6 +74,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-15m}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-7d}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
       - "3001:3001"
@@ -68,6 +85,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      bootstrap:
+        condition: service_completed_successfully
 
   observability-service:
     build:
