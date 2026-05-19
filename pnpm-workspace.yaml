@@ -1,3 +1,17 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+allowBuilds:
+  "@nestjs/core": false
+  "@prisma/engines": true
+  bcrypt: true
+  esbuild: true
+  maplibre-gl: false
+  msgpackr-extract: false
+  prisma: true
+  unrs-resolver: false
+  vue-demi: true
+
+overrides:
+  handlebars: ">=4.7.9"
