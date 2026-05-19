@@ -55,7 +55,7 @@ export class ObsLoggerService {
     const reqCtx = RequestContextStore.getStore();
 
     const entry: AppLogDto = {
-      type: LOG_TYPES.APP as "app",
+      type: LOG_TYPES.APP,
       service: this.serviceName,
       timestamp: new Date().toISOString(),
       userId: reqCtx?.userId ?? null,

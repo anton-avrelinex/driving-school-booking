@@ -17,8 +17,10 @@
     }
   },
   "dependencies": {
+    "eslint-plugin-vue": "^10.9.1"
+  },
+  "peerDependencies": {
     "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-vue": "^10.9.1",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.3.0",
     "typescript-eslint": "^8.35.1"

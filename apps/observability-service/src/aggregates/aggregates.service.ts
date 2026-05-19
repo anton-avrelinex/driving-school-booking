@@ -22,12 +22,9 @@ export class AggregatesService {
       },
     };
     if (filters.service) {
-      match.service = filters.service;
+      match.service = { $eq: filters.service };
     }
 
-    return (await this.aggregateModel
-      .find(match)
-      .sort({ date: -1 })
-      .lean()) as unknown as DailyAggregateDto[];
+    return await this.aggregateModel.find(match).sort({ date: -1 }).lean();
   }
 }
