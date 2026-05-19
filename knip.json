@@ -4,6 +4,9 @@
   "ignoreBinaries": ["eslint", "nest", "tsx"],
   "ignoreDependencies": ["eslint"],
   "workspaces": {
+    ".": {
+      "entry": ["scripts/setup.mjs"]
+    },
     "apps/main-service": {
       "entry": ["src/main.ts!", "src/**/*.spec.ts", "eslint.config.mjs"],
       "ignore": ["src/test-utils/**", "prisma/seed.ts"],

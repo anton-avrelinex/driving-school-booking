@@ -1,21 +1,18 @@
 import { fileURLToPath, URL } from "node:url";
 
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
 import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const apiTarget =
-    mode === "production"
-      ? (process.env.VITE_API_URL ?? "http://main-service:3001")
-      : (process.env.VITE_API_URL ?? "http://localhost:3001");
-
-  const obsTarget =
-    mode === "production"
-      ? (process.env.VITE_OBS_URL ?? "http://observability-service:4001")
-      : (process.env.VITE_OBS_URL ?? "http://localhost:4001");
+  // loadEnv() reads .env at config time (Vite doesn't auto-inject into
+  // process.env for the config). Defaults point at the standard local-dev
+  // ports so config-loaders like knip / vitest can resolve without a .env.
+  const env = loadEnv(mode, process.cwd(), "VITE_");
+  const apiTarget = env.VITE_API_URL ?? "http://localhost:3001";
+  const obsTarget = env.VITE_OBS_URL ?? "http://localhost:4001";
 
   return {
     plugins: [vue(), vueDevTools(), tailwindcss()],
