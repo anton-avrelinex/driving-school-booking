@@ -7,14 +7,12 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
+  // loadEnv() reads .env at config time (Vite doesn't auto-inject into
+  // process.env for the config). Defaults point at the standard local-dev
+  // ports so config-loaders like knip / vitest can resolve without a .env.
   const env = loadEnv(mode, process.cwd(), "VITE_");
-  const apiTarget = env.VITE_API_URL;
-  const obsTarget = env.VITE_OBS_URL;
-  if (!apiTarget || !obsTarget) {
-    throw new Error(
-      "VITE_API_URL and VITE_OBS_URL must be set (see apps/web-client/.env.example).",
-    );
-  }
+  const apiTarget = env.VITE_API_URL ?? "http://localhost:3001";
+  const obsTarget = env.VITE_OBS_URL ?? "http://localhost:4001";
 
   return {
     plugins: [vue(), vueDevTools(), tailwindcss()],
