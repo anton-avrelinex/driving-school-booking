@@ -258,7 +258,6 @@ export class LessonLifecycleService {
         startTime: true,
         endTime: true,
         enrollment: { select: { studentProfileId: true } },
-        school: { select: { config: true } },
       },
     });
 
@@ -272,11 +271,10 @@ export class LessonLifecycleService {
       );
     }
 
-    const fee = resolveCancellationFee(
-      callerRole,
-      lesson,
-      lesson.school.config,
-    );
+    const config = await this.prisma.schoolConfig.findUnique({
+      where: { schoolId },
+    });
+    const fee = resolveCancellationFee(callerRole, lesson, config);
 
     const [updated] = await this.prisma.$transaction([
       this.prisma.lesson.update({
@@ -304,12 +302,10 @@ export class LessonLifecycleService {
   ): Promise<CancellationInfoDto> {
     const lesson = await this.prisma.lesson.findUnique({
       where: { id: lessonId, schoolId },
-      select: {
-        status: true,
-        startTime: true,
-        endTime: true,
-        school: { select: { config: true } },
-      },
+      select: { status: true, startTime: true, endTime: true },
+    });
+    const config = await this.prisma.schoolConfig.findUnique({
+      where: { schoolId },
     });
 
     if (!lesson) {
@@ -318,23 +314,16 @@ export class LessonLifecycleService {
     if (!ACTIVE_LESSON_STATUSES.includes(lesson.status)) {
       throw new BadRequestException("Lesson is not cancellable");
     }
-    if (!lesson.school.config) {
+    if (!config) {
       throw new BadRequestException("School config missing");
     }
 
     const subjectToFeePolicy =
       callerRole === Role.STUDENT && lesson.status === LessonStatus.SCHEDULED;
     const deadlineAt = subjectToFeePolicy
-      ? computeCancelDeadlineUtc(
-          lesson.startTime,
-          lesson.school.config,
-        ).toISOString()
+      ? computeCancelDeadlineUtc(lesson.startTime, config).toISOString()
       : null;
-    const fee = resolveCancellationFee(
-      callerRole,
-      lesson,
-      lesson.school.config,
-    );
+    const fee = resolveCancellationFee(callerRole, lesson, config);
 
     return { deadlineAt, fee };
   }
