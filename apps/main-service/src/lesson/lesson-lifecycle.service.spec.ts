@@ -756,6 +756,79 @@ describe("LessonLifecycleService", () => {
     });
   });
 
+  // Multi-tenant invariant: every single-row write method must refuse a lesson
+  // belonging to a different school. They all share the same
+  // `where: { id, schoolId }` shape, so one parameterized test locks the
+  // pattern. (assignVehicle / complete are tested separately above with the
+  // full cross-school setup.)
+  describe("single-row methods refuse a lesson in another school", () => {
+    async function setupForeignLesson() {
+      const a = await seedSchool(db.prisma);
+      const b = await seedSchool(db.prisma);
+      const instructor = await a.addInstructor();
+      const student = await a.addStudent();
+      const lessonId = await student.bookLesson({
+        instructorProfileId: instructor.instructorProfileId,
+        startTime: FUTURE_START,
+        endTime: FUTURE_END,
+      });
+      await db.prisma.lesson.update({
+        where: { id: lessonId },
+        data: { status: LessonStatus.PENDING },
+      });
+      return { a, b, lessonId, instructor, student };
+    }
+
+    it("cancel → NotFound", async () => {
+      const { b, lessonId, student } = await setupForeignLesson();
+      await expect(
+        service.cancel(b.id, lessonId, student.userId, Role.STUDENT),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it("confirm → NotFound", async () => {
+      const { b, lessonId, instructor } = await setupForeignLesson();
+      await expect(
+        service.confirm(b.id, lessonId, instructor.userId, Role.ADMIN),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it("reject → NotFound", async () => {
+      const { b, lessonId, instructor } = await setupForeignLesson();
+      await expect(
+        service.reject(b.id, lessonId, instructor.userId, Role.ADMIN),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it("getCancellationInfo → NotFound", async () => {
+      const { b, lessonId } = await setupForeignLesson();
+      await expect(
+        service.getCancellationInfo(b.id, lessonId, Role.ADMIN),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it("getAvailableVehicles → NotFound", async () => {
+      const { b, lessonId, instructor } = await setupForeignLesson();
+      await expect(
+        service.getAvailableVehicles(
+          b.id,
+          lessonId,
+          instructor.userId,
+          Role.ADMIN,
+        ),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it("assignVehicle → NotFound", async () => {
+      const { b, lessonId } = await setupForeignLesson();
+      await expect(
+        service.assignVehicle(b.id, lessonId, {
+          vehicleId: b.vehicleId,
+        }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
   describe("assignVehicle", () => {
     it("assigns a matching vehicle to a SCHEDULED lesson", async () => {
       const school = await seedSchool(db.prisma);
