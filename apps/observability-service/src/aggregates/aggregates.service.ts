@@ -25,9 +25,6 @@ export class AggregatesService {
       match.service = filters.service;
     }
 
-    return (await this.aggregateModel
-      .find(match)
-      .sort({ date: -1 })
-      .lean()) as unknown as DailyAggregateDto[];
+    return await this.aggregateModel.find(match).sort({ date: -1 }).lean();
   }
 }

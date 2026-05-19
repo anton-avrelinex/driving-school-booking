@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@driving-school-booking/eslint-config": "workspace:^",
-    "@driving-school-booking/tsconfig": "workspace:^"
+    "@driving-school-booking/tsconfig": "workspace:^",
+    "eslint": "^10.3.0"
   }
 }

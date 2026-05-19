@@ -150,6 +150,9 @@ importers:
       '@types/pg':
         specifier: ^8.20.0
         version: 8.20.0
+      eslint:
+        specifier: ^10.3.0
+        version: 10.4.0(jiti@2.7.0)
       jest:
         specifier: ^30.0.0
         version: 30.4.2(@types/node@22.19.19)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.19.19)(typescript@5.9.2))
@@ -271,6 +274,9 @@ importers:
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.3
+      eslint:
+        specifier: ^10.3.0
+        version: 10.4.0(jiti@2.7.0)
       jest:
         specifier: ^30.0.0
         version: 30.4.2(@types/node@22.19.19)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@types/node@22.19.19)(typescript@5.9.2))
@@ -368,6 +374,9 @@ importers:
       '@vue/tsconfig':
         specifier: ^0.8.1
         version: 0.8.1(typescript@5.9.2)(vue@3.5.34(typescript@5.9.2))
+      eslint:
+        specifier: ^10.3.0
+        version: 10.4.0(jiti@2.7.0)
       jsdom:
         specifier: ^28.1.0
         version: 28.1.0(@noble/hashes@1.8.0)
@@ -453,6 +462,9 @@ importers:
       '@types/passport-jwt':
         specifier: ^4.0.1
         version: 4.0.1
+      eslint:
+        specifier: ^10.3.0
+        version: 10.4.0(jiti@2.7.0)
 
   packages/nestjs-logger:
     dependencies:
@@ -481,6 +493,9 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
+      eslint:
+        specifier: ^10.3.0
+        version: 10.4.0(jiti@2.7.0)
 
   packages/shared-types:
     devDependencies:
@@ -490,6 +505,9 @@ importers:
       '@driving-school-booking/tsconfig':
         specifier: workspace:^
         version: link:../tsconfig
+      eslint:
+        specifier: ^10.3.0
+        version: 10.4.0(jiti@2.7.0)
 
   packages/tsconfig: {}
 
