@@ -1,10 +1,9 @@
 <template>
-  <div class="max-w-2xl">
-    <PageHeader
-      :title="$t('settings_title')"
-      :description="$t('settings_description')"
-    />
-
+  <PageLayout
+    :title="$t('settings_title')"
+    :description="$t('settings_description')"
+    class="max-w-2xl"
+  >
     <Transition name="fade" mode="out-in">
       <div
         v-if="settings.loading && !settings.profile"
@@ -81,7 +80,7 @@
     </Transition>
 
     <ChangePasswordDialog v-model:open="passwordDialogOpen" />
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -93,7 +92,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import {
   Card,
   CardContent,

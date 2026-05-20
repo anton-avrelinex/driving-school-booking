@@ -1,10 +1,9 @@
 <template>
-  <div class="flex flex-col gap-4 flex-1 min-h-0">
-    <PageHeader
-      :title="$t('messages_title')"
-      :description="$t('messages_description')"
-    />
-
+  <PageLayout
+    :title="$t('messages_title')"
+    :description="$t('messages_description')"
+    class="flex-1 min-h-0"
+  >
     <Card class="flex-1 min-h-0 overflow-hidden py-0">
       <div class="grid grid-cols-1 md:grid-cols-[320px_1fr] h-full min-h-0">
         <ConversationList
@@ -26,14 +25,14 @@
     </Card>
 
     <NewConversationDialog v-model:open="composeOpen" @created="onSelect" />
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Card } from "@/components/ui/card";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import { useAuthStore } from "@/auth/auth.store";
 import { useMessagesStore } from "@/messages/messages.store";
 import ConversationList from "@/messages/ConversationList.vue";

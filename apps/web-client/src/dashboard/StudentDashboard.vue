@@ -1,10 +1,5 @@
 <template>
-  <div>
-    <PageHeader
-      :title="title"
-      :description="$t('dashboard_student_description')"
-    />
-
+  <PageLayout :title="title" :description="$t('dashboard_student_description')">
     <Transition name="fade" mode="out-in">
       <div
         v-if="store.loading && !store.studentProfile"
@@ -119,7 +114,7 @@
         </Card>
       </div>
     </Transition>
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -133,7 +128,7 @@ import {
 import { useAuthStore } from "@/auth/auth.store";
 import { useDashboardStore } from "@/dashboard/dashboard.store";
 import type { DashboardLesson } from "@/dashboard/dashboard.models";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import {
   Card,
   CardContent,

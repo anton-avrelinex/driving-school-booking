@@ -1,15 +1,13 @@
 <template>
-  <div>
-    <PageHeader
-      :title="$t('teacher_manage_title')"
-      :description="$t('teacher_manage_description')"
-    >
-      <template #actions>
-        <Button @click="showCreateDialog = true">
-          {{ $t("teacher_add") }}
-        </Button>
-      </template>
-    </PageHeader>
+  <PageLayout
+    :title="$t('teacher_manage_title')"
+    :description="$t('teacher_manage_description')"
+  >
+    <template #actions>
+      <Button @click="showCreateDialog = true">
+        {{ $t("teacher_add") }}
+      </Button>
+    </template>
 
     <Transition name="fade" mode="out-in">
       <TableSkeleton
@@ -125,7 +123,7 @@
       v-model:open="showAvailabilityDialog"
       :user="availabilityUser"
     />
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -150,7 +148,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import EmptyState from "@/components/EmptyState.vue";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import TableSkeleton from "@/components/TableSkeleton.vue";
 import CreateTeacherDialog from "@/teachers/CreateTeacherDialog.vue";
 import TempPasswordDialog from "@/teachers/TempPasswordDialog.vue";

@@ -1,10 +1,8 @@
 <template>
-  <div>
-    <PageHeader
-      :title="$t('nav_my_availability')"
-      :description="$t('nav_my_availability_description')"
-    />
-
+  <PageLayout
+    :title="$t('nav_my_availability')"
+    :description="$t('nav_my_availability_description')"
+  >
     <Transition name="fade" mode="out-in">
       <div v-if="availabilityStore.loading" class="flex flex-col gap-3">
         <Skeleton v-for="i in 7" :key="i" class="h-12 w-full" />
@@ -25,7 +23,7 @@
         </div>
       </form>
     </Transition>
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -38,7 +36,7 @@ import type { AvailabilityBlockModel } from "@/availability/availability.models"
 import AvailabilityForm from "@/availability/AvailabilityForm.vue";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 
 const { t } = useI18n();
 const authStore = useAuthStore();

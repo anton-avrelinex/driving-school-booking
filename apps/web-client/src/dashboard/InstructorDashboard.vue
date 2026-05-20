@@ -1,10 +1,8 @@
 <template>
-  <div>
-    <PageHeader
-      :title="$t('dashboard_instructor_title')"
-      :description="$t('dashboard_instructor_description')"
-    />
-
+  <PageLayout
+    :title="$t('dashboard_instructor_title')"
+    :description="$t('dashboard_instructor_description')"
+  >
     <Transition name="fade" mode="out-in">
       <div
         v-if="store.loading && store.lessons.length === 0"
@@ -29,7 +27,7 @@
         />
       </div>
     </Transition>
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -43,7 +41,7 @@ import {
 import { LESSON_STATUSES } from "@driving-school-booking/shared-types";
 import { useDashboardStore } from "@/dashboard/dashboard.store";
 import type { DashboardLesson } from "@/dashboard/dashboard.models";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import { Skeleton } from "@/components/ui/skeleton";
 import TodayScheduleCard from "@/dashboard/components/TodayScheduleCard.vue";
 import WeekOverviewCard from "@/dashboard/components/WeekOverviewCard.vue";

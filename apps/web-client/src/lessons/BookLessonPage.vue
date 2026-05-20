@@ -1,10 +1,8 @@
 <template>
-  <div>
-    <PageHeader
-      :title="$t('lesson_book')"
-      :description="$t('lesson_book_description')"
-    />
-
+  <PageLayout
+    :title="$t('lesson_book')"
+    :description="$t('lesson_book_description')"
+  >
     <Transition name="fade" mode="out-in">
       <div v-if="loadingEnrollments" class="flex flex-col gap-4 max-w-2xl">
         <Skeleton class="h-9 w-full" />
@@ -261,7 +259,7 @@
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -301,7 +299,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmptyState from "@/components/EmptyState.vue";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import {
   type CalendarDate,
   type DateValue,

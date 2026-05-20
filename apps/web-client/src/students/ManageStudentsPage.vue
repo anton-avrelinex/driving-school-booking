@@ -1,15 +1,13 @@
 <template>
-  <div>
-    <PageHeader
-      :title="$t('student_manage_title')"
-      :description="$t('student_manage_description')"
-    >
-      <template #actions>
-        <Button @click="showCreateDialog = true">
-          {{ $t("student_add") }}
-        </Button>
-      </template>
-    </PageHeader>
+  <PageLayout
+    :title="$t('student_manage_title')"
+    :description="$t('student_manage_description')"
+  >
+    <template #actions>
+      <Button @click="showCreateDialog = true">
+        {{ $t("student_add") }}
+      </Button>
+    </template>
 
     <Transition name="fade" mode="out-in">
       <TableSkeleton
@@ -122,7 +120,7 @@
       :student-id="balanceTargetId"
       :initial-balance="balanceInitial"
     />
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -146,7 +144,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import EmptyState from "@/components/EmptyState.vue";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import TableSkeleton from "@/components/TableSkeleton.vue";
 import CreateStudentDialog from "@/students/CreateStudentDialog.vue";
 import TempPasswordDialog from "@/students/TempPasswordDialog.vue";

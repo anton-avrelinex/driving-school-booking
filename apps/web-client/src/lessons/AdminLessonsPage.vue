@@ -1,10 +1,8 @@
 <template>
-  <div>
-    <PageHeader
-      :title="$t('lesson_admin_title')"
-      :description="$t('lesson_admin_description')"
-    />
-
+  <PageLayout
+    :title="$t('lesson_admin_title')"
+    :description="$t('lesson_admin_description')"
+  >
     <div class="flex items-center gap-4 mb-4">
       <Select v-model="statusFilter" @update:model-value="applyFilters">
         <SelectTrigger class="w-48">
@@ -137,7 +135,7 @@
       :lesson-id="cancelTargetLessonId"
       @cancelled="applyFilters"
     />
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -162,7 +160,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import EmptyState from "@/components/EmptyState.vue";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import TableSkeleton from "@/components/TableSkeleton.vue";
 import {
   Select,
