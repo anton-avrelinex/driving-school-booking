@@ -29,7 +29,67 @@ Full-stack TypeScript monorepo for driving school management. Functionality incl
 ![ESLint](https://img.shields.io/badge/ESLint-4B32C3?logo=eslint&logoColor=white)
 ![Prettier](https://img.shields.io/badge/Prettier-F7B93E?logo=prettier&logoColor=black)
 
-## How it works
+## Try it locally
+
+<details>
+<summary><b>Docker - one command</b></summary>
+
+```sh
+git clone git@github.com:anton-avrelinex/driving-school-booking.git
+cd driving-school-booking
+cp .env.example .env
+docker compose up
+```
+
+> On Windows `cmd.exe`, use `copy .env.example .env` instead of `cp`. PowerShell and Git Bash both accept `cp`.
+
+Open **http://localhost** and log in:
+
+| Role       | Email             | Password      |
+| ---------- | ----------------- | ------------- |
+| Admin      | `admin@demo.com`  | `admin123`    |
+| Instructor | `erik@demo.com`   | `password123` |
+| Student    | `sophie@demo.com` | `password123` |
+
+(Other demo users: `maria@`, `lars@` as instructors; `tom@`, `anna@`, `lukas@`, `emma@` as students - all `password123`.)
+
+To bootstrap admin-only (no demo data), delete the `DEMO_USERS_PASSWORD` line in root `.env` before `docker compose up`.
+
+</details>
+
+<details>
+<summary><b>Local - databases in Docker, apps on host</b></summary>
+
+```sh
+git clone git@github.com:anton-avrelinex/driving-school-booking.git
+cd driving-school-booking
+pnpm install
+pnpm setup
+
+docker compose up -d postgres mongo redis
+
+cd apps/main-service
+pnpm exec prisma migrate deploy
+pnpm exec prisma db seed
+cd ../..
+
+pnpm dev
+```
+
+Then **http://localhost:5173**.
+
+</details>
+
+## Architecture
+
+Three services behind nginx, two databases, one queue between them.
+
+![Architecture](docs/architecture.png)
+
+- dashed line means asynchronous (queue or server-push)
+- FE telemetry is sent in batches
+
+## Walkthrough
 
 A school is the tenant. Currently there are 3 roles: Admin, Instructor, Student.
 
@@ -99,66 +159,6 @@ Admins have access to monitoring. They can see both business metrics e.g. which 
 - **Shared types with compile-time assertions** - DTO classes use `TypesAreEqual<DTO, SharedDTO>` assertion that fails on build if the class-validator DTO is different from the shared package. This way there's a compile-time guarantee that FE is sending/receiving exact same type that BE declares.
 - **PGlite integration tests** - most important flows are tested against a real Postgres-in-process via [test-utils/pglite.ts](apps/main-service/src/test-utils/pglite.ts), including the slot SQL with DST cases, the full lesson lifecycle, cross-tenant isolation, and auth refresh rotation.
 - **One-command Docker bootstrap** - `cp .env.example .env && docker compose up` boots the stack with migrations applied, demo data seeded, and an admin user and demo instructor/student users ready to log in. A separate `bootstrap` container handles migrations + seed.
-
-## Architecture
-
-Three services behind nginx, two databases, one queue between them.
-
-![Architecture](docs/architecture.png)
-
-- dashed line means asynchronous (queue or server-push)
-- FE telemetry is sent in batches
-
-## Try it locally
-
-<details>
-<summary><b>Docker - one command</b></summary>
-
-```sh
-git clone git@github.com:anton-avrelinex/driving-school-booking.git
-cd driving-school-booking
-cp .env.example .env
-docker compose up
-```
-
-> On Windows `cmd.exe`, use `copy .env.example .env` instead of `cp`. PowerShell and Git Bash both accept `cp`.
-
-Open **http://localhost** and log in:
-
-| Role       | Email             | Password      |
-| ---------- | ----------------- | ------------- |
-| Admin      | `admin@demo.com`  | `admin123`    |
-| Instructor | `erik@demo.com`   | `password123` |
-| Student    | `sophie@demo.com` | `password123` |
-
-(Other demo users: `maria@`, `lars@` as instructors; `tom@`, `anna@`, `lukas@`, `emma@` as students - all `password123`.)
-
-To bootstrap admin-only (no demo data), delete the `DEMO_USERS_PASSWORD` line in root `.env` before `docker compose up`.
-
-</details>
-
-<details>
-<summary><b>Local - databases in Docker, apps on host</b></summary>
-
-```sh
-git clone git@github.com:anton-avrelinex/driving-school-booking.git
-cd driving-school-booking
-pnpm install
-pnpm setup
-
-docker compose up -d postgres mongo redis
-
-cd apps/main-service
-pnpm exec prisma migrate deploy
-pnpm exec prisma db seed
-cd ../..
-
-pnpm dev
-```
-
-Then **http://localhost:5173**.
-
-</details>
 
 ## Repo map
 
