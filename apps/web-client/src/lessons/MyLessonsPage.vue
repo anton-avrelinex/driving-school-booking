@@ -1,47 +1,46 @@
 <template>
-  <div class="flex flex-col gap-6 flex-1 min-h-0">
-    <PageHeader
-      :title="$t('lesson_list_title')"
-      :description="$t('lesson_list_description')"
-    >
-      <template #actions>
-        <Select v-model="statusFilter" @update:model-value="applyFilters">
-          <SelectTrigger class="w-44">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem :value="null">{{ $t("common_all") }}</SelectItem>
-            <SelectItem :value="LESSON_STATUSES.PENDING">
-              {{ $t("lesson_status_pending") }}
-            </SelectItem>
-            <SelectItem :value="LESSON_STATUSES.SCHEDULED">
-              {{ $t("lesson_status_scheduled") }}
-            </SelectItem>
-            <SelectItem :value="LESSON_STATUSES.COMPLETED">
-              {{ $t("lesson_status_completed") }}
-            </SelectItem>
-            <SelectItem :value="LESSON_STATUSES.CANCELLED">
-              {{ $t("lesson_status_cancelled") }}
-            </SelectItem>
-            <SelectItem :value="LESSON_STATUSES.REJECTED">
-              {{ $t("lesson_status_rejected") }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-        <Tabs v-model="view">
-          <TabsList>
-            <TabsTrigger value="list">
-              <ListIcon class="size-4" />
-              {{ $t("schedule_view_list") }}
-            </TabsTrigger>
-            <TabsTrigger value="calendar">
-              <CalendarIcon class="size-4" />
-              {{ $t("schedule_view_calendar") }}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </template>
-    </PageHeader>
+  <PageLayout
+    :title="$t('lesson_list_title')"
+    :description="$t('lesson_list_description')"
+    class="flex-1 min-h-0"
+  >
+    <template #actions>
+      <Select v-model="statusFilter" @update:model-value="applyFilters">
+        <SelectTrigger class="w-44">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="null">{{ $t("common_all") }}</SelectItem>
+          <SelectItem :value="LESSON_STATUSES.PENDING">
+            {{ $t("lesson_status_pending") }}
+          </SelectItem>
+          <SelectItem :value="LESSON_STATUSES.SCHEDULED">
+            {{ $t("lesson_status_scheduled") }}
+          </SelectItem>
+          <SelectItem :value="LESSON_STATUSES.COMPLETED">
+            {{ $t("lesson_status_completed") }}
+          </SelectItem>
+          <SelectItem :value="LESSON_STATUSES.CANCELLED">
+            {{ $t("lesson_status_cancelled") }}
+          </SelectItem>
+          <SelectItem :value="LESSON_STATUSES.REJECTED">
+            {{ $t("lesson_status_rejected") }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+      <Tabs v-model="view">
+        <TabsList>
+          <TabsTrigger value="list">
+            <ListIcon class="size-4" />
+            {{ $t("schedule_view_list") }}
+          </TabsTrigger>
+          <TabsTrigger value="calendar">
+            <CalendarIcon class="size-4" />
+            {{ $t("schedule_view_calendar") }}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+    </template>
 
     <div class="flex flex-col flex-1 min-h-0 overflow-y-auto">
       <Transition name="fade" mode="out-in">
@@ -239,7 +238,7 @@
       v-model:open="cancelDialogOpen"
       :lesson-id="cancelTargetLessonId"
     />
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -276,7 +275,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import EmptyState from "@/components/EmptyState.vue";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import TableSkeleton from "@/components/TableSkeleton.vue";
 import AssignVehicleDialog from "@/lessons/AssignVehicleDialog.vue";
 import CancelLessonDialog from "@/lessons/CancelLessonDialog.vue";

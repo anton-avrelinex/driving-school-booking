@@ -1,10 +1,8 @@
 <template>
-  <div>
-    <PageHeader
-      :title="$t('dashboard_admin_title')"
-      :description="$t('dashboard_admin_description')"
-    />
-
+  <PageLayout
+    :title="$t('dashboard_admin_title')"
+    :description="$t('dashboard_admin_description')"
+  >
     <Transition name="fade" mode="out-in">
       <div v-if="store.loading && !stats" class="flex flex-col gap-6">
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -47,7 +45,7 @@
         <RecentActivityCard :entries="stats.recentActivity" />
       </div>
     </Transition>
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -59,7 +57,7 @@ import {
   UsersIcon,
 } from "lucide-vue-next";
 import { useDashboardStore } from "@/dashboard/dashboard.store";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import { Skeleton } from "@/components/ui/skeleton";
 import StatCard from "@/dashboard/components/StatCard.vue";
 import LessonsOverTimeChart from "@/dashboard/components/LessonsOverTimeChart.vue";

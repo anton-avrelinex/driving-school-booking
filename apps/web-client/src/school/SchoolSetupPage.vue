@@ -1,10 +1,8 @@
 <template>
-  <div class="flex flex-col gap-8">
-    <PageHeader
-      :title="$t('school_setup_title')"
-      :description="$t('school_setup_description')"
-    />
-
+  <PageLayout
+    :title="$t('school_setup_title')"
+    :description="$t('school_setup_description')"
+  >
     <div class="grid gap-4 md:grid-cols-3">
       <Card>
         <CardHeader>
@@ -90,7 +88,7 @@
     <ManageCategoriesDialog v-model:open="categoriesOpen" />
     <ManageCoursesDialog v-model:open="coursesOpen" />
     <ManageVehiclesDialog v-model:open="vehiclesOpen" />
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -108,7 +106,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 import ManageCategoriesDialog from "@/categories/ManageCategoriesDialog.vue";
 import ManageCoursesDialog from "@/courses/ManageCoursesDialog.vue";
 import ManageVehiclesDialog from "@/vehicles/ManageVehiclesDialog.vue";

@@ -1,9 +1,8 @@
 <template>
-  <div class="space-y-6">
-    <PageHeader
-      :title="$t('nav_monitoring')"
-      :description="$t('monitoring_description')"
-    />
+  <PageLayout
+    :title="$t('nav_monitoring')"
+    :description="$t('monitoring_description')"
+  >
     <nav class="flex gap-1 border-b">
       <RouterLink
         v-for="tab in tabs"
@@ -21,14 +20,14 @@
     </nav>
 
     <RouterView />
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import PageHeader from "@/components/PageHeader.vue";
+import PageLayout from "@/components/PageLayout.vue";
 
 const { t } = useI18n();
 const route = useRoute();
